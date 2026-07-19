@@ -42,6 +42,28 @@ internal static class NativeMethods
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static extern bool core_clean_memory(uint source, uint mask, ref CleanupResultNative result);
+
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool core_get_bool(string key, [MarshalAs(UnmanagedType.Bool)] bool defaultVal);
+
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+    internal static extern void core_set_bool(string key, [MarshalAs(UnmanagedType.Bool)] bool value);
+
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+    internal static extern uint core_get_uint(string key, uint defaultVal);
+
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+    internal static extern void core_set_uint(string key, uint value);
+
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+    internal static extern int core_get_int(string key, int defaultVal);
+
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+    internal static extern void core_set_int(string key, int value);
+
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern void core_set_config_mask(uint mask);
 }
 
 [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]

@@ -100,4 +100,13 @@ public static class CoreService
             Success = success
         };
     }
+
+    // config helpers
+    public static bool GetBool(string key, bool defaultValue = false) => core_get_bool(key, defaultValue);
+    public static void SetBool(string key, bool value) => core_set_bool(key, value);
+    public static uint GetUInt(string key, uint defaultValue = 0) => core_get_uint(key, defaultValue);
+    public static void SetUInt(string key, uint value) => core_set_uint(key, value);
+    public static int GetInt(string key, int defaultValue = 0) => core_get_int(key, defaultValue);
+    public static void SetInt(string key, int value) => core_set_int(key, value);
+    public static void SetConfigMask(uint mask) => core_set_config_mask(mask);
 }

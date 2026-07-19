@@ -13,63 +13,19 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <Grid RowDefinitions="Auto,*" Padding="12" RowSpacing="12">
-        <TitleBar x:Name="AppTitleBar" Grid.Row="0" Title="Mem Reduct">
-            <TitleBar.IconSource>
-                <ImageIconSource ImageSource="Assets/AppIcon.ico" />
-            </TitleBar.IconSource>
-        </TitleBar>
+    <controls:NavigationView x:Name="NavView"
+        IsBackButtonVisible="Collapsed"
+        IsSettingsVisible="False"
+        IsTitleBarAutoPaddingEnabled="False"
+        PaneDisplayMode="LeftCompact"
+        CompactModeThresholdWidth="0">
 
-        <ScrollViewer Grid.Row="1">
-            <StackPanel Spacing="12" Padding="0 8 0 0">
+        <controls:NavigationView.MenuItems>
+            <controls:NavigationViewItem Icon="Globe" Content="Memory" Tag="main"/>
+            <controls:NavigationViewItem Icon="Setting" Content="Settings" Tag="settings"/>
+        </controls:NavigationView.MenuItems>
 
-                <controls:InfoBar x:Name="ResultBar" IsOpen="False" IsClosable="True" />
+        <Frame x:Name="ContentFrame" />
 
-                <!-- Physical Memory -->
-                <Expander Header="Physical Memory" IsExpanded="True">
-                    <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*" RowSpacing="6" ColumnSpacing="12">
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Usage:" VerticalAlignment="Center"/>
-                        <ProgressBar x:Name="PhysicalBar" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="100"/>
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Available:"/>
-                        <TextBlock x:Name="PhysicalFreeText" Grid.Row="1" Grid.Column="1"/>
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Total:"/>
-                        <TextBlock x:Name="PhysicalTotalText" Grid.Row="2" Grid.Column="1"/>
-                    </Grid>
-                </Expander>
-
-                <!-- Page File -->
-                <Expander Header="Pagefile">
-                    <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*" RowSpacing="6" ColumnSpacing="12">
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Usage:"/>
-                        <ProgressBar x:Name="PageFileBar" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="100"/>
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Available:"/>
-                        <TextBlock x:Name="PageFileFreeText" Grid.Row="1" Grid.Column="1"/>
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Total:"/>
-                        <TextBlock x:Name="PageFileTotalText" Grid.Row="2" Grid.Column="1"/>
-                    </Grid>
-                </Expander>
-
-                <!-- System Cache -->
-                <Expander Header="System Working Set">
-                    <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*" RowSpacing="6" ColumnSpacing="12">
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Usage:"/>
-                        <ProgressBar x:Name="CacheBar" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="100"/>
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Available:"/>
-                        <TextBlock x:Name="CacheFreeText" Grid.Row="1" Grid.Column="1"/>
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Total:"/>
-                        <TextBlock x:Name="CacheTotalText" Grid.Row="2" Grid.Column="1"/>
-                    </Grid>
-                </Expander>
-
-                <!-- Clean Button -->
-                <Button x:Name="CleanBtn" HorizontalAlignment="Stretch" Click="OnCleanClick" Padding="8">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <SymbolIcon Symbol="Refresh"/>
-                        <TextBlock Text="Clean memory"/>
-                    </StackPanel>
-                </Button>
-
-            </StackPanel>
-        </ScrollViewer>
-    </Grid>
+    </controls:NavigationView>
 </Window>

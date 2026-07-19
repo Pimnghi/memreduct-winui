@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="memreduct_winui.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Microsoft.UI.Xaml.Controls">
+
+    <Grid RowDefinitions="Auto,*" Padding="12" RowSpacing="12">
+        <controls:InfoBar x:Name="ResultBar" Grid.Row="0" IsOpen="False" IsClosable="True" />
+
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Spacing="12">
+
+                <!-- Physical Memory -->
+                <Expander Header="Physical Memory" IsExpanded="True">
+                    <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*" RowSpacing="6" ColumnSpacing="12">
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Usage:" VerticalAlignment="Center"/>
+                        <ProgressBar x:Name="PhysicalBar" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="100"/>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Available:"/>
+                        <TextBlock x:Name="PhysicalFreeText" Grid.Row="1" Grid.Column="1"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Total:"/>
+                        <TextBlock x:Name="PhysicalTotalText" Grid.Row="2" Grid.Column="1"/>
+                    </Grid>
+                </Expander>
+
+                <!-- Page File -->
+                <Expander Header="Pagefile">
+                    <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*" RowSpacing="6" ColumnSpacing="12">
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Usage:"/>
+                        <ProgressBar x:Name="PageFileBar" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="100"/>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Available:"/>
+                        <TextBlock x:Name="PageFileFreeText" Grid.Row="1" Grid.Column="1"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Total:"/>
+                        <TextBlock x:Name="PageFileTotalText" Grid.Row="2" Grid.Column="1"/>
+                    </Grid>
+                </Expander>
+
+                <!-- System Cache -->
+                <Expander Header="System Working Set">
+                    <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*" RowSpacing="6" ColumnSpacing="12">
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Usage:"/>
+                        <ProgressBar x:Name="CacheBar" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="100"/>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Available:"/>
+                        <TextBlock x:Name="CacheFreeText" Grid.Row="1" Grid.Column="1"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Total:"/>
+                        <TextBlock x:Name="CacheTotalText" Grid.Row="2" Grid.Column="1"/>
+                    </Grid>
+                </Expander>
+
+                <!-- Clean Button -->
+                <Button x:Name="CleanBtn" HorizontalAlignment="Stretch" Click="OnCleanClick" Padding="8">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <SymbolIcon Symbol="Refresh"/>
+                        <TextBlock Text="Clean memory"/>
+                    </StackPanel>
+                </Button>
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>

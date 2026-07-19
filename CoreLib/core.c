@@ -257,3 +257,38 @@ BOOLEAN core_clean_memory(ULONG source, ULONG mask, CLEANUP_RESULT *result)
 
 	return TRUE;
 }
+
+BOOLEAN core_get_bool(LPCWSTR key, BOOLEAN default_val)
+{
+	return _r_config_getboolean(key, default_val);
+}
+
+void core_set_bool(LPCWSTR key, BOOLEAN value)
+{
+	_r_config_setboolean(key, value);
+}
+
+ULONG core_get_uint(LPCWSTR key, ULONG default_val)
+{
+	return _r_config_getulong(key, default_val);
+}
+
+void core_set_uint(LPCWSTR key, ULONG value)
+{
+	_r_config_setulong(key, value);
+}
+
+LONG core_get_int(LPCWSTR key, LONG default_val)
+{
+	return _r_config_getlong(key, default_val);
+}
+
+void core_set_int(LPCWSTR key, LONG value)
+{
+	_r_config_setlong(key, value);
+}
+
+void core_set_config_mask(ULONG mask)
+{
+	_r_config_setulong(L"ReductMask2", mask);
+}

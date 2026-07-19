@@ -9,3 +9,10 @@ EXPORTS
     core_should_interval_clean
     core_get_memory_info
     core_clean_memory
+    core_get_bool
+    core_set_bool
+    core_get_uint
+    core_set_uint
+    core_get_int
+    core_set_int
+    core_set_config_mask

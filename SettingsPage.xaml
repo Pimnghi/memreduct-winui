@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="memreduct_winui.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Microsoft.UI.Xaml.Controls">
+
+    <Grid RowDefinitions="*">
+        <ScrollViewer>
+            <StackPanel Spacing="16" Padding="16">
+
+                <!-- Memory Regions -->
+                <Expander Header="Memory regions to clean" IsExpanded="True">
+                    <StackPanel Spacing="6">
+                        <CheckBox x:Name="ChkWorkingSet" Content="Working set" Checked="OnRegionChanged" Unchecked="OnRegionChanged"/>
+                        <CheckBox x:Name="ChkSystemFileCache" Content="System file cache" Checked="OnRegionChanged" Unchecked="OnRegionChanged"/>
+                        <CheckBox x:Name="ChkModifiedFileCache" Content="Modified file cache" Checked="OnRegionChanged" Unchecked="OnRegionChanged"/>
+                        <CheckBox x:Name="ChkModifiedList" Content="Modified page list *" Checked="OnRegionChanged" Unchecked="OnRegionChanged"/>
+                        <CheckBox x:Name="ChkStandbyList" Content="Standby list *" Checked="OnRegionChanged" Unchecked="OnRegionChanged"/>
+                        <CheckBox x:Name="ChkStandbyPriority0" Content="Standby list (low priority)" Checked="OnRegionChanged" Unchecked="OnRegionChanged"/>
+                        <CheckBox x:Name="ChkRegistryCache" Content="Registry cache (Win8.1+)" Checked="OnRegionChanged" Unchecked="OnRegionChanged"/>
+                        <CheckBox x:Name="ChkCombineLists" Content="Combine memory lists (Win10+)" Checked="OnRegionChanged" Unchecked="OnRegionChanged"/>
+                    </StackPanel>
+                </Expander>
+
+                <!-- Auto Clean -->
+                <Expander Header="Auto memory management" IsExpanded="False">
+                    <StackPanel Spacing="10">
+                        <CheckBox x:Name="ChkAutoClean" Content="Clean when memory usage above" Checked="OnAutoCleanChanged" Unchecked="OnAutoCleanChanged"/>
+                        <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="8">
+                            <controls:NumberBox x:Name="NbAutoClean" Grid.Column="0" Minimum="1" Maximum="100" Value="90" SpinButtonPlacementMode="Compact" ValueChanged="OnAutoCleanValueChanged" Width="80"/>
+                            <TextBlock Grid.Column="1" Text="%" VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <CheckBox x:Name="ChkIntervalClean" Content="Clean every" Checked="OnIntervalCleanChanged" Unchecked="OnIntervalCleanChanged"/>
+                        <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="8">
+                            <controls:NumberBox x:Name="NbInterval" Grid.Column="0" Minimum="1" Maximum="1440" Value="30" SpinButtonPlacementMode="Compact" ValueChanged="OnIntervalValueChanged" Width="80"/>
+                            <TextBlock Grid.Column="1" Text="minutes" VerticalAlignment="Center"/>
+                        </Grid>
+                    </StackPanel>
+                </Expander>
+
+                <!-- General -->
+                <Expander Header="General" IsExpanded="False">
+                    <StackPanel Spacing="6">
+                        <CheckBox x:Name="ChkAlwaysOnTop" Content="Always on top" Checked="OnBoolChanged" Unchecked="OnBoolChanged"/>
+                        <CheckBox x:Name="ChkStartMinimized" Content="Start minimized" Checked="OnBoolChanged" Unchecked="OnBoolChanged"/>
+                        <CheckBox x:Name="ChkConfirmClean" Content="Confirm memory cleaning" Checked="OnBoolChanged" Unchecked="OnBoolChanged"/>
+                        <CheckBox x:Name="ChkShowResults" Content="Show cleaning results" Checked="OnBoolChanged" Unchecked="OnBoolChanged"/>
+                    </StackPanel>
+                </Expander>
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>
