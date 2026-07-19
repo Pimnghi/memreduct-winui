@@ -26,6 +26,7 @@ public partial class App : Application
         MainWindow.Activate();
 
         MemReduct.Core.TrayIcon.Create("Mem Reduct");
+        MemReduct.Core.AutoCleanService.Refresh();
 
         appInstance.Activated += (s, e) =>
         {

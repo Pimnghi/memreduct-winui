@@ -114,6 +114,7 @@ public sealed partial class SettingsPage : Page
         if (_loading) return;
         NbAutoClean.IsEnabled = ChkAutoClean.IsChecked == true;
         IniConfig.WriteBool("AutoreductEnable", ChkAutoClean.IsChecked == true);
+        AutoCleanService.Refresh();
     }
 
     private void OnIntervalCleanChanged(object sender, RoutedEventArgs e)
@@ -121,6 +122,7 @@ public sealed partial class SettingsPage : Page
         if (_loading) return;
         NbInterval.IsEnabled = ChkIntervalClean.IsChecked == true;
         IniConfig.WriteBool("AutoreductIntervalEnable", ChkIntervalClean.IsChecked == true);
+        AutoCleanService.Refresh();
     }
 
     private void OnAutoCleanValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
