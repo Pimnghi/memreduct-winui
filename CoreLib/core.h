@@ -64,6 +64,8 @@ CORE_API void     core_get_memory_info(
 
 CORE_API BOOLEAN  core_clean_memory(ULONG source, ULONG mask, CLEANUP_RESULT *result);
 
+CORE_API BOOLEAN  core_init(void);
+
 // config getters/setters
 CORE_API BOOLEAN  core_get_bool(LPCWSTR key, BOOLEAN default_val);
 CORE_API void     core_set_bool(LPCWSTR key, BOOLEAN value);
@@ -72,6 +74,13 @@ CORE_API void     core_set_uint(LPCWSTR key, ULONG value);
 CORE_API LONG     core_get_int(LPCWSTR key, LONG default_val);
 CORE_API void     core_set_int(LPCWSTR key, LONG value);
 CORE_API void     core_set_config_mask(ULONG mask);
+
+// locale
+CORE_API ULONG    core_locale_count(void);
+CORE_API BOOLEAN  core_locale_get_name(ULONG index, LPWSTR buf, ULONG buf_size);
+CORE_API ULONG_PTR core_locale_get_current(void);
+CORE_API BOOLEAN  core_locale_set(ULONG_PTR index);
+CORE_API LPCWSTR   core_get_string(ULONG uid);
 
 #ifdef __cplusplus
 }

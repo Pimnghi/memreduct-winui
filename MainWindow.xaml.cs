@@ -1,6 +1,6 @@
+using MemReduct.Core;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Navigation;
 
 namespace memreduct_winui;
 
@@ -9,7 +9,6 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-
         AppWindow.SetIcon("Assets/AppIcon.ico");
 
         NavView.ItemInvoked += OnNavItemInvoked;

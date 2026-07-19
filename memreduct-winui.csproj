@@ -29,6 +29,7 @@
 
     <ItemGroup>
         <Content Include="CoreLib\bin\x64\CoreLib.dll" Link="CoreLib.dll" CopyToOutputDirectory="PreserveNewest" />
+        <Content Include="..\bin\memreduct.lng" Link="memreduct.lng" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
     <ItemGroup>

@@ -11,43 +11,39 @@
         <ScrollViewer Grid.Row="1">
             <StackPanel Spacing="12">
 
-                <!-- Physical Memory -->
-                <Expander Header="Physical Memory" IsExpanded="True">
+                <Expander x:Name="PhysicalExpander" Header="Physical Memory" IsExpanded="True">
                     <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*" RowSpacing="6" ColumnSpacing="12">
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Usage:" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="PhysicalUsageLabel" Grid.Row="0" Grid.Column="0" Text="Usage:" VerticalAlignment="Center"/>
                         <ProgressBar x:Name="PhysicalBar" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="100"/>
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Available:"/>
+                        <TextBlock x:Name="PhysicalFreeLabel" Grid.Row="1" Grid.Column="0" Text="Available:"/>
                         <TextBlock x:Name="PhysicalFreeText" Grid.Row="1" Grid.Column="1"/>
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Total:"/>
+                        <TextBlock x:Name="PhysicalTotalLabel" Grid.Row="2" Grid.Column="0" Text="Total:"/>
                         <TextBlock x:Name="PhysicalTotalText" Grid.Row="2" Grid.Column="1"/>
                     </Grid>
                 </Expander>
 
-                <!-- Page File -->
-                <Expander Header="Pagefile">
+                <Expander x:Name="PageFileExpander" Header="Pagefile">
                     <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*" RowSpacing="6" ColumnSpacing="12">
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Usage:"/>
+                        <TextBlock x:Name="PageFileUsageLabel" Grid.Row="0" Grid.Column="0" Text="Usage:"/>
                         <ProgressBar x:Name="PageFileBar" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="100"/>
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Available:"/>
+                        <TextBlock x:Name="PageFileFreeLabel" Grid.Row="1" Grid.Column="0" Text="Available:"/>
                         <TextBlock x:Name="PageFileFreeText" Grid.Row="1" Grid.Column="1"/>
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Total:"/>
+                        <TextBlock x:Name="PageFileTotalLabel" Grid.Row="2" Grid.Column="0" Text="Total:"/>
                         <TextBlock x:Name="PageFileTotalText" Grid.Row="2" Grid.Column="1"/>
                     </Grid>
                 </Expander>
 
-                <!-- System Cache -->
-                <Expander Header="System Working Set">
+                <Expander x:Name="CacheExpander" Header="System Working Set">
                     <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*" RowSpacing="6" ColumnSpacing="12">
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Usage:"/>
+                        <TextBlock x:Name="CacheUsageLabel" Grid.Row="0" Grid.Column="0" Text="Usage:"/>
                         <ProgressBar x:Name="CacheBar" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="100"/>
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Available:"/>
+                        <TextBlock x:Name="CacheFreeLabel" Grid.Row="1" Grid.Column="0" Text="Available:"/>
                         <TextBlock x:Name="CacheFreeText" Grid.Row="1" Grid.Column="1"/>
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Total:"/>
+                        <TextBlock x:Name="CacheTotalLabel" Grid.Row="2" Grid.Column="0" Text="Total:"/>
                         <TextBlock x:Name="CacheTotalText" Grid.Row="2" Grid.Column="1"/>
                     </Grid>
                 </Expander>
 
-                <!-- Clean Button -->
                 <Button x:Name="CleanBtn" HorizontalAlignment="Stretch" Click="OnCleanClick" Padding="8">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <SymbolIcon Symbol="Refresh"/>

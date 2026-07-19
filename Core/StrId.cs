@@ -1,0 +1,35 @@
+namespace MemReduct.Core;
+
+public static class StrId
+{
+    public const uint CleanMemory = 17;
+    public const uint GroupPhysical = 18;
+    public const uint GroupPagefile = 19;
+    public const uint GroupSystemCache = 20;
+    public const uint ItemUsage = 21;
+    public const uint ItemAvailable = 22;
+    public const uint ItemTotal = 23;
+    public const uint SettingsGeneral = 24;
+    public const uint SettingsMemory = 25;
+    public const uint SettingsAppearance = 26;
+    public const uint SettingsTray = 27;
+    public const uint TitleMemoryRegions = 31;
+    public const uint TitleMemoryManagement = 32;
+    public const uint AlwaysOnTop = 38;
+    public const uint LoadOnStartup = 39;
+    public const uint StartMinimized = 40;
+    public const uint ConfirmCleaning = 41;
+    public const uint WorkingSet = 45;
+    public const uint SystemFileCache = 46;
+    public const uint StandbyPriority0 = 47;
+    public const uint StandbyList = 48;
+    public const uint ModifiedList = 49;
+    public const uint CombineMemoryLists = 50;
+    public const uint AutoCleanEnable = 51;
+    public const uint AutoCleanInterval = 52;
+    public const uint HotkeyClean = 53;
+    public const uint LanguageHint = 44;
+    public const uint ShowCleanResult = 71;
+    public const uint StatusCleaned = 75;
+    public const uint StatusNoPrivileges = 76;
+}

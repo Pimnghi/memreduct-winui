@@ -64,6 +64,23 @@ internal static class NativeMethods
 
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     internal static extern void core_set_config_mask(uint mask);
+
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern uint core_locale_count();
+
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool core_locale_get_name(uint index, [Out] char[] buf, uint bufSize);
+
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+    internal static extern nuint core_locale_get_current();
+
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static extern bool core_locale_set(nuint index);
+
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Unicode)]
+    internal static extern IntPtr core_get_string(uint uid);
 }
 
 [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]

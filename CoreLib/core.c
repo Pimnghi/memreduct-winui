@@ -1,5 +1,7 @@
 #include "core.h"
 
+extern APP_GLOBAL_CONFIG app_global;
+
 #define MOUNTMGR_DEVICE_NAME L"\\Device\\MountPointManager"
 #define MOUNTMGRCONTROLTYPE 0x0000006D
 #define IOCTL_MOUNTMGR_QUERY_POINTS CTL_CODE(MOUNTMGRCONTROLTYPE, 2, METHOD_BUFFERED, FILE_ANY_ACCESS)
@@ -258,6 +260,26 @@ BOOLEAN core_clean_memory(ULONG source, ULONG mask, CLEANUP_RESULT *result)
 	return TRUE;
 }
 
+BOOLEAN core_init(void)
+{
+	// warm up subsystem lazy initialization
+	core_get_limit_value();
+	return TRUE;
+}
+
+LPCWSTR core_get_string(ULONG uid)
+{
+	static WCHAR buf[256];
+	LPWSTR str;
+
+	str = _r_locale_getstring(uid);
+
+	if (str)
+		_r_str_copy(buf, (LONG)RTL_NUMBER_OF(buf), str);
+
+	return str ? buf : NULL;
+}
+
 BOOLEAN core_get_bool(LPCWSTR key, BOOLEAN default_val)
 {
 	return _r_config_getboolean(key, default_val);
@@ -291,4 +313,111 @@ void core_set_int(LPCWSTR key, LONG value)
 void core_set_config_mask(ULONG mask)
 {
 	_r_config_setulong(L"ReductMask2", mask);
+}
+
+ULONG core_locale_count(void)
+{
+	ULONG_PTR 	count = 0;
+
+	if (!app_global.locale.available_list)
+		return 0;
+	count = _r_obj_getlistsize(app_global.locale.available_list);
+	_r_queuedlock_releaseshared(&app_global.locale.lock);
+
+	return (ULONG)count;
+}
+
+BOOLEAN core_locale_get_name(ULONG index, LPWSTR buf, ULONG buf_size)
+{
+	PR_STRING name;
+	BOOLEAN result = FALSE;
+
+	if (!buf || !buf_size)
+		return FALSE;
+
+	buf[0] = L'\0';
+
+	if (index == 0)
+	{
+		name = app_global.locale.resource_name;
+	}
+	else if (app_global.locale.available_list)
+	{
+		name = _r_obj_getlistitem(app_global.locale.available_list, index - 1);
+	}
+	else
+	{
+		name = NULL;
+	}
+
+	if (name)
+	{
+		_r_str_copy(buf, (LONG)buf_size, name->buffer);
+		result = TRUE;
+	}
+
+	_r_queuedlock_releaseshared(&app_global.locale.lock);
+
+	return result;
+}
+
+ULONG_PTR core_locale_get_current(void)
+{
+	PR_STRING current_name;
+	PR_STRING locale_name;
+	ULONG_PTR count, result = SIZE_MAX;
+
+	_r_queuedlock_acquireshared(&app_global.locale.lock);
+
+	current_name = app_global.locale.current_name;
+
+	if (!app_global.locale.available_list)
+		count = 0;
+	else
+		count = _r_obj_getlistsize(app_global.locale.available_list);
+
+	if (current_name && _r_obj_isstringempty(current_name))
+		result = 0; // system default
+	else if (current_name)
+	{
+		for (ULONG_PTR i = 0; i < count; i++)
+		{
+			locale_name = _r_obj_getlistitem(app_global.locale.available_list, i);
+
+			if (locale_name && _r_str_isequal(&current_name->sr, &locale_name->sr, TRUE))
+			{
+				result = i + 1;
+				break;
+			}
+		}
+	}
+
+	_r_queuedlock_releaseshared(&app_global.locale.lock);
+
+	return result;
+}
+
+BOOLEAN core_locale_set(ULONG_PTR index)
+{
+	PR_STRING locale_name;
+
+	_r_queuedlock_acquireexclusive(&app_global.locale.lock);
+
+	if (index == 0)
+	{
+		_r_obj_swapreference(&app_global.locale.current_name, app_global.locale.resource_name);
+	}
+	else if (app_global.locale.available_list)
+	{
+		locale_name = _r_obj_getlistitem(app_global.locale.available_list, index - 1);
+
+		if (locale_name)
+			_r_obj_swapreference(&app_global.locale.current_name, locale_name);
+	}
+
+	_r_config_setstring(L"Language", _r_obj_getstring(app_global.locale.current_name));
+
+	_r_queuedlock_releaseexclusive(&app_global.locale.lock);
+
+	return TRUE;
 }

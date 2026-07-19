@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using static MemReduct.Core.NativeMethods;
 
 namespace MemReduct.Core;
@@ -109,4 +110,27 @@ public static class CoreService
     public static int GetInt(string key, int defaultValue = 0) => core_get_int(key, defaultValue);
     public static void SetInt(string key, int value) => core_set_int(key, value);
     public static void SetConfigMask(uint mask) => core_set_config_mask(mask);
+
+    // locale
+    public static uint GetLocaleCount() => core_locale_count();
+
+    public static string? GetLocaleName(uint index)
+    {
+        var buf = new char[128];
+        return core_locale_get_name(index, buf, (uint)buf.Length) ? new string(buf).TrimEnd('\0') : null;
+    }
+
+    public static uint GetCurrentLocaleIndex()
+    {
+        var idx = core_locale_get_current();
+        return idx == nuint.MaxValue ? 0 : (uint)idx;
+    }
+
+    public static bool SetLocale(uint index) => core_locale_set(index);
+
+    public static string? GetString(uint uid)
+    {
+        var ptr = core_get_string(uid);
+        return ptr != IntPtr.Zero ? Marshal.PtrToStringUni(ptr) : null;
+    }
 }

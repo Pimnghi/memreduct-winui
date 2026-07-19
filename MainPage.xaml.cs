@@ -33,45 +33,33 @@ public sealed partial class MainPage : Page
     protected override void OnNavigatingFrom(Microsoft.UI.Xaml.Navigation.NavigatingCancelEventArgs e)
     {
         base.OnNavigatingFrom(e);
-        if (_timer != null)
-        {
-            _timer.Stop();
-            _timer.Tick -= OnTimerTick;
-        }
+        _timer?.Stop();
+        if (_timer != null) _timer.Tick -= OnTimerTick;
     }
 
-    private void OnTimerTick(DispatcherQueueTimer sender, object args)
-    {
-        UpdateDisplay();
-    }
+    private void OnTimerTick(DispatcherQueueTimer sender, object args) => UpdateDisplay();
 
     private void UpdateDisplay()
     {
         var stats = CoreService.GetMemoryStats();
-
         PhysicalBar.Value = stats.PhysicalPercent;
         PhysicalFreeText.Text = FormatBytes(stats.PhysicalFree);
         PhysicalTotalText.Text = FormatBytes(stats.PhysicalTotal);
-
         PageFileBar.Value = stats.PageFilePercent;
         PageFileFreeText.Text = FormatBytes(stats.PageFileFree);
         PageFileTotalText.Text = FormatBytes(stats.PageFileTotal);
-
         CacheBar.Value = stats.SystemCachePercent;
         CacheFreeText.Text = FormatBytes(stats.SystemCacheFree);
         CacheTotalText.Text = FormatBytes(stats.SystemCacheTotal);
     }
 
-    private static string FormatBytes(ulong bytes)
+    private static string FormatBytes(ulong bytes) => bytes switch
     {
-        return bytes switch
-        {
-            >= 1073741824 => $"{bytes / 1073741824.0:F2} GB",
-            >= 1048576 => $"{bytes / 1048576.0:F1} MB",
-            >= 1024 => $"{bytes / 1024.0:F0} KB",
-            _ => $"{bytes} B"
-        };
-    }
+        >= 1073741824 => $"{bytes / 1073741824.0:F2} GB",
+        >= 1048576 => $"{bytes / 1048576.0:F1} MB",
+        >= 1024 => $"{bytes / 1024.0:F0} KB",
+        _ => $"{bytes} B"
+    };
 
     private async void OnCleanClick(object sender, RoutedEventArgs e)
     {
@@ -88,8 +76,7 @@ public sealed partial class MainPage : Page
         CleanBtn.Content = "Cleaning...";
 
         var result = await System.Threading.Tasks.Task.Run(() =>
-            CoreService.CleanMemory(MemoryMask.Default));
-
+            CoreService.CleanMemory(IniConfig.ReadUInt("ReductMask2", MemoryMask.Default)));
         CleanBtn.IsEnabled = true;
         CleanBtn.Content = "Clean memory";
 
