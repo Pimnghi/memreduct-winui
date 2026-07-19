@@ -97,12 +97,13 @@ public sealed partial class MainPage : Page
         }
 
         CleanBtn.IsEnabled = false;
-        CleanBtn.Content = "Cleaning...";
+        CleanBtn.Content = (CoreService.GetString(StrId.CleanMemory) ?? "Cleaning") + "…";
 
         var result = await System.Threading.Tasks.Task.Run(() =>
             CoreService.CleanMemory(IniConfig.ReadUInt("ReductMask2", MemoryMask.Default)));
         CleanBtn.IsEnabled = true;
-        CleanBtn.Content = "Clean memory";
+
+        ApplyLocalization();
 
         if (result.Success && result.BytesFreed > 0)
         {
