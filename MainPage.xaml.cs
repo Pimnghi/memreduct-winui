@@ -66,6 +66,9 @@ public sealed partial class MainPage : Page
 
         v = s(StrId.CleanMemory);
         if (v != null) CleanBtn.Content = v;
+
+        if (App.MainWindow is MainWindow w)
+            w.RefreshTrayMenu();
     }
 
     private void UpdateDisplay()

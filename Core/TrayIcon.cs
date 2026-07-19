@@ -5,7 +5,7 @@ namespace MemReduct.Core;
 
 public static class TrayIcon
 {
-    private static readonly Guid IconGuid = new("AE9053F0-8D59-4803-9ABB-74AFE66B5FD2");
+    private static readonly Guid IconGuid = new("B5F8C3A1-2D4E-4F6A-8C9B-1E3D5F7A9B2C");
     private static nint _hwnd;
     private static bool _created;
     private static WndProcDelegate? _wndProcDelegate;
@@ -25,8 +25,31 @@ public static class TrayIcon
     private const uint NIIF_NOSOUND = 0x00000010;
     private const uint NIIF_INFO = 0x00000001;
 
+    public const int CMD_SHOW = 1;
+    public const int CMD_CLEAN = 2;
+    public const int CMD_SETTINGS = 3;
+    public const int CMD_EXIT = 4;
+
     [DllImport("shell32", CharSet = CharSet.Unicode)]
     private static extern bool Shell_NotifyIconW(uint dwMessage, ref NOTIFYICONDATAW lpData);
+
+    [DllImport("user32")]
+    private static extern nint CreatePopupMenu();
+
+    [DllImport("user32", CharSet = CharSet.Unicode)]
+    private static extern bool AppendMenuW(nint hMenu, uint uFlags, nuint uIDNewItem, string lpNewItem);
+
+    [DllImport("user32")]
+    private static extern bool SetForegroundWindow(nint hWnd);
+
+    [DllImport("user32")]
+    private static extern int TrackPopupMenu(nint hMenu, uint uFlags, int x, int y, int nReserved, nint hWnd, nint prcRect);
+
+    [DllImport("user32")]
+    private static extern bool GetCursorPos(out POINT lpPoint);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct POINT { public int X; public int Y; }
 
     [DllImport("user32", SetLastError = true)]
     private static extern nint CreateWindowExW(uint dwExStyle, [MarshalAs(UnmanagedType.LPWStr)] string lpClassName,
@@ -91,7 +114,20 @@ public static class TrayIcon
 
     private delegate nint WndProcDelegate(nint hwnd, uint msg, nuint wParam, nint lParam);
 
-    public static event Action? TrayRightClick;
+    public static event Action<int>? TrayCommand;
+
+    private static string _textShow = "Show / Hide";
+    private static string _textClean = "Clean memory";
+    private static string _textSettings = "Settings";
+    private static string _textExit = "Exit";
+
+    public static void SetMenuTexts(string show, string clean, string settings, string exit)
+    {
+        _textShow = show;
+        _textClean = clean;
+        _textSettings = settings;
+        _textExit = exit;
+    }
 
     private static nint WndProc(nint hwnd, uint msg, nuint wParam, nint lParam)
     {
@@ -101,7 +137,20 @@ public static class TrayIcon
             if (evt == NIN_BALLOONUSERCLICK || evt == NIN_BALLOONTIMEOUT)
                 return 0;
             if (evt == 0x0205) // WM_RBUTTONUP
-                TrayRightClick?.Invoke();
+            {
+                var hMenu = CreatePopupMenu();
+                AppendMenuW(hMenu, 0, CMD_SHOW, _textShow);
+                AppendMenuW(hMenu, 0, CMD_CLEAN, _textClean);
+                AppendMenuW(hMenu, 0x800, 0, "");
+                AppendMenuW(hMenu, 0, CMD_SETTINGS, _textSettings);
+                AppendMenuW(hMenu, 0x800, 0, "");
+                AppendMenuW(hMenu, 0, CMD_EXIT, _textExit);
+                SetForegroundWindow(hwnd);
+                GetCursorPos(out var pt);
+                var cmd = TrackPopupMenu(hMenu, 0x2 | 0x100 | 0x80, pt.X, pt.Y, 0, hwnd, 0);
+                if (cmd > 0) TrayCommand?.Invoke(cmd);
+                return 0;
+            }
         }
         return DefWindowProcW(hwnd, msg, wParam, lParam);
     }

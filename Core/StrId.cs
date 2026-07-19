@@ -2,6 +2,8 @@ namespace MemReduct.Core;
 
 public static class StrId
 {
+    public const uint TrayShow = 12;
+    public const uint Settings = 4;
     public const uint CleanMemory = 17;
     public const uint GroupPhysical = 18;
     public const uint GroupPagefile = 19;

@@ -1,13 +1,13 @@
 using MemReduct.Core;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using System;
-using System.Runtime.InteropServices;
 
 namespace memreduct_winui;
 
 public sealed partial class MainWindow : Window
 {
+    private bool _exiting;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -23,70 +23,70 @@ public sealed partial class MainWindow : Window
             else if (e.Content is SettingsPage sp) sp.ApplyLocalization();
         };
 
-        TrayIcon.TrayRightClick += OnTrayRightClick;
+        TrayIcon.TrayCommand += OnTrayCommand;
         Closed += (s, e) => TrayIcon.Destroy();
+
+        AppWindow.Closing += AppWindow_Closing;
+
+        UpdateTrayMenuTexts();
     }
 
-    [DllImport("user32")]
-    private static extern bool GetCursorPos(out POINT lpPoint);
-
-    [StructLayout(LayoutKind.Sequential)]
-    private struct POINT { public int X; public int Y; }
-
-    private void OnTrayRightClick()
+    private void OnTrayCommand(int cmd)
     {
         DispatcherQueue.TryEnqueue(() =>
         {
-            var menu = new MenuFlyout();
-
-            var showItem = new MenuFlyoutItem
+            switch (cmd)
             {
-                Text = CoreService.GetString(StrId.GroupPhysical) ?? "Show",
-                Icon = new SymbolIcon(Symbol.Home),
-            };
-            showItem.Click += (s, e) =>
-            {
-                this.Activate();
-            };
-            menu.Items.Add(showItem);
-
-            var cleanItem = new MenuFlyoutItem
-            {
-                Text = CoreService.GetString(StrId.CleanMemory) ?? "Clean memory",
-                Icon = new SymbolIcon(Symbol.Refresh),
-            };
-            cleanItem.Click += (s, e) =>
-            {
-                if (ContentFrame.Content is MainPage mp)
-                    mp.TriggerClean();
-            };
-            menu.Items.Add(cleanItem);
-
-            menu.Items.Add(new MenuFlyoutSeparator());
-
-            var settingsItem = new MenuFlyoutItem
-            {
-                Text = CoreService.GetString(StrId.SettingsGeneral) ?? "Settings",
-                Icon = new SymbolIcon(Symbol.Setting),
-            };
-            settingsItem.Click += (s, e) => NavView.SelectedItem = NavView.MenuItems[1];
-            menu.Items.Add(settingsItem);
-
-            var exitItem = new MenuFlyoutItem
-            {
-                Text = "Exit",
-                Icon = new SymbolIcon(Symbol.Cancel),
-            };
-            exitItem.Click += (s, e) => Close();
-            menu.Items.Add(exitItem);
-
-            // show flyout at cursor position
-            if (GetCursorPos(out var pt))
-            {
-                menu.ShowAt(Content, new Windows.Foundation.Point(pt.X, pt.Y));
+                case TrayIcon.CMD_SHOW:
+                    if (AppWindow.IsVisible)
+                        AppWindow.Hide();
+                    else
+                        Activate();
+                    break;
+                case TrayIcon.CMD_CLEAN:
+                    if (!AppWindow.IsVisible)
+                        Activate();
+                    DispatcherQueue.TryEnqueue(async () =>
+                    {
+                        await System.Threading.Tasks.Task.Delay(200);
+                        ContentFrame.Navigate(typeof(MainPage));
+                        NavView.SelectedItem = NavView.MenuItems[0];
+                        if (ContentFrame.Content is MainPage mp) mp.TriggerClean();
+                    });
+                    break;
+                case TrayIcon.CMD_SETTINGS:
+                    Activate();
+                    NavView.SelectedItem = NavView.MenuItems[1];
+                    ContentFrame.Navigate(typeof(SettingsPage));
+                    break;
+                case TrayIcon.CMD_EXIT:
+                    _exiting = true;
+                    TrayIcon.Destroy();
+                    Close();
+                    break;
             }
         });
     }
+
+    private void AppWindow_Closing(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowClosingEventArgs args)
+    {
+        if (!_exiting)
+        {
+            args.Cancel = true;
+            sender.Hide();
+        }
+    }
+
+    private void UpdateTrayMenuTexts()
+    {
+        TrayIcon.SetMenuTexts(
+            CoreService.GetString(StrId.TrayShow) ?? "Show / Hide",
+            CoreService.GetString(StrId.CleanMemory) ?? "Clean memory",
+            CoreService.GetString(StrId.Settings) ?? "Settings",
+            "Exit");
+    }
+
+    public void RefreshTrayMenu() => UpdateTrayMenuTexts();
 
     private void OnNavItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
     {
