@@ -27,6 +27,7 @@ public sealed partial class MainPage : Page
         _timer.Tick += OnTimerTick;
         _timer.Start();
 
+        ApplyLocalization();
         UpdateDisplay();
     }
 
@@ -38,6 +39,29 @@ public sealed partial class MainPage : Page
     }
 
     private void OnTimerTick(DispatcherQueueTimer sender, object args) => UpdateDisplay();
+
+    public void ApplyLocalization()
+    {
+        var s = (uint id) => CoreService.GetString(id);
+
+        var v = s(StrId.GroupPhysical);
+        if (v != null) PhysicalExpander.Header = v;
+        v = s(StrId.GroupPagefile);
+        if (v != null) PageFileExpander.Header = v;
+        v = s(StrId.GroupSystemCache);
+        if (v != null) CacheExpander.Header = v;
+
+        var usage = s(StrId.ItemUsage);
+        var avail = s(StrId.ItemAvailable);
+        var total = s(StrId.ItemTotal);
+
+        if (usage != null) { PhysicalUsageLabel.Text = usage + ":"; PageFileUsageLabel.Text = usage + ":"; CacheUsageLabel.Text = usage + ":"; }
+        if (avail != null) { PhysicalFreeLabel.Text = avail + ":"; PageFileFreeLabel.Text = avail + ":"; CacheFreeLabel.Text = avail + ":"; }
+        if (total != null) { PhysicalTotalLabel.Text = total + ":"; PageFileTotalLabel.Text = total + ":"; CacheTotalLabel.Text = total + ":"; }
+
+        v = s(StrId.CleanMemory);
+        if (v != null) CleanBtn.Content = v;
+    }
 
     private void UpdateDisplay()
     {

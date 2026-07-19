@@ -267,17 +267,84 @@ BOOLEAN core_init(void)
 	return TRUE;
 }
 
+static LPCWSTR core_get_string_en(ULONG uid)
+{
+	switch (uid)
+	{
+		case 17: return L"Clean memory";
+		case 18: return L"Physical memory";
+		case 19: return L"Pagefile";
+		case 20: return L"System working set";
+		case 21: return L"Usage";
+		case 22: return L"Available";
+		case 23: return L"Total available";
+		case 24: return L"General";
+		case 25: return L"Memory cleaning";
+		case 26: return L"Appearance";
+		case 31: return L"Memory regions to be cleaned";
+		case 32: return L"Memory management";
+		case 38: return L"Always on top";
+		case 39: return L"Load on system startup";
+		case 40: return L"Start minimized";
+		case 41: return L"Confirm memory cleaning start";
+		case 44: return L"Select language";
+		case 45: return L"Working set";
+		case 46: return L"System file cache";
+		case 47: return L"Standby list (without priority)";
+		case 48: return L"Standby list";
+		case 49: return L"Modified page list";
+		case 50: return L"Combine memory lists";
+		case 51: return L"Clean when above: (%)";
+		case 52: return L"Clean every: (min.)";
+		case 71: return L"Show memory cleaning results";
+		case 75: return L"Memory was released.";
+		case 76: return L"Required administrator privileges.";
+		default: return NULL;
+	}
+}
+
 LPCWSTR core_get_string(ULONG uid)
 {
 	static WCHAR buf[256];
-	LPWSTR str;
 
-	str = _r_locale_getstring(uid);
+	// try routine library first
+	if (app_global.locale.table && _r_obj_gethashtablesize(app_global.locale.table))
+	{
+		LPWSTR str = _r_locale_getstring(uid);
+		if (str)
+		{
+			_r_str_copy(buf, (LONG)RTL_NUMBER_OF(buf), str);
+			return buf;
+		}
+	}
 
-	if (str)
-		_r_str_copy(buf, (LONG)RTL_NUMBER_OF(buf), str);
+	// read .lng file directly
+	static WCHAR lng_path[MAX_PATH];
+	static R_INITONCE lng_init = PR_INITONCE_INIT;
+	if (_r_initonce_begin(&lng_init))
+	{
+		_r_str_printf(lng_path, RTL_NUMBER_OF(lng_path), L"%s\\memreduct.lng", _r_app_getdirectory()->buffer);
+		_r_initonce_end(&lng_init);
+	}
 
-	return str ? buf : NULL;
+	WCHAR language[128] = {0};
+	WCHAR section[128];
+	GetPrivateProfileStringW(L"memreduct", L"Language", L"", language, 127, _r_app_getconfigpath()->buffer);
+
+	if (language[0])
+	{
+		wcscpy_s(section, 127, language);
+
+		WCHAR key[16];
+		_r_str_printf(key, RTL_NUMBER_OF(key), L"%03u", uid);
+		GetPrivateProfileStringW(section, key, L"", buf, 255, lng_path);
+
+		if (buf[0])
+			return buf;
+	}
+
+	// no translation found — return English default
+	return core_get_string_en(uid);
 }
 
 BOOLEAN core_get_bool(LPCWSTR key, BOOLEAN default_val)
@@ -317,48 +384,60 @@ void core_set_config_mask(ULONG mask)
 
 ULONG core_locale_count(void)
 {
-	ULONG_PTR 	count = 0;
+	// try routine library first
+	if (app_global.locale.available_list)
+	{
+		ULONG_PTR count;
+		_r_queuedlock_acquireshared(&app_global.locale.lock);
+		count = _r_obj_getlistsize(app_global.locale.available_list);
+		_r_queuedlock_releaseshared(&app_global.locale.lock);
+		return (ULONG)count;
+	}
 
-	if (!app_global.locale.available_list)
+	// fallback: count sections in memreduct.lng
+	WCHAR buf[4096];
+	WCHAR lng_path[MAX_PATH];
+	_r_str_printf(lng_path, RTL_NUMBER_OF(lng_path), L"%s\\memreduct.lng", _r_app_getdirectory()->buffer);
+	if (GetPrivateProfileSectionNamesW(buf, RTL_NUMBER_OF(buf), lng_path) == 0)
 		return 0;
-	count = _r_obj_getlistsize(app_global.locale.available_list);
-	_r_queuedlock_releaseshared(&app_global.locale.lock);
 
+	ULONG_PTR count = 0;
+	for (LPWSTR p = buf; *p; p += wcslen(p) + 1)
+		count++;
 	return (ULONG)count;
 }
 
 BOOLEAN core_locale_get_name(ULONG index, LPWSTR buf, ULONG buf_size)
 {
-	PR_STRING name;
-	BOOLEAN result = FALSE;
-
-	if (!buf || !buf_size)
-		return FALSE;
-
+	if (!buf || !buf_size) return FALSE;
 	buf[0] = L'\0';
 
-	if (index == 0)
+	// try routine library first
+	if (app_global.locale.available_list)
 	{
-		name = app_global.locale.resource_name;
-	}
-	else if (app_global.locale.available_list)
-	{
-		name = _r_obj_getlistitem(app_global.locale.available_list, index - 1);
-	}
-	else
-	{
-		name = NULL;
-	}
-
-	if (name)
-	{
-		_r_str_copy(buf, (LONG)buf_size, name->buffer);
-		result = TRUE;
+		PR_STRING name = NULL;
+		_r_queuedlock_acquireshared(&app_global.locale.lock);
+		if (index == 0) name = app_global.locale.resource_name;
+		else name = _r_obj_getlistitem(app_global.locale.available_list, index - 1);
+		if (name) _r_str_copy(buf, (LONG)buf_size, name->buffer);
+		_r_queuedlock_releaseshared(&app_global.locale.lock);
+		return name != NULL;
 	}
 
-	_r_queuedlock_releaseshared(&app_global.locale.lock);
+	// fallback: read section names from memreduct.lng
+	WCHAR sections[4096];
+	WCHAR lng_path[MAX_PATH];
+	_r_str_printf(lng_path, RTL_NUMBER_OF(lng_path), L"%s\\memreduct.lng", _r_app_getdirectory()->buffer);
+	if (GetPrivateProfileSectionNamesW(sections, RTL_NUMBER_OF(sections), lng_path) == 0)
+		return FALSE;
 
-	return result;
+	ULONG_PTR i = 0;
+	for (LPWSTR p = sections; *p; p += wcslen(p) + 1)
+	{
+		if (i == index) { _r_str_copy(buf, (LONG)buf_size, p); return TRUE; }
+		i++;
+	}
+	return FALSE;
 }
 
 ULONG_PTR core_locale_get_current(void)
@@ -367,34 +446,51 @@ ULONG_PTR core_locale_get_current(void)
 	PR_STRING locale_name;
 	ULONG_PTR count, result = SIZE_MAX;
 
-	_r_queuedlock_acquireshared(&app_global.locale.lock);
+	if (app_global.locale.available_list)
+	{
+		_r_queuedlock_acquireshared(&app_global.locale.lock);
 
-	current_name = app_global.locale.current_name;
-
-	if (!app_global.locale.available_list)
-		count = 0;
-	else
+		current_name = app_global.locale.current_name;
 		count = _r_obj_getlistsize(app_global.locale.available_list);
 
-	if (current_name && _r_obj_isstringempty(current_name))
-		result = 0; // system default
-	else if (current_name)
-	{
-		for (ULONG_PTR i = 0; i < count; i++)
+		if (current_name && _r_obj_isstringempty(current_name))
+			result = 0;
+		else if (current_name)
 		{
-			locale_name = _r_obj_getlistitem(app_global.locale.available_list, i);
-
-			if (locale_name && _r_str_isequal(&current_name->sr, &locale_name->sr, TRUE))
+			for (ULONG_PTR i = 0; i < count; i++)
 			{
-				result = i + 1;
-				break;
+				locale_name = _r_obj_getlistitem(app_global.locale.available_list, i);
+				if (locale_name && _r_str_isequal(&current_name->sr, &locale_name->sr, TRUE))
+				{
+					result = i + 1;
+					break;
+				}
 			}
 		}
+
+		_r_queuedlock_releaseshared(&app_global.locale.lock);
+		return result;
 	}
 
-	_r_queuedlock_releaseshared(&app_global.locale.lock);
+	// fallback: read Language from INI, find matching section in .lng
+	WCHAR language[128] = {0};
+	GetPrivateProfileStringW(L"memreduct", L"Language", L"", language, 127, _r_app_getconfigpath()->buffer);
+	if (!language[0]) return 0; // System default
 
-	return result;
+	WCHAR sections[4096];
+	WCHAR lng_path[MAX_PATH];
+	_r_str_printf(lng_path, RTL_NUMBER_OF(lng_path), L"%s\\memreduct.lng", _r_app_getdirectory()->buffer);
+	if (GetPrivateProfileSectionNamesW(sections, RTL_NUMBER_OF(sections), lng_path) == 0)
+		return 0;
+
+	ULONG_PTR i = 1;
+	for (LPWSTR p = sections; *p; p += wcslen(p) + 1)
+	{
+		if (_wcsicmp(p, language) == 0)
+			return i;
+		i++;
+	}
+	return 0;
 }
 
 BOOLEAN core_locale_set(ULONG_PTR index)
@@ -414,8 +510,6 @@ BOOLEAN core_locale_set(ULONG_PTR index)
 		if (locale_name)
 			_r_obj_swapreference(&app_global.locale.current_name, locale_name);
 	}
-
-	_r_config_setstring(L"Language", _r_obj_getstring(app_global.locale.current_name));
 
 	_r_queuedlock_releaseexclusive(&app_global.locale.lock);
 

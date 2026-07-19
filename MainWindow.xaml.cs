@@ -14,6 +14,12 @@ public sealed partial class MainWindow : Window
         NavView.ItemInvoked += OnNavItemInvoked;
         NavView.SelectedItem = NavView.MenuItems[0];
         ContentFrame.Navigate(typeof(MainPage));
+
+        ContentFrame.Navigated += (s, e) =>
+        {
+            if (e.Content is MainPage mp) mp.ApplyLocalization();
+            else if (e.Content is SettingsPage sp) sp.ApplyLocalization();
+        };
     }
 
     private void OnNavItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)

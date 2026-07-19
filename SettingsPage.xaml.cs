@@ -17,6 +17,35 @@ public sealed partial class SettingsPage : Page
         _loading = false;
     }
 
+    public void ApplyLocalization()
+    {
+        var s = (uint id) => CoreService.GetString(id);
+
+        var v = s(StrId.TitleMemoryRegions);
+        if (v != null) RegionsExpander.Header = v;
+        v = s(StrId.TitleMemoryManagement);
+        if (v != null) AutoExpander.Header = v;
+        v = s(StrId.SettingsGeneral);
+        if (v != null) GeneralExpander.Header = v;
+        v = s(StrId.LanguageHint);
+        if (v != null) LanguageLabel.Text = v + ":";
+
+        v = s(StrId.WorkingSet);           if (v != null) ChkWorkingSet.Content = v;
+        v = s(StrId.SystemFileCache);       if (v != null) ChkSystemFileCache.Content = v;
+        v = s(StrId.ModifiedList);          if (v != null) ChkModifiedList.Content = v;
+        v = s(StrId.StandbyList);           if (v != null) ChkStandbyList.Content = v;
+        v = s(StrId.StandbyPriority0);      if (v != null) ChkStandbyPriority0.Content = v;
+        v = s(StrId.CombineMemoryLists);    if (v != null) ChkCombineLists.Content = v;
+
+        v = s(StrId.AutoCleanEnable);       if (v != null) ChkAutoClean.Content = v;
+        v = s(StrId.AutoCleanInterval);     if (v != null) ChkIntervalClean.Content = v;
+
+        v = s(StrId.AlwaysOnTop);           if (v != null) ChkAlwaysOnTop.Content = v;
+        v = s(StrId.StartMinimized);        if (v != null) ChkStartMinimized.Content = v;
+        v = s(StrId.ConfirmCleaning);       if (v != null) ChkConfirmClean.Content = v;
+        v = s(StrId.ShowCleanResult);       if (v != null) ChkShowResults.Content = v;
+    }
+
     private void LoadSettings()
     {
         var mask = IniConfig.ReadUInt("ReductMask2", MemoryMask.Default);
@@ -124,5 +153,7 @@ public sealed partial class SettingsPage : Page
         if (_loading || CmbLanguage.SelectedItem is not ComboBoxItem item) return;
         var name = (string?)item.Content ?? "";
         IniConfig.WriteString("Language", name == "System default" ? "" : name);
+        CoreService.SetLocale((uint)(item.Tag ?? 0u));
+        ApplyLocalization();
     }
 }
