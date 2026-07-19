@@ -93,10 +93,6 @@ ULONG core_get_warning_value(void)
 	return _r_calc_clamp(_r_config_getulong(L"TrayLevelWarning", DEFAULT_WARNING_LEVEL), 0, 100);
 }
 
-ULONG core_get_config_mask(void)
-{
-	return _r_config_getulong(L"ReductMask2", REDUCT_MASK_DEFAULT);
-}
 
 BOOLEAN core_is_elevated(void)
 {
@@ -267,13 +263,6 @@ BOOLEAN core_clean_memory(ULONG source, ULONG mask, CLEANUP_RESULT *result)
 	return TRUE;
 }
 
-BOOLEAN core_init(void)
-{
-	// warm up subsystem lazy initialization
-	core_get_limit_value();
-	return TRUE;
-}
-
 static LPCWSTR core_get_string_en(ULONG uid)
 {
 	switch (uid)
@@ -352,41 +341,6 @@ LPCWSTR core_get_string(ULONG uid)
 
 	// no translation found — return English default
 	return core_get_string_en(uid);
-}
-
-BOOLEAN core_get_bool(LPCWSTR key, BOOLEAN default_val)
-{
-	return _r_config_getboolean(key, default_val);
-}
-
-void core_set_bool(LPCWSTR key, BOOLEAN value)
-{
-	_r_config_setboolean(key, value);
-}
-
-ULONG core_get_uint(LPCWSTR key, ULONG default_val)
-{
-	return _r_config_getulong(key, default_val);
-}
-
-void core_set_uint(LPCWSTR key, ULONG value)
-{
-	_r_config_setulong(key, value);
-}
-
-LONG core_get_int(LPCWSTR key, LONG default_val)
-{
-	return _r_config_getlong(key, default_val);
-}
-
-void core_set_int(LPCWSTR key, LONG value)
-{
-	_r_config_setlong(key, value);
-}
-
-void core_set_config_mask(ULONG mask)
-{
-	_r_config_setulong(L"ReductMask2", mask);
 }
 
 ULONG core_locale_count(void)

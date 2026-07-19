@@ -3,20 +3,11 @@ EXPORTS
     core_get_interval_value
     core_get_danger_value
     core_get_warning_value
-    core_get_config_mask
     core_is_elevated
     core_should_autoclean
     core_should_interval_clean
     core_get_memory_info
     core_clean_memory
-    core_init
-    core_get_bool
-    core_set_bool
-    core_get_uint
-    core_set_uint
-    core_get_int
-    core_set_int
-    core_set_config_mask
     core_locale_count
     core_locale_get_name
     core_locale_get_current

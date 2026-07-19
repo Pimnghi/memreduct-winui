@@ -57,7 +57,6 @@ public static class CoreService
     public static uint GetIntervalValue() => core_get_interval_value();
     public static uint GetDangerValue() => core_get_danger_value();
     public static uint GetWarningValue() => core_get_warning_value();
-    public static uint GetConfigMask() => core_get_config_mask();
     public static bool IsElevated() => core_is_elevated();
     public static bool ShouldAutoClean() => core_should_autoclean();
     public static bool ShouldIntervalClean() => core_should_interval_clean();
@@ -101,15 +100,6 @@ public static class CoreService
             Success = success
         };
     }
-
-    // config helpers
-    public static bool GetBool(string key, bool defaultValue = false) => core_get_bool(key, defaultValue);
-    public static void SetBool(string key, bool value) => core_set_bool(key, value);
-    public static uint GetUInt(string key, uint defaultValue = 0) => core_get_uint(key, defaultValue);
-    public static void SetUInt(string key, uint value) => core_set_uint(key, value);
-    public static int GetInt(string key, int defaultValue = 0) => core_get_int(key, defaultValue);
-    public static void SetInt(string key, int value) => core_set_int(key, value);
-    public static void SetConfigMask(uint mask) => core_set_config_mask(mask);
 
     // locale
     public static uint GetLocaleCount() => core_locale_count();
