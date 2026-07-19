@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "memreduct-winui (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "memreduct-winui (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
