@@ -179,6 +179,13 @@ BOOLEAN core_clean_memory(ULONG source, ULONG mask, CLEANUP_RESULT *result)
 			mask &= ~REDUCT_MASK_FREEZES;
 	}
 
+	// enable required privileges (critical for memory cleanup to work)
+	ULONG privileges[] = {
+		SE_PROF_SINGLE_PROCESS_PRIVILEGE,
+		SE_INCREASE_QUOTA_PRIVILEGE,
+	};
+	_r_sys_setprocessprivilege(NtCurrentProcess(), privileges, RTL_NUMBER_OF(privileges), TRUE);
+
 	before = _r_sys_getmemoryinfo(&info);
 	before = info.physical_memory.used_bytes;
 
