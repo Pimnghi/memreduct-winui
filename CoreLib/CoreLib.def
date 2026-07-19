@@ -1,0 +1,11 @@
+EXPORTS
+    core_get_limit_value
+    core_get_interval_value
+    core_get_danger_value
+    core_get_warning_value
+    core_get_config_mask
+    core_is_elevated
+    core_should_autoclean
+    core_should_interval_clean
+    core_get_memory_info
+    core_clean_memory
