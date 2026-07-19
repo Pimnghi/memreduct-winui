@@ -1,7 +1,5 @@
 ﻿using Microsoft.UI.Xaml;
-
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
+using Microsoft.Windows.AppLifecycle;
 
 namespace memreduct_winui;
 
@@ -16,9 +14,26 @@ public partial class App : Application
 
     protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
+        var appInstance = AppInstance.FindOrRegisterForKey("memreduct_winui_instance");
+        if (!appInstance.IsCurrent)
+        {
+            appInstance.RedirectActivationToAsync(AppInstance.GetCurrent().GetActivatedEventArgs()).AsTask().Wait();
+            Environment.Exit(0);
+            return;
+        }
+
         MainWindow = new MainWindow();
         MainWindow.Activate();
 
         MemReduct.Core.TrayIcon.Create("Mem Reduct");
+
+        appInstance.Activated += (s, e) =>
+        {
+            MainWindow?.DispatcherQueue.TryEnqueue(() =>
+            {
+                if (MainWindow is MainWindow w && w.AppWindow != null)
+                    w.AppWindow.Show(true);
+            });
+        };
     }
 }
