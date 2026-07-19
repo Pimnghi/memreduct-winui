@@ -38,6 +38,11 @@ public sealed partial class MainPage : Page
         if (_timer != null) _timer.Tick -= OnTimerTick;
     }
 
+    public void TriggerClean()
+    {
+        OnCleanClick(this, new RoutedEventArgs());
+    }
+
     private void OnTimerTick(DispatcherQueueTimer sender, object args) => UpdateDisplay();
 
     public void ApplyLocalization()
@@ -107,9 +112,13 @@ public sealed partial class MainPage : Page
 
         if (result.Success && result.BytesFreed > 0)
         {
-            ResultBar.Title = "Memory cleaned";
+            var title = CoreService.GetString(StrId.CleanMemory) ?? "Memory cleaned";
+            ResultBar.Title = title;
             ResultBar.Message = $"Released: {result.FreedFormatted}";
             ResultBar.Severity = InfoBarSeverity.Success;
+
+            if (IniConfig.ReadBool("BalloonCleanResults", true))
+                ToastService.Show(title, $"Released: {result.FreedFormatted}");
         }
         else
         {

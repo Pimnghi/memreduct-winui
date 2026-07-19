@@ -18,5 +18,7 @@ public partial class App : Application
     {
         MainWindow = new MainWindow();
         MainWindow.Activate();
+
+        MemReduct.Core.TrayIcon.Create("Mem Reduct");
     }
 }
