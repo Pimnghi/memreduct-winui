@@ -13,14 +13,15 @@ public static class StrId
     public const uint ItemTotal = 23;
     public const uint SettingsGeneral = 24;
     public const uint SettingsMemory = 25;
-    public const uint SettingsAppearance = 26;
-    public const uint SettingsTray = 27;
     public const uint TitleMemoryRegions = 31;
     public const uint TitleMemoryManagement = 32;
+    public const uint TitleHotkeys = 33;
+    public const uint ColorIndication = 35;
     public const uint AlwaysOnTop = 38;
     public const uint LoadOnStartup = 39;
     public const uint StartMinimized = 40;
     public const uint ConfirmCleaning = 41;
+    public const uint LanguageHint = 44;
     public const uint WorkingSet = 45;
     public const uint SystemFileCache = 46;
     public const uint StandbyPriority0 = 47;
@@ -30,9 +31,13 @@ public static class StrId
     public const uint AutoCleanEnable = 51;
     public const uint AutoCleanInterval = 52;
     public const uint HotkeyClean = 53;
-    public const uint LanguageHint = 44;
+    public const uint WarningLevel = 64;
+    public const uint DangerLevel = 65;
     public const uint ShowCleanResult = 71;
     public const uint StatusCleaned = 75;
     public const uint StatusNoPrivileges = 76;
-    public const uint TitleHotkeys = 33;
+    public const uint Theme = 91;
+    public const uint ThemeSystem = 92;
+    public const uint ThemeLight = 93;
+    public const uint ThemeDark = 94;
 }

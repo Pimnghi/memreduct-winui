@@ -50,6 +50,9 @@ public sealed partial class SettingsPage : Page
 
         v = s(StrId.HotkeyClean);            if (v != null) ChkHotkey.Content = v;
         v = s(StrId.TitleHotkeys);           if (v != null) HotkeyExpander.Header = v;
+        v = s(StrId.ColorIndication);        if (v != null) ColorExpander.Header = v;
+        v = s(StrId.WarningLevel);           if (v != null) WarningLabel.Text = v;
+        v = s(StrId.DangerLevel);            if (v != null) DangerLabel.Text = v;
     }
 
     private void LoadSettings()
@@ -76,6 +79,9 @@ public sealed partial class SettingsPage : Page
         ChkStartMinimized.IsChecked = IniConfig.ReadBool("IsStartMinimized");
         ChkConfirmClean.IsChecked = IniConfig.ReadBool("IsShowReductConfirmation", true);
         ChkShowResults.IsChecked = IniConfig.ReadBool("BalloonCleanResults", true);
+
+        NbWarning.Value = IniConfig.ReadUInt("TrayLevelWarning", 70);
+        NbDanger.Value = IniConfig.ReadUInt("TrayLevelDanger", 90);
 
         CmbTheme.Items.Clear();
         CmbTheme.Items.Add(new ComboBoxItem { Content = "System default", Tag = "System" });
@@ -131,6 +137,9 @@ public sealed partial class SettingsPage : Page
     private void OnIntervalCleanChanged(object sender, RoutedEventArgs e) { if (_loading) return; NbInterval.IsEnabled = ChkIntervalClean.IsChecked == true; IniConfig.WriteBool("AutoreductIntervalEnable", ChkIntervalClean.IsChecked == true); AutoCleanService.Refresh(); }
     private void OnAutoCleanValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args) { if (_loading || double.IsNaN(args.NewValue)) return; IniConfig.WriteUInt("AutoreductValue", (uint)args.NewValue); }
     private void OnIntervalValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args) { if (_loading || double.IsNaN(args.NewValue)) return; IniConfig.WriteUInt("AutoreductIntervalValue", (uint)args.NewValue); }
+
+    private void OnWarningValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args) { if (_loading || double.IsNaN(args.NewValue)) return; IniConfig.WriteUInt("TrayLevelWarning", (uint)args.NewValue); }
+    private void OnDangerValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args) { if (_loading || double.IsNaN(args.NewValue)) return; IniConfig.WriteUInt("TrayLevelDanger", (uint)args.NewValue); }
 
     private void OnBoolChanged(object sender, RoutedEventArgs e)
     {

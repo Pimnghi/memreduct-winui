@@ -295,6 +295,13 @@ static LPCWSTR core_get_string_en(ULONG uid)
 		case 71: return L"Show memory cleaning results";
 		case 75: return L"Memory was released.";
 		case 76: return L"Required administrator privileges.";
+		case 35: return L"Color indication";
+		case 64: return L"Warning level (%)";
+		case 65: return L"Danger level (%)";
+		case 91: return L"Theme";
+		case 92: return L"System default";
+		case 93: return L"Light";
+		case 94: return L"Dark";
 		default: return NULL;
 	}
 }

@@ -99,6 +99,32 @@ public sealed partial class MainPage : Page
         CacheBar.Value = stats.SystemCachePercent;
         CacheFreeText.Text = FormatBytes(stats.SystemCacheFree);
         CacheTotalText.Text = FormatBytes(stats.SystemCacheTotal);
+
+        UpdateBarColors(stats);
+    }
+
+    private void UpdateBarColors(MemoryStats stats)
+    {
+        var danger = IniConfig.ReadUInt("TrayLevelDanger", 90);
+        var warning = IniConfig.ReadUInt("TrayLevelWarning", 70);
+
+        var dangerBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(Windows.UI.Color.FromArgb(0xFF, 0xEC, 0x1C, 0x24));
+        var warningBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(Windows.UI.Color.FromArgb(0xFF, 0xFF, 0x80, 0x40));
+
+        SetBarColor(PhysicalBar, stats.PhysicalPercent, danger, warning, dangerBrush, warningBrush);
+        SetBarColor(PageFileBar, stats.PageFilePercent, danger, warning, dangerBrush, warningBrush);
+        SetBarColor(CacheBar, stats.SystemCachePercent, danger, warning, dangerBrush, warningBrush);
+    }
+
+    private static void SetBarColor(ProgressBar bar, double pct, uint danger, uint warning,
+        Microsoft.UI.Xaml.Media.SolidColorBrush dangerBrush, Microsoft.UI.Xaml.Media.SolidColorBrush warningBrush)
+    {
+        if (pct >= danger)
+            bar.Foreground = dangerBrush;
+        else if (pct >= warning)
+            bar.Foreground = warningBrush;
+        else
+            bar.ClearValue(ProgressBar.ForegroundProperty);
     }
 
     private static string FormatBytes(ulong bytes) => bytes switch
