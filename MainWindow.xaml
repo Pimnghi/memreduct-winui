@@ -34,6 +34,14 @@
             <controls:NavigationViewItem Icon="Setting" Content="Settings" Tag="settings"/>
         </controls:NavigationView.MenuItems>
 
+        <controls:NavigationView.FooterMenuItems>
+            <controls:NavigationViewItem Tag="about">
+                <controls:NavigationViewItem.Icon>
+                    <FontIcon Glyph="&#xE946;" FontSize="16"/>
+                </controls:NavigationViewItem.Icon>
+            </controls:NavigationViewItem>
+        </controls:NavigationView.FooterMenuItems>
+
         <Frame x:Name="ContentFrame" />
     </controls:NavigationView>
     </Grid>

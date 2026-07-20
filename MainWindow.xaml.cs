@@ -172,5 +172,9 @@ public sealed partial class MainWindow : Window
         {
             ContentFrame.Navigate(typeof(SettingsPage));
         }
+        else if (tag == "about")
+        {
+            ContentFrame.Navigate(typeof(AboutPage));
+        }
     }
 }
