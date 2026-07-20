@@ -325,7 +325,9 @@ LPCWSTR core_get_string(ULONG uid)
 
 	WCHAR language[128] = {0};
 	WCHAR section[128];
-	GetPrivateProfileStringW(L"memreduct", L"Language", L"", language, 127, _r_app_getconfigpath()->buffer);
+	WCHAR ini_path[MAX_PATH];
+	_r_str_printf(ini_path, RTL_NUMBER_OF(ini_path), L"%s\\data\\memreduct-winui.ini", _r_app_getdirectory()->buffer);
+	GetPrivateProfileStringW(L"memreduct", L"Language", L"", language, 127, ini_path);
 
 	if (language[0])
 	{
@@ -435,7 +437,9 @@ ULONG_PTR core_locale_get_current(void)
 
 	// fallback: read Language from INI, find matching section in .lng
 	WCHAR language[128] = {0};
-	GetPrivateProfileStringW(L"memreduct", L"Language", L"", language, 127, _r_app_getconfigpath()->buffer);
+	WCHAR ini_path[MAX_PATH];
+	_r_str_printf(ini_path, RTL_NUMBER_OF(ini_path), L"%s\\data\\memreduct-winui.ini", _r_app_getdirectory()->buffer);
+	GetPrivateProfileStringW(L"memreduct", L"Language", L"", language, 127, ini_path);
 	if (!language[0]) return 0; // System default
 
 	WCHAR sections[4096];

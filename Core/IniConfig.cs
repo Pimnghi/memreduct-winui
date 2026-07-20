@@ -8,8 +8,14 @@ internal static class IniConfig
     private const string Section = "memreduct";
 
     private static readonly string Path = System.IO.Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "Henry++", "Mem Reduct", "memreduct.ini");
+        AppContext.BaseDirectory, "data", "memreduct-winui.ini");
+
+    static IniConfig()
+    {
+        var dir = System.IO.Path.GetDirectoryName(Path);
+        if (dir != null)
+            System.IO.Directory.CreateDirectory(dir);
+    }
 
     [DllImport("kernel32", CharSet = CharSet.Unicode)]
     private static extern int GetPrivateProfileStringW(

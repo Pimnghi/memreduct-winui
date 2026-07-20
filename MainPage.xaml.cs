@@ -3,6 +3,8 @@ using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
+using System.Diagnostics;
+using System.IO;
 
 namespace memreduct_winui;
 
@@ -112,9 +114,35 @@ public sealed partial class MainPage : Page
         if (!CoreService.IsElevated())
         {
             ResultBar.Title = "Administrator privileges required";
-            ResultBar.Message = "Please run the program as administrator.";
+            ResultBar.Message = "Please run as administrator.";
             ResultBar.Severity = InfoBarSeverity.Error;
             ResultBar.IsOpen = true;
+
+            var restart = new Button
+            {
+                Content = "Restart as Administrator",
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                Padding = new Thickness(8),
+            };
+            restart.Click += (s2, e2) =>
+            {
+                var exePath = Process.GetCurrentProcess().MainModule?.FileName ?? "";
+                if (!string.IsNullOrEmpty(exePath))
+                {
+                    try
+                    {
+                        Process.Start(new ProcessStartInfo(exePath)
+                        {
+                            UseShellExecute = true,
+                            Verb = "runas",
+                            WorkingDirectory = Path.GetDirectoryName(exePath),
+                        });
+                        Application.Current.Exit();
+                    }
+                    catch { }
+                }
+            };
+            ResultBar.ActionButton = restart;
             return;
         }
 
