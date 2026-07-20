@@ -93,11 +93,21 @@ public sealed partial class MainWindow : Window
         if (!CoreService.IsElevated()) return;
         DispatcherQueue.TryEnqueue(async () =>
         {
+            // if on main page, show cleaning animation
+            if (ContentFrame.Content is MainPage mp)
+                mp.SetCleaningState(true);
+
             var result = await System.Threading.Tasks.Task.Run(() =>
                 CoreService.CleanMemory(IniConfig.ReadUInt("ReductMask2", MemoryMask.Default)));
 
+            if (ContentFrame.Content is MainPage mainPage)
+            {
+                mainPage.SetCleaningState(false);
+                mainPage.ApplyLocalization();
+            }
+
             if (result.Success && result.BytesFreed > 0 && IniConfig.ReadBool("BalloonCleanResults", true))
-                ToastService.Show("Mem Reduct", $"Memory released: {result.FreedFormatted}");
+                ToastService.ShowCleanResult(result.BytesFreed, result.FreedFormatted);
         });
     }
 

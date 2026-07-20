@@ -43,6 +43,20 @@ public sealed partial class MainPage : Page
         OnCleanClick(this, new RoutedEventArgs());
     }
 
+    public void SetCleaningState(bool cleaning)
+    {
+        if (cleaning)
+        {
+            CleanBtn.IsEnabled = false;
+            CleanBtn.Content = (CoreService.GetString(StrId.CleanMemory) ?? "Cleaning") + "…";
+        }
+        else
+        {
+            CleanBtn.IsEnabled = true;
+            CleanBtn.Content = CoreService.GetString(StrId.CleanMemory) ?? "Clean memory";
+        }
+    }
+
     private void OnTimerTick(DispatcherQueueTimer sender, object args) => UpdateDisplay();
 
     public void ApplyLocalization()
@@ -121,7 +135,7 @@ public sealed partial class MainPage : Page
             ResultBar.Severity = InfoBarSeverity.Success;
 
             if (IniConfig.ReadBool("BalloonCleanResults", true))
-                ToastService.Show("Mem Reduct", $"Memory released: {result.FreedFormatted}");
+                ToastService.ShowCleanResult(result.BytesFreed, result.FreedFormatted);
         }
         else
         {

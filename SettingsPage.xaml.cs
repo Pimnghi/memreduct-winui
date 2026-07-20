@@ -49,7 +49,7 @@ public sealed partial class SettingsPage : Page
         v = s(StrId.ShowCleanResult);       if (v != null) ChkShowResults.Content = v;
 
         v = s(StrId.HotkeyClean);            if (v != null) ChkHotkey.Content = v;
-        v = s(StrId.HotkeyClean);            if (v != null) HotkeyExpander.Header = "Hotkey"; // no localized header, use English fallback
+        v = s(StrId.TitleHotkeys);           if (v != null) HotkeyExpander.Header = v;
     }
 
     private void LoadSettings()

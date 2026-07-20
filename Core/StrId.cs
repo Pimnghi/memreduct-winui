@@ -34,4 +34,5 @@ public static class StrId
     public const uint ShowCleanResult = 71;
     public const uint StatusCleaned = 75;
     public const uint StatusNoPrivileges = 76;
+    public const uint TitleHotkeys = 33;
 }

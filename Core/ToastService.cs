@@ -1,10 +1,18 @@
+using System;
+
 namespace MemReduct.Core;
 
 public static class ToastService
 {
-    public static void Show(string title, string message)
+    public static void ShowCleanResult(ulong bytesFreed, string formatted)
     {
         var noSound = !IniConfig.ReadBool("IsNotificationsSound", true);
-        TrayIcon.ShowBalloon(title, message, noSound);
+        var title = CoreService.GetString(StrId.CleanMemory) ?? "Memory cleaned";
+        var msg = CoreService.GetString(StrId.StatusCleaned);
+        if (msg != null)
+            msg = msg.Replace("%s", formatted);
+        else
+            msg = $"Memory released: {formatted}";
+        TrayIcon.ShowBalloon(title, msg, noSound);
     }
 }
