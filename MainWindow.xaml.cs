@@ -1,12 +1,23 @@
 using MemReduct.Core;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using System;
+using System.Runtime.InteropServices;
 
 namespace memreduct_winui;
 
 public sealed partial class MainWindow : Window
 {
     private bool _exiting;
+
+    private static readonly nint HWND_TOPMOST = -1;
+    private static readonly nint HWND_NOTOPMOST = -2;
+    private const uint SWP_NOSIZE = 0x0001;
+    private const uint SWP_NOMOVE = 0x0002;
+    private const uint SWP_NOACTIVATE = 0x0010;
+
+    [DllImport("user32")]
+    private static extern bool SetWindowPos(nint hWnd, nint hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
 
     public MainWindow()
     {
@@ -29,6 +40,16 @@ public sealed partial class MainWindow : Window
         AppWindow.Closing += AppWindow_Closing;
         UpdateTrayMenuTexts();
         TrayIcon.RefreshHotkey();
+        ApplyTopmost();
+    }
+
+    public void ApplyTopmost()
+    {
+        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+        if (hwnd == nint.Zero) return;
+
+        var topmost = IniConfig.ReadBool("AlwaysOnTop");
+        SetWindowPos(hwnd, topmost ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
     }
 
     private void OnTrayCommand(int cmd)

@@ -150,7 +150,10 @@ public sealed partial class SettingsPage : Page
     {
         if (_loading) return;
         if (ReferenceEquals(sender, ChkAlwaysOnTop))
+        {
             IniConfig.WriteBool("AlwaysOnTop", ChkAlwaysOnTop.IsChecked == true);
+            if (App.MainWindow is MainWindow w) w.ApplyTopmost();
+        }
         else if (ReferenceEquals(sender, ChkStartMinimized))
             IniConfig.WriteBool("IsStartMinimized", ChkStartMinimized.IsChecked == true);
         else if (ReferenceEquals(sender, ChkConfirmClean))
