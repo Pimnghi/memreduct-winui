@@ -319,7 +319,7 @@ LPCWSTR core_get_string(ULONG uid)
 	static R_INITONCE lng_init = PR_INITONCE_INIT;
 	if (_r_initonce_begin(&lng_init))
 	{
-		_r_str_printf(lng_path, RTL_NUMBER_OF(lng_path), L"%s\\memreduct.lng", _r_app_getdirectory()->buffer);
+		_r_str_printf(lng_path, RTL_NUMBER_OF(lng_path), L"%s\\language\\memreduct-winui.lng", _r_app_getdirectory()->buffer);
 		_r_initonce_end(&lng_init);
 	}
 
@@ -357,10 +357,10 @@ ULONG core_locale_count(void)
 		return (ULONG)count;
 	}
 
-	// fallback: count sections in memreduct.lng
+	// fallback: count sections in language\\memreduct-winui.lng
 	WCHAR buf[4096];
 	WCHAR lng_path[MAX_PATH];
-	_r_str_printf(lng_path, RTL_NUMBER_OF(lng_path), L"%s\\memreduct.lng", _r_app_getdirectory()->buffer);
+	_r_str_printf(lng_path, RTL_NUMBER_OF(lng_path), L"%s\\language\\memreduct-winui.lng", _r_app_getdirectory()->buffer);
 	if (GetPrivateProfileSectionNamesW(buf, RTL_NUMBER_OF(buf), lng_path) == 0)
 		return 0;
 
@@ -387,10 +387,10 @@ BOOLEAN core_locale_get_name(ULONG index, LPWSTR buf, ULONG buf_size)
 		return name != NULL;
 	}
 
-	// fallback: read section names from memreduct.lng
+	// fallback: read section names from language\\memreduct-winui.lng
 	WCHAR sections[4096];
 	WCHAR lng_path[MAX_PATH];
-	_r_str_printf(lng_path, RTL_NUMBER_OF(lng_path), L"%s\\memreduct.lng", _r_app_getdirectory()->buffer);
+	_r_str_printf(lng_path, RTL_NUMBER_OF(lng_path), L"%s\\language\\memreduct-winui.lng", _r_app_getdirectory()->buffer);
 	if (GetPrivateProfileSectionNamesW(sections, RTL_NUMBER_OF(sections), lng_path) == 0)
 		return FALSE;
 
@@ -444,7 +444,7 @@ ULONG_PTR core_locale_get_current(void)
 
 	WCHAR sections[4096];
 	WCHAR lng_path[MAX_PATH];
-	_r_str_printf(lng_path, RTL_NUMBER_OF(lng_path), L"%s\\memreduct.lng", _r_app_getdirectory()->buffer);
+	_r_str_printf(lng_path, RTL_NUMBER_OF(lng_path), L"%s\\language\\memreduct-winui.lng", _r_app_getdirectory()->buffer);
 	if (GetPrivateProfileSectionNamesW(sections, RTL_NUMBER_OF(sections), lng_path) == 0)
 		return 0;
 
