@@ -26,23 +26,29 @@
             Grid.Row="1"
             IsBackButtonVisible="Collapsed"
             IsSettingsVisible="False"
+            IsPaneToggleButtonVisible="False"
             PaneDisplayMode="LeftCompact"
             CompactModeThresholdWidth="0">
 
-        <controls:NavigationView.MenuItems>
-            <controls:NavigationViewItem Icon="Globe" Content="Memory" Tag="main"/>
-            <controls:NavigationViewItem Icon="Setting" Content="Settings" Tag="settings"/>
-        </controls:NavigationView.MenuItems>
+            <controls:NavigationView.MenuItems>
+                <controls:NavigationViewItem Icon="Globe" Content="Memory" Tag="main"/>
+            </controls:NavigationView.MenuItems>
 
-        <controls:NavigationView.FooterMenuItems>
-            <controls:NavigationViewItem Tag="about">
-                <controls:NavigationViewItem.Icon>
-                    <FontIcon Glyph="&#xE946;" FontSize="16"/>
-                </controls:NavigationViewItem.Icon>
-            </controls:NavigationViewItem>
-        </controls:NavigationView.FooterMenuItems>
+            <controls:NavigationView.FooterMenuItems>
+                <controls:NavigationViewItem Icon="Setting" Content="Settings" Tag="settings"/>
+                <controls:NavigationViewItem Content="About" Tag="about">
+                    <controls:NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE946;" FontSize="16"/>
+                    </controls:NavigationViewItem.Icon>
+                </controls:NavigationViewItem>
+                <controls:NavigationViewItem x:Name="ToggleBtn" Tag="toggle">
+                    <controls:NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE700;" FontSize="16"/>
+                    </controls:NavigationViewItem.Icon>
+                </controls:NavigationViewItem>
+            </controls:NavigationView.FooterMenuItems>
 
-        <Frame x:Name="ContentFrame" />
-    </controls:NavigationView>
+            <Frame x:Name="ContentFrame" />
+        </controls:NavigationView>
     </Grid>
 </Window>

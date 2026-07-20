@@ -31,6 +31,14 @@ public sealed partial class MainWindow : Window
         if (Content is FrameworkElement fe)
             fe.ActualThemeChanged += (s, e) => UpdateTitleBarColors();
 
+        ToggleBtn.Tapped += (s, e) =>
+        {
+            NavView.PaneDisplayMode = NavView.PaneDisplayMode == NavigationViewPaneDisplayMode.LeftCompact
+                ? NavigationViewPaneDisplayMode.Left
+                : NavigationViewPaneDisplayMode.LeftCompact;
+            e.Handled = true;
+        };
+
         NavView.ItemInvoked += OnNavItemInvoked;
         NavView.SelectedItem = NavView.MenuItems[0];
         ContentFrame.Navigate(typeof(MainPage));
