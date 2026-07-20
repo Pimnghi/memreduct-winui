@@ -3,6 +3,7 @@ using Microsoft.Windows.AppLifecycle;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace memreduct_winui;
@@ -26,9 +27,9 @@ public partial class App : Application
 
     protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
-        // command-line mode
         var cmdline = string.Join(" ", Environment.GetCommandLineArgs().Skip(1));
         var isAutostart = cmdline.Contains("-autostart");
+
         if (cmdline.Contains("-clean") || cmdline.Contains("/clean"))
         {
             var fullMask = cmdline.Contains("full") ? MemReduct.Core.MemoryMask.All : MemReduct.Core.MemoryMask.Default;
@@ -41,12 +42,14 @@ public partial class App : Application
             }
 #endif
 
-            AttachConsole(ATTACH_PARENT_PROCESS);
+            if (!AttachConsole(ATTACH_PARENT_PROCESS)) AllocConsole();
             var result = MemReduct.Core.CoreService.CleanMemory(fullMask);
             if (result.Success)
                 Console.WriteLine($"Memory released: {result.FreedFormatted}");
             else
                 Console.WriteLine("Clean failed.");
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadKey();
             Environment.Exit(result.Success ? 0 : 1);
             return;
         }
@@ -54,7 +57,7 @@ public partial class App : Application
 #if !DEBUG
         if (!MemReduct.Core.CoreService.IsElevated())
         {
-            RunAsAdmin(string.Join(" ", Environment.GetCommandLineArgs().Skip(1)));
+            RunAsAdmin(cmdline);
             return;
         }
 #endif
@@ -78,7 +81,6 @@ public partial class App : Application
             MainWindow.AppWindow.Hide();
 
         MemReduct.Core.AutoCleanService.Refresh();
-
         SyncAutoStart();
 
         appInstance.Activated += (s, e) =>
@@ -108,7 +110,7 @@ public partial class App : Application
 
     private static void RunAsAdmin(string arguments)
     {
-        var exePath = Process.GetCurrentProcess().MainModule?.FileName ?? "";
+        var exePath = Process.GetCurrentProcess().MainModule?.FileName ?? Environment.ProcessPath ?? "";
         if (!string.IsNullOrEmpty(exePath) && File.Exists(exePath))
         {
             try
