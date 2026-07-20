@@ -52,6 +52,9 @@
                         <CheckBox x:Name="ChkStartMinimized" Checked="OnBoolChanged" Unchecked="OnBoolChanged"/>
                         <CheckBox x:Name="ChkConfirmClean" Checked="OnBoolChanged" Unchecked="OnBoolChanged"/>
                         <CheckBox x:Name="ChkShowResults" Checked="OnBoolChanged" Unchecked="OnBoolChanged"/>
+
+                        <TextBlock Text="Theme:"/>
+                        <ComboBox x:Name="CmbTheme" SelectionChanged="OnThemeChanged"/>
                     </StackPanel>
                 </Expander>
 

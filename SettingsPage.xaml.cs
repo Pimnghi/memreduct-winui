@@ -77,6 +77,12 @@ public sealed partial class SettingsPage : Page
         ChkConfirmClean.IsChecked = IniConfig.ReadBool("IsShowReductConfirmation", true);
         ChkShowResults.IsChecked = IniConfig.ReadBool("BalloonCleanResults", true);
 
+        CmbTheme.Items.Clear();
+        CmbTheme.Items.Add(new ComboBoxItem { Content = "System default", Tag = "System" });
+        CmbTheme.Items.Add(new ComboBoxItem { Content = "Light", Tag = "Light" });
+        CmbTheme.Items.Add(new ComboBoxItem { Content = "Dark", Tag = "Dark" });
+        CmbTheme.SelectedIndex = (IniConfig.ReadString("Theme", "System") ?? "System") switch { "Light" => 1, "Dark" => 2, _ => 0 };
+
         ChkHotkey.IsChecked = IniConfig.ReadBool("HotkeyCleanEnable");
         LoadHotkeyDisplay();
     }
@@ -98,6 +104,14 @@ public sealed partial class SettingsPage : Page
         }
     }
 
+    private void OnThemeChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loading || CmbTheme.SelectedItem is not ComboBoxItem item) return;
+        var theme = item.Tag?.ToString() ?? "System";
+        IniConfig.WriteString("Theme", theme);
+        App.ApplyTheme(theme);
+    }
+
     private void SaveMask()
     {
         uint mask = 0;
@@ -112,39 +126,11 @@ public sealed partial class SettingsPage : Page
         IniConfig.WriteUInt("ReductMask2", mask);
     }
 
-    private void OnRegionChanged(object sender, RoutedEventArgs e)
-    {
-        if (_loading) return;
-        SaveMask();
-    }
-
-    private void OnAutoCleanChanged(object sender, RoutedEventArgs e)
-    {
-        if (_loading) return;
-        NbAutoClean.IsEnabled = ChkAutoClean.IsChecked == true;
-        IniConfig.WriteBool("AutoreductEnable", ChkAutoClean.IsChecked == true);
-        AutoCleanService.Refresh();
-    }
-
-    private void OnIntervalCleanChanged(object sender, RoutedEventArgs e)
-    {
-        if (_loading) return;
-        NbInterval.IsEnabled = ChkIntervalClean.IsChecked == true;
-        IniConfig.WriteBool("AutoreductIntervalEnable", ChkIntervalClean.IsChecked == true);
-        AutoCleanService.Refresh();
-    }
-
-    private void OnAutoCleanValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
-    {
-        if (_loading || double.IsNaN(args.NewValue)) return;
-        IniConfig.WriteUInt("AutoreductValue", (uint)args.NewValue);
-    }
-
-    private void OnIntervalValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
-    {
-        if (_loading || double.IsNaN(args.NewValue)) return;
-        IniConfig.WriteUInt("AutoreductIntervalValue", (uint)args.NewValue);
-    }
+    private void OnRegionChanged(object sender, RoutedEventArgs e) { if (!_loading) SaveMask(); }
+    private void OnAutoCleanChanged(object sender, RoutedEventArgs e) { if (_loading) return; NbAutoClean.IsEnabled = ChkAutoClean.IsChecked == true; IniConfig.WriteBool("AutoreductEnable", ChkAutoClean.IsChecked == true); AutoCleanService.Refresh(); }
+    private void OnIntervalCleanChanged(object sender, RoutedEventArgs e) { if (_loading) return; NbInterval.IsEnabled = ChkIntervalClean.IsChecked == true; IniConfig.WriteBool("AutoreductIntervalEnable", ChkIntervalClean.IsChecked == true); AutoCleanService.Refresh(); }
+    private void OnAutoCleanValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args) { if (_loading || double.IsNaN(args.NewValue)) return; IniConfig.WriteUInt("AutoreductValue", (uint)args.NewValue); }
+    private void OnIntervalValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args) { if (_loading || double.IsNaN(args.NewValue)) return; IniConfig.WriteUInt("AutoreductIntervalValue", (uint)args.NewValue); }
 
     private void OnBoolChanged(object sender, RoutedEventArgs e)
     {
@@ -179,27 +165,13 @@ public sealed partial class SettingsPage : Page
         HotkeyBox.Text = HotkeyToString((uint)mods, (uint)vk);
     }
 
-    private void OnHotkeyChanged(object sender, RoutedEventArgs e)
-    {
-        if (_loading) return;
-        IniConfig.WriteBool("HotkeyCleanEnable", ChkHotkey.IsChecked == true);
-        if (App.MainWindow is MainWindow w) TrayIcon.RefreshHotkey();
-    }
-
-    private void OnHotkeyTapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)
-    {
-        HotkeyBox.PlaceholderText = "Press a key combination...";
-        HotkeyBox.Focus(FocusState.Keyboard);
-    }
+    private void OnHotkeyChanged(object sender, RoutedEventArgs e) { if (_loading) return; IniConfig.WriteBool("HotkeyCleanEnable", ChkHotkey.IsChecked == true); if (App.MainWindow is MainWindow w) TrayIcon.RefreshHotkey(); }
+    private void OnHotkeyTapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e) { HotkeyBox.PlaceholderText = "Press a key combination..."; HotkeyBox.Focus(FocusState.Keyboard); }
 
     private void OnHotkeyKeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
     {
         var vk = (uint)e.Key;
-        if (vk is 0xA0 or 0xA1 or 0xA2 or 0xA3 or 0xA4 or 0xA5) // modifier keys
-        {
-            e.Handled = false;
-            return;
-        }
+        if (vk is 0xA0 or 0xA1 or 0xA2 or 0xA3 or 0xA4 or 0xA5) { e.Handled = false; return; }
 
         uint mods = 0;
         var ctrl = InputKeyboardSource.GetKeyStateForCurrentThread(Windows.System.VirtualKey.Control);
@@ -208,16 +180,15 @@ public sealed partial class SettingsPage : Page
         var lwin = InputKeyboardSource.GetKeyStateForCurrentThread(Windows.System.VirtualKey.LeftWindows);
         var rwin = InputKeyboardSource.GetKeyStateForCurrentThread(Windows.System.VirtualKey.RightWindows);
 
-        if (ctrl.HasFlag(CoreVirtualKeyStates.Down)) mods |= 2; // Ctrl → bit1
-        if (alt.HasFlag(CoreVirtualKeyStates.Down)) mods |= 4;  // Alt → bit2
-        if (shift.HasFlag(CoreVirtualKeyStates.Down)) mods |= 1; // Shift → bit0
-        if (lwin.HasFlag(CoreVirtualKeyStates.Down) || rwin.HasFlag(CoreVirtualKeyStates.Down)) mods |= 8; // Win → bit3
+        if (ctrl.HasFlag(CoreVirtualKeyStates.Down)) mods |= 2;
+        if (alt.HasFlag(CoreVirtualKeyStates.Down)) mods |= 4;
+        if (shift.HasFlag(CoreVirtualKeyStates.Down)) mods |= 1;
+        if (lwin.HasFlag(CoreVirtualKeyStates.Down) || rwin.HasFlag(CoreVirtualKeyStates.Down)) mods |= 8;
 
         var hotkey = ((int)mods << 8) | (int)vk;
         IniConfig.WriteInt("HotkeyClean", hotkey);
         HotkeyBox.Text = HotkeyToString(mods, vk);
         if (App.MainWindow is MainWindow w) TrayIcon.RefreshHotkey();
-
         e.Handled = true;
     }
 

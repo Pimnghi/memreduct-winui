@@ -52,6 +52,8 @@ public partial class App : Application
         MainWindow = new MainWindow();
         MainWindow.Activate();
 
+        ApplySavedTheme();
+
         MemReduct.Core.AutoCleanService.Refresh();
 
         appInstance.Activated += (s, e) =>
@@ -62,5 +64,20 @@ public partial class App : Application
                     w.AppWindow.Show(true);
             });
         };
+    }
+
+    public static void ApplyTheme(string? theme)
+    {
+        if (theme == null) theme = MemReduct.Core.IniConfig.ReadString("Theme", "System") ?? "System";
+        var value = theme == "Dark" ? ElementTheme.Dark :
+                    theme == "Light" ? ElementTheme.Light : ElementTheme.Default;
+
+        if (MainWindow?.Content is FrameworkElement fe)
+            fe.RequestedTheme = value;
+    }
+
+    private static void ApplySavedTheme()
+    {
+        ApplyTheme(null);
     }
 }
