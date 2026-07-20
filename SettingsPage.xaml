@@ -29,12 +29,18 @@
                             <controls:NumberBox x:Name="NbAutoClean" Grid.Column="0" Minimum="1" Maximum="100" SpinButtonPlacementMode="Compact" ValueChanged="OnAutoCleanValueChanged" Width="80"/>
                             <TextBlock Grid.Column="1" Text="%" VerticalAlignment="Center"/>
                         </Grid>
-
                         <CheckBox x:Name="ChkIntervalClean" Checked="OnIntervalCleanChanged" Unchecked="OnIntervalCleanChanged"/>
                         <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="8">
                             <controls:NumberBox x:Name="NbInterval" Grid.Column="0" Minimum="1" Maximum="1440" SpinButtonPlacementMode="Compact" ValueChanged="OnIntervalValueChanged" Width="80"/>
                             <TextBlock x:Name="IntervalUnit" Grid.Column="1" Text="minutes" VerticalAlignment="Center"/>
                         </Grid>
+                    </StackPanel>
+                </Expander>
+
+                <Expander x:Name="HotkeyExpander" Header="Hotkey (global)" IsExpanded="False">
+                    <StackPanel Spacing="10">
+                        <CheckBox x:Name="ChkHotkey" Content="Clean memory:" Checked="OnHotkeyChanged" Unchecked="OnHotkeyChanged"/>
+                        <TextBox x:Name="HotkeyBox" IsReadOnly="True" PlaceholderText="Click here and press a key combination..." KeyDown="OnHotkeyKeyDown" Tapped="OnHotkeyTapped"/>
                     </StackPanel>
                 </Expander>
 

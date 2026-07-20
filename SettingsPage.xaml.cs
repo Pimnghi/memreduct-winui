@@ -1,6 +1,9 @@
 using MemReduct.Core;
+using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Windows.UI.Core;
+using Windows.System;
 
 namespace memreduct_winui;
 
@@ -44,6 +47,9 @@ public sealed partial class SettingsPage : Page
         v = s(StrId.StartMinimized);        if (v != null) ChkStartMinimized.Content = v;
         v = s(StrId.ConfirmCleaning);       if (v != null) ChkConfirmClean.Content = v;
         v = s(StrId.ShowCleanResult);       if (v != null) ChkShowResults.Content = v;
+
+        v = s(StrId.HotkeyClean);            if (v != null) ChkHotkey.Content = v;
+        v = s(StrId.HotkeyClean);            if (v != null) HotkeyExpander.Header = "Hotkey"; // no localized header, use English fallback
     }
 
     private void LoadSettings()
@@ -70,6 +76,9 @@ public sealed partial class SettingsPage : Page
         ChkStartMinimized.IsChecked = IniConfig.ReadBool("IsStartMinimized");
         ChkConfirmClean.IsChecked = IniConfig.ReadBool("IsShowReductConfirmation", true);
         ChkShowResults.IsChecked = IniConfig.ReadBool("BalloonCleanResults", true);
+
+        ChkHotkey.IsChecked = IniConfig.ReadBool("HotkeyCleanEnable");
+        LoadHotkeyDisplay();
     }
 
     private void LoadLocales()
@@ -157,5 +166,75 @@ public sealed partial class SettingsPage : Page
         IniConfig.WriteString("Language", name == "System default" ? "" : name);
         CoreService.SetLocale((uint)(item.Tag ?? 0u));
         ApplyLocalization();
+    }
+
+    private void LoadHotkeyDisplay()
+    {
+        var hotkey = IniConfig.ReadInt("HotkeyClean", (0x02 << 8 | 0x70));
+        var vk = hotkey & 0xFF;
+        var mods = (hotkey >> 8) & 0xFF;
+        HotkeyBox.Text = HotkeyToString((uint)mods, (uint)vk);
+    }
+
+    private void OnHotkeyChanged(object sender, RoutedEventArgs e)
+    {
+        if (_loading) return;
+        IniConfig.WriteBool("HotkeyCleanEnable", ChkHotkey.IsChecked == true);
+        if (App.MainWindow is MainWindow w) TrayIcon.RefreshHotkey();
+    }
+
+    private void OnHotkeyTapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)
+    {
+        HotkeyBox.PlaceholderText = "Press a key combination...";
+        HotkeyBox.Focus(FocusState.Keyboard);
+    }
+
+    private void OnHotkeyKeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+    {
+        var vk = (uint)e.Key;
+        if (vk is 0xA0 or 0xA1 or 0xA2 or 0xA3 or 0xA4 or 0xA5) // modifier keys
+        {
+            e.Handled = false;
+            return;
+        }
+
+        uint mods = 0;
+        var ctrl = InputKeyboardSource.GetKeyStateForCurrentThread(Windows.System.VirtualKey.Control);
+        var alt = InputKeyboardSource.GetKeyStateForCurrentThread(Windows.System.VirtualKey.Menu);
+        var shift = InputKeyboardSource.GetKeyStateForCurrentThread(Windows.System.VirtualKey.Shift);
+        var lwin = InputKeyboardSource.GetKeyStateForCurrentThread(Windows.System.VirtualKey.LeftWindows);
+        var rwin = InputKeyboardSource.GetKeyStateForCurrentThread(Windows.System.VirtualKey.RightWindows);
+
+        if (ctrl.HasFlag(CoreVirtualKeyStates.Down)) mods |= 2; // Ctrl → bit1
+        if (alt.HasFlag(CoreVirtualKeyStates.Down)) mods |= 4;  // Alt → bit2
+        if (shift.HasFlag(CoreVirtualKeyStates.Down)) mods |= 1; // Shift → bit0
+        if (lwin.HasFlag(CoreVirtualKeyStates.Down) || rwin.HasFlag(CoreVirtualKeyStates.Down)) mods |= 8; // Win → bit3
+
+        var hotkey = ((int)mods << 8) | (int)vk;
+        IniConfig.WriteInt("HotkeyClean", hotkey);
+        HotkeyBox.Text = HotkeyToString(mods, vk);
+        if (App.MainWindow is MainWindow w) TrayIcon.RefreshHotkey();
+
+        e.Handled = true;
+    }
+
+    private static string HotkeyToString(uint mods, uint vk)
+    {
+        var parts = new System.Collections.Generic.List<string>();
+        if ((mods & 2) != 0) parts.Add("Ctrl");
+        if ((mods & 1) != 0) parts.Add("Alt");
+        if ((mods & 4) != 0) parts.Add("Shift");
+        if ((mods & 8) != 0) parts.Add("Win");
+        var keyName = vk switch
+        {
+            >= 0x70 and <= 0x87 => "F" + (vk - 0x70 + 1),
+            0x2E => "Del", 0x08 => "Back", 0x09 => "Tab", 0x0D => "Enter",
+            0x20 => "Space", 0x21 => "PgUp", 0x22 => "PgDn",
+            0x23 => "End", 0x24 => "Home", 0x25 => "Left", 0x26 => "Up",
+            0x27 => "Right", 0x28 => "Down", 0x2D => "Ins",
+            _ => ((char)vk).ToString()
+        };
+        parts.Add(keyName);
+        return string.Join(" + ", parts);
     }
 }

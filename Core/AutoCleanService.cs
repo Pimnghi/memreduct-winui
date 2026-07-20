@@ -49,9 +49,6 @@ public static class AutoCleanService
             CoreService.CleanMemory(IniConfig.ReadUInt("ReductMask2", MemoryMask.Default)));
 
         if (result.Success && result.BytesFreed > 0 && IniConfig.ReadBool("BalloonCleanResults", true))
-        {
-            var title = CoreService.GetString(StrId.StatusCleaned) ?? "Memory cleaned";
-            ToastService.Show(title, $"Released: {result.FreedFormatted}");
-        }
+            ToastService.Show("Mem Reduct", $"Memory released: {result.FreedFormatted}");
     }
 }

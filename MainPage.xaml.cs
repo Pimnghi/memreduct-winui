@@ -121,7 +121,7 @@ public sealed partial class MainPage : Page
             ResultBar.Severity = InfoBarSeverity.Success;
 
             if (IniConfig.ReadBool("BalloonCleanResults", true))
-                ToastService.Show(title, $"Released: {result.FreedFormatted}");
+                ToastService.Show("Mem Reduct", $"Memory released: {result.FreedFormatted}");
         }
         else
         {

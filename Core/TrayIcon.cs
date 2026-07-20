@@ -24,6 +24,9 @@ public static class TrayIcon
     private const uint NIN_BALLOONTIMEOUT = 6;
     private const uint NIIF_NOSOUND = 0x00000010;
     private const uint NIIF_INFO = 0x00000001;
+    private const uint WM_HOTKEY = 0x0312;
+    private const uint HOTKEY_ID = 1337;
+    private const uint VK_F1 = 0x70;
 
     public const int CMD_SHOW = 1;
     public const int CMD_CLEAN = 2;
@@ -44,6 +47,12 @@ public static class TrayIcon
 
     [DllImport("user32")]
     private static extern int TrackPopupMenu(nint hMenu, uint uFlags, int x, int y, int nReserved, nint hWnd, nint prcRect);
+
+    [DllImport("user32")]
+    private static extern bool RegisterHotKey(nint hWnd, int id, uint fsModifiers, uint vk);
+
+    [DllImport("user32")]
+    private static extern bool UnregisterHotKey(nint hWnd, int id);
 
     [DllImport("user32")]
     private static extern bool GetCursorPos(out POINT lpPoint);
@@ -115,6 +124,7 @@ public static class TrayIcon
     private delegate nint WndProcDelegate(nint hwnd, uint msg, nuint wParam, nint lParam);
 
     public static event Action<int>? TrayCommand;
+    public static event Action? HotkeyPressed;
 
     private static string _textShow = "Show / Hide";
     private static string _textClean = "Clean memory";
@@ -151,6 +161,11 @@ public static class TrayIcon
                 if (cmd > 0) TrayCommand?.Invoke(cmd);
                 return 0;
             }
+        }
+        else if (msg == WM_HOTKEY && wParam == HOTKEY_ID)
+        {
+            HotkeyPressed?.Invoke();
+            return 0;
         }
         return DefWindowProcW(hwnd, msg, wParam, lParam);
     }
@@ -194,9 +209,33 @@ public static class TrayIcon
         return _created;
     }
 
+    public static void RefreshHotkey()
+    {
+        if (_hwnd == nint.Zero) return;
+        UnregisterHotKey(_hwnd, (int)HOTKEY_ID);
+
+        var enabled = IniConfig.ReadBool("HotkeyCleanEnable");
+        if (!enabled) return;
+
+        var hotkey = IniConfig.ReadInt("HotkeyClean", unchecked((int)(0x0002 << 8 | VK_F1)));
+        var vk = (uint)(hotkey & 0xFF);
+        var mod = (uint)((hotkey >> 8) & 0xFF);
+
+        // original app bit order: bit0=Shift(1), bit1=Ctrl(2), bit2=Alt(4), bit3=Win(8)
+        // remap to Windows MOD_* flags
+        uint winMod = 0;
+        if ((mod & 1) != 0) winMod |= 0x0004; // Shift → MOD_SHIFT
+        if ((mod & 2) != 0) winMod |= 0x0002; // Ctrl → MOD_CONTROL
+        if ((mod & 4) != 0) winMod |= 0x0001; // Alt → MOD_ALT
+        if ((mod & 8) != 0) winMod |= 0x0008; // Win → MOD_WIN
+
+        RegisterHotKey(_hwnd, (int)HOTKEY_ID, winMod, vk);
+    }
+
     public static void Destroy()
     {
         if (!_created) return;
+        if (_hwnd != nint.Zero) UnregisterHotKey(_hwnd, (int)HOTKEY_ID);
         var nid = new NOTIFYICONDATAW
         {
             cbSize = (uint)Marshal.SizeOf<NOTIFYICONDATAW>(),

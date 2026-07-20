@@ -24,11 +24,11 @@ public sealed partial class MainWindow : Window
         };
 
         TrayIcon.TrayCommand += OnTrayCommand;
+        TrayIcon.HotkeyPressed += OnHotkeyPressed;
         Closed += (s, e) => TrayIcon.Destroy();
-
         AppWindow.Closing += AppWindow_Closing;
-
         UpdateTrayMenuTexts();
+        TrayIcon.RefreshHotkey();
     }
 
     private void OnTrayCommand(int cmd)
@@ -87,6 +87,19 @@ public sealed partial class MainWindow : Window
     }
 
     public void RefreshTrayMenu() => UpdateTrayMenuTexts();
+
+    private async void OnHotkeyPressed()
+    {
+        if (!CoreService.IsElevated()) return;
+        DispatcherQueue.TryEnqueue(async () =>
+        {
+            var result = await System.Threading.Tasks.Task.Run(() =>
+                CoreService.CleanMemory(IniConfig.ReadUInt("ReductMask2", MemoryMask.Default)));
+
+            if (result.Success && result.BytesFreed > 0 && IniConfig.ReadBool("BalloonCleanResults", true))
+                ToastService.Show("Mem Reduct", $"Memory released: {result.FreedFormatted}");
+        });
+    }
 
     private void OnNavItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
     {
