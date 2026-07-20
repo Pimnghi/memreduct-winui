@@ -24,6 +24,13 @@ public sealed partial class MainWindow : Window
         InitializeComponent();
         AppWindow.SetIcon("Assets/AppIcon.ico");
 
+        ExtendsContentIntoTitleBar = true;
+        UpdateTitleBarColors();
+
+        // track theme changes
+        if (Content is FrameworkElement fe)
+            fe.ActualThemeChanged += (s, e) => UpdateTitleBarColors();
+
         NavView.ItemInvoked += OnNavItemInvoked;
         NavView.SelectedItem = NavView.MenuItems[0];
         ContentFrame.Navigate(typeof(MainPage));
@@ -41,6 +48,28 @@ public sealed partial class MainWindow : Window
         UpdateTrayMenuTexts();
         TrayIcon.RefreshHotkey();
         ApplyTopmost();
+    }
+
+    private void UpdateTitleBarColors()
+    {
+        var theme = Content is FrameworkElement fe ? fe.ActualTheme : ElementTheme.Default;
+        var tb = AppWindow.TitleBar;
+        tb.ButtonBackgroundColor = Windows.UI.Color.FromArgb(0, 0, 0, 0);
+        tb.ButtonInactiveBackgroundColor = Windows.UI.Color.FromArgb(0, 0, 0, 0);
+        tb.ButtonHoverBackgroundColor = Windows.UI.Color.FromArgb(20, 0, 0, 0);
+
+        if (theme == ElementTheme.Dark)
+        {
+            tb.ButtonForegroundColor = Windows.UI.Color.FromArgb(255, 220, 220, 220);
+            tb.ButtonInactiveForegroundColor = Windows.UI.Color.FromArgb(140, 220, 220, 220);
+            tb.ButtonHoverForegroundColor = Windows.UI.Color.FromArgb(255, 240, 240, 240);
+        }
+        else
+        {
+            tb.ButtonForegroundColor = Windows.UI.Color.FromArgb(255, 40, 40, 40);
+            tb.ButtonInactiveForegroundColor = Windows.UI.Color.FromArgb(120, 40, 40, 40);
+            tb.ButtonHoverForegroundColor = Windows.UI.Color.FromArgb(255, 20, 20, 20);
+        }
     }
 
     public void ApplyTopmost()

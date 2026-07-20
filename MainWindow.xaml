@@ -13,12 +13,21 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <controls:NavigationView x:Name="NavView"
-        IsBackButtonVisible="Collapsed"
-        IsSettingsVisible="False"
-        IsTitleBarAutoPaddingEnabled="False"
-        PaneDisplayMode="LeftCompact"
-        CompactModeThresholdWidth="0">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="32"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock x:Name="TitleLabel" Text="Mem Reduct" Grid.Row="0" VerticalAlignment="Center" Margin="48,0,0,0"
+                   FontSize="12" Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
+
+        <controls:NavigationView x:Name="NavView"
+            Grid.Row="1"
+            IsBackButtonVisible="Collapsed"
+            IsSettingsVisible="False"
+            PaneDisplayMode="LeftCompact"
+            CompactModeThresholdWidth="0">
 
         <controls:NavigationView.MenuItems>
             <controls:NavigationViewItem Icon="Globe" Content="Memory" Tag="main"/>
@@ -26,6 +35,6 @@
         </controls:NavigationView.MenuItems>
 
         <Frame x:Name="ContentFrame" />
-
     </controls:NavigationView>
+    </Grid>
 </Window>
