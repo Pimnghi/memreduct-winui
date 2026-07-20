@@ -2,6 +2,7 @@ using MemReduct.Core;
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using System.Diagnostics;
 using Windows.UI.Core;
 using Windows.System;
 
@@ -44,6 +45,7 @@ public sealed partial class SettingsPage : Page
         v = s(StrId.AutoCleanInterval);     if (v != null) ChkIntervalClean.Content = v;
 
         v = s(StrId.AlwaysOnTop);           if (v != null) ChkAlwaysOnTop.Content = v;
+        v = s(StrId.LoadOnStartup);          if (v != null) ChkLoadOnStartup.Content = v;
         v = s(StrId.StartMinimized);        if (v != null) ChkStartMinimized.Content = v;
         v = s(StrId.ConfirmCleaning);       if (v != null) ChkConfirmClean.Content = v;
         v = s(StrId.ShowCleanResult);       if (v != null) ChkShowResults.Content = v;
@@ -76,6 +78,7 @@ public sealed partial class SettingsPage : Page
         NbInterval.IsEnabled = ChkIntervalClean.IsChecked == true;
 
         ChkAlwaysOnTop.IsChecked = IniConfig.ReadBool("AlwaysOnTop");
+        ChkLoadOnStartup.IsChecked = IniConfig.ReadBool("LoadOnStartup");
         ChkStartMinimized.IsChecked = IniConfig.ReadBool("IsStartMinimized");
         ChkConfirmClean.IsChecked = IniConfig.ReadBool("IsShowReductConfirmation", true);
         ChkShowResults.IsChecked = IniConfig.ReadBool("BalloonCleanResults", true);
@@ -151,6 +154,11 @@ public sealed partial class SettingsPage : Page
         }
         else if (ReferenceEquals(sender, ChkStartMinimized))
             IniConfig.WriteBool("IsStartMinimized", ChkStartMinimized.IsChecked == true);
+        else if (ReferenceEquals(sender, ChkLoadOnStartup))
+        {
+            IniConfig.WriteBool("LoadOnStartup", ChkLoadOnStartup.IsChecked == true);
+            SetAutoStart(ChkLoadOnStartup.IsChecked == true);
+        }
         else if (ReferenceEquals(sender, ChkConfirmClean))
             IniConfig.WriteBool("IsShowReductConfirmation", ChkConfirmClean.IsChecked == true);
         else if (ReferenceEquals(sender, ChkShowResults))
@@ -219,5 +227,28 @@ public sealed partial class SettingsPage : Page
         };
         parts.Add(keyName);
         return string.Join(" + ", parts);
+    }
+
+    private static void SetAutoStart(bool enable)
+    {
+        var exePath = Process.GetCurrentProcess().MainModule?.FileName ?? "";
+        if (string.IsNullOrEmpty(exePath)) return;
+
+        if (enable)
+        {
+            Process.Start(new ProcessStartInfo("schtasks.exe", $"/create /tn \"MemReductWinUI\" /tr \"\\\"{exePath}\\\" -autostart\" /sc onlogon /rl highest /f")
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            })?.WaitForExit();
+        }
+        else
+        {
+            Process.Start(new ProcessStartInfo("schtasks.exe", "/delete /tn \"MemReductWinUI\" /f")
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            })?.WaitForExit();
+        }
     }
 }

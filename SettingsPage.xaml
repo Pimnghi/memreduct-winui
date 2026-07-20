@@ -60,6 +60,7 @@
                         <TextBlock x:Name="LanguageLabel" Text="Language:"/>
                         <ComboBox x:Name="CmbLanguage" SelectionChanged="OnLanguageChanged"/>
                         <CheckBox x:Name="ChkAlwaysOnTop" Checked="OnBoolChanged" Unchecked="OnBoolChanged"/>
+                        <CheckBox x:Name="ChkLoadOnStartup" Checked="OnBoolChanged" Unchecked="OnBoolChanged"/>
                         <CheckBox x:Name="ChkStartMinimized" Checked="OnBoolChanged" Unchecked="OnBoolChanged"/>
                         <CheckBox x:Name="ChkConfirmClean" Checked="OnBoolChanged" Unchecked="OnBoolChanged"/>
                         <CheckBox x:Name="ChkShowResults" Checked="OnBoolChanged" Unchecked="OnBoolChanged"/>

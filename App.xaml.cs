@@ -28,6 +28,7 @@ public partial class App : Application
     {
         // command-line mode
         var cmdline = string.Join(" ", Environment.GetCommandLineArgs().Skip(1));
+        var isAutostart = cmdline.Contains("-autostart");
         if (cmdline.Contains("-clean") || cmdline.Contains("/clean"))
         {
             var fullMask = cmdline.Contains("full") ? MemReduct.Core.MemoryMask.All : MemReduct.Core.MemoryMask.Default;
@@ -73,7 +74,12 @@ public partial class App : Application
 
         ApplySavedTheme();
 
+        if (MemReduct.Core.IniConfig.ReadBool("IsStartMinimized") || isAutostart)
+            MainWindow.AppWindow.Hide();
+
         MemReduct.Core.AutoCleanService.Refresh();
+
+        SyncAutoStart();
 
         appInstance.Activated += (s, e) =>
         {
@@ -117,5 +123,29 @@ public partial class App : Application
             catch { }
         }
         Environment.Exit(0);
+    }
+
+    private static void SyncAutoStart()
+    {
+        var enable = MemReduct.Core.IniConfig.ReadBool("LoadOnStartup");
+        var exePath = Process.GetCurrentProcess().MainModule?.FileName ?? "";
+        if (string.IsNullOrEmpty(exePath)) return;
+
+        if (enable)
+        {
+            Process.Start(new ProcessStartInfo("schtasks.exe", $"/create /tn \"MemReductWinUI\" /tr \"\\\"{exePath}\\\" -autostart\" /sc onlogon /rl highest /f")
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            })?.WaitForExit();
+        }
+        else
+        {
+            Process.Start(new ProcessStartInfo("schtasks.exe", "/delete /tn \"MemReductWinUI\" /f")
+            {
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            })?.WaitForExit();
+        }
     }
 }
