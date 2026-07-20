@@ -138,7 +138,7 @@ public sealed partial class MainWindow : Window
 
     public void RefreshTrayMenu() => UpdateTrayMenuTexts();
 
-    private async void OnHotkeyPressed()
+    private void OnHotkeyPressed()
     {
         if (!CoreService.IsElevated()) return;
         DispatcherQueue.TryEnqueue(async () =>
