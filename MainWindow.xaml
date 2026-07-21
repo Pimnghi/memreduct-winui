@@ -31,8 +31,7 @@
             IsBackButtonVisible="Collapsed"
             IsSettingsVisible="False"
             IsPaneToggleButtonVisible="True"
-            PaneDisplayMode="LeftCompact"
-            CompactModeThresholdWidth="0"
+            PaneDisplayMode="Left"
             OpenPaneLength="240">
 
             <controls:NavigationView.MenuItems/>
