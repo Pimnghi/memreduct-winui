@@ -172,6 +172,7 @@ public sealed partial class SettingsPage : Page
         IniConfig.WriteString("Language", name == "System default" ? "" : name);
         CoreService.SetLocale((uint)(item.Tag ?? 0u));
         ApplyLocalization();
+        if (App.MainWindow is MainWindow w) w.ApplyNavLocalization();
     }
 
     private void LoadHotkeyDisplay()

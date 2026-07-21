@@ -267,6 +267,8 @@ static LPCWSTR core_get_string_en(ULONG uid)
 {
 	switch (uid)
 	{
+		case 4:  return L"Settings";
+		case 10: return L"About";
 		case 17: return L"Clean memory";
 		case 18: return L"Physical memory";
 		case 19: return L"Pagefile";

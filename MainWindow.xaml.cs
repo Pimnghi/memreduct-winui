@@ -50,6 +50,7 @@ public sealed partial class MainWindow : Window
         UpdateTrayMenuTexts();
         TrayIcon.RefreshHotkey();
         ApplyTopmost();
+        ApplyNavLocalization();
     }
 
     // 注意：已删除多余的 OnHamburgerClick 方法，NavigationView 内置汉堡按钮会自动处理点击展开/折叠推移动画
@@ -131,6 +132,14 @@ public sealed partial class MainWindow : Window
     }
 
     public void RefreshTrayMenu() => UpdateTrayMenuTexts();
+
+    public void ApplyNavLocalization()
+    {
+        var s = (uint id) => CoreService.GetString(id);
+        var v = s(StrId.GroupPhysical);       if (v != null) NavMemory.Content = v;
+        v = s(StrId.Settings);                if (v != null) NavSettings.Content = v;
+        v = s(StrId.About);                   if (v != null) NavAbout.Content = v;
+    }
 
     private void OnHotkeyPressed()
     {

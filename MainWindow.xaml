@@ -20,7 +20,7 @@
         </Grid.RowDefinitions>
 
         <Grid x:Name="AppTitleBar" Grid.Row="0" VerticalAlignment="Stretch" Background="Transparent">
-            <TextBlock x:Name="TitleLabel" Text="Mem Reduct" 
+                <TextBlock x:Name="TitleLabel" Text="Mem Reduct WinUI"
                        VerticalAlignment="Center" 
                        Margin="16,0,0,0"
                        FontSize="12" 
@@ -37,9 +37,13 @@
             <controls:NavigationView.MenuItems/>
 
             <controls:NavigationView.FooterMenuItems>
-                <controls:NavigationViewItem Icon="Globe" Content="Memory" Tag="main"/>
-                <controls:NavigationViewItem Icon="Setting" Content="Settings" Tag="settings"/>
-                <controls:NavigationViewItem Content="About" Tag="about">
+                <controls:NavigationViewItem x:Name="NavMemory" Tag="main" Content="Memory">
+                    <controls:NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE950;" FontSize="16"/>
+                    </controls:NavigationViewItem.Icon>
+                </controls:NavigationViewItem>
+                <controls:NavigationViewItem x:Name="NavSettings" Icon="Setting" Content="Settings" Tag="settings"/>
+                <controls:NavigationViewItem x:Name="NavAbout" Content="About" Tag="about">
                     <controls:NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE946;" FontSize="16"/>
                     </controls:NavigationViewItem.Icon>
