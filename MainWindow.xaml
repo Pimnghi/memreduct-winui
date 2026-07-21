@@ -19,31 +19,30 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock x:Name="TitleLabel" Text="Mem Reduct" Grid.Row="0" VerticalAlignment="Center" Margin="48,0,0,0"
-                   FontSize="12" Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
+        <Grid x:Name="AppTitleBar" Grid.Row="0" VerticalAlignment="Stretch" Background="Transparent">
+            <TextBlock x:Name="TitleLabel" Text="Mem Reduct" 
+                       VerticalAlignment="Center" 
+                       Margin="16,0,0,0"
+                       FontSize="12" 
+                       Foreground="{ThemeResource TextFillColorPrimaryBrush}"/>
+        </Grid>
 
-        <controls:NavigationView x:Name="NavView"
-            Grid.Row="1"
+        <controls:NavigationView x:Name="NavView" Grid.Row="1"
             IsBackButtonVisible="Collapsed"
             IsSettingsVisible="False"
-            IsPaneToggleButtonVisible="False"
+            IsPaneToggleButtonVisible="True"
             PaneDisplayMode="LeftCompact"
-            CompactModeThresholdWidth="0">
+            CompactModeThresholdWidth="0"
+            OpenPaneLength="240">
 
-            <controls:NavigationView.MenuItems>
-                <controls:NavigationViewItem Icon="Globe" Content="Memory" Tag="main"/>
-            </controls:NavigationView.MenuItems>
+            <controls:NavigationView.MenuItems/>
 
             <controls:NavigationView.FooterMenuItems>
+                <controls:NavigationViewItem Icon="Globe" Content="Memory" Tag="main"/>
                 <controls:NavigationViewItem Icon="Setting" Content="Settings" Tag="settings"/>
                 <controls:NavigationViewItem Content="About" Tag="about">
                     <controls:NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE946;" FontSize="16"/>
-                    </controls:NavigationViewItem.Icon>
-                </controls:NavigationViewItem>
-                <controls:NavigationViewItem x:Name="ToggleBtn" Tag="toggle">
-                    <controls:NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE700;" FontSize="16"/>
                     </controls:NavigationViewItem.Icon>
                 </controls:NavigationViewItem>
             </controls:NavigationView.FooterMenuItems>

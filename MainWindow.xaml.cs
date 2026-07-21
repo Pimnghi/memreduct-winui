@@ -1,4 +1,5 @@
 using MemReduct.Core;
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
@@ -25,22 +26,15 @@ public sealed partial class MainWindow : Window
         AppWindow.SetIcon("Assets/AppIcon.ico");
 
         ExtendsContentIntoTitleBar = true;
+        SetTitleBar(AppTitleBar);
+
         UpdateTitleBarColors();
 
-        // track theme changes
         if (Content is FrameworkElement fe)
             fe.ActualThemeChanged += (s, e) => UpdateTitleBarColors();
 
-        ToggleBtn.Tapped += (s, e) =>
-        {
-            NavView.PaneDisplayMode = NavView.PaneDisplayMode == NavigationViewPaneDisplayMode.LeftCompact
-                ? NavigationViewPaneDisplayMode.Left
-                : NavigationViewPaneDisplayMode.LeftCompact;
-            e.Handled = true;
-        };
-
         NavView.ItemInvoked += OnNavItemInvoked;
-        NavView.SelectedItem = NavView.MenuItems[0];
+        NavView.SelectedItem = NavView.FooterMenuItems[0];
         ContentFrame.Navigate(typeof(MainPage));
 
         ContentFrame.Navigated += (s, e) =>
@@ -57,6 +51,8 @@ public sealed partial class MainWindow : Window
         TrayIcon.RefreshHotkey();
         ApplyTopmost();
     }
+
+    // 注意：已删除多余的 OnHamburgerClick 方法，NavigationView 内置汉堡按钮会自动处理点击展开/折叠推移动画
 
     private void UpdateTitleBarColors()
     {
@@ -84,7 +80,6 @@ public sealed partial class MainWindow : Window
     {
         var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
         if (hwnd == nint.Zero) return;
-
         var topmost = IniConfig.ReadBool("AlwaysOnTop");
         SetWindowPos(hwnd, topmost ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
     }
@@ -96,25 +91,21 @@ public sealed partial class MainWindow : Window
             switch (cmd)
             {
                 case TrayIcon.CMD_SHOW:
-                    if (AppWindow.IsVisible)
-                        AppWindow.Hide();
-                    else
-                        Activate();
+                    if (AppWindow.IsVisible) AppWindow.Hide(); else Activate();
                     break;
                 case TrayIcon.CMD_CLEAN:
-                    if (!AppWindow.IsVisible)
-                        Activate();
+                    if (!AppWindow.IsVisible) Activate();
                     DispatcherQueue.TryEnqueue(async () =>
                     {
                         await System.Threading.Tasks.Task.Delay(200);
                         ContentFrame.Navigate(typeof(MainPage));
-                        NavView.SelectedItem = NavView.MenuItems[0];
+                        NavView.SelectedItem = NavView.FooterMenuItems[0];
                         if (ContentFrame.Content is MainPage mp) mp.TriggerClean();
                     });
                     break;
                 case TrayIcon.CMD_SETTINGS:
                     Activate();
-                    NavView.SelectedItem = NavView.MenuItems[1];
+                    NavView.SelectedItem = NavView.FooterMenuItems[1];
                     ContentFrame.Navigate(typeof(SettingsPage));
                     break;
                 case TrayIcon.CMD_EXIT:
@@ -128,11 +119,7 @@ public sealed partial class MainWindow : Window
 
     private void AppWindow_Closing(Microsoft.UI.Windowing.AppWindow sender, Microsoft.UI.Windowing.AppWindowClosingEventArgs args)
     {
-        if (!_exiting)
-        {
-            args.Cancel = true;
-            sender.Hide();
-        }
+        if (!_exiting) { args.Cancel = true; sender.Hide(); }
     }
 
     private void UpdateTrayMenuTexts()
@@ -140,8 +127,7 @@ public sealed partial class MainWindow : Window
         TrayIcon.SetMenuTexts(
             CoreService.GetString(StrId.TrayShow) ?? "Show / Hide",
             CoreService.GetString(StrId.CleanMemory) ?? "Clean memory",
-            CoreService.GetString(StrId.Settings) ?? "Settings",
-            "Exit");
+            CoreService.GetString(StrId.Settings) ?? "Settings", "Exit");
     }
 
     public void RefreshTrayMenu() => UpdateTrayMenuTexts();
@@ -151,19 +137,14 @@ public sealed partial class MainWindow : Window
         if (!CoreService.IsElevated()) return;
         DispatcherQueue.TryEnqueue(async () =>
         {
-            // if on main page, show cleaning animation
-            if (ContentFrame.Content is MainPage mp)
-                mp.SetCleaningState(true);
-
+            if (ContentFrame.Content is MainPage mp) mp.SetCleaningState(true);
             var result = await System.Threading.Tasks.Task.Run(() =>
                 CoreService.CleanMemory(IniConfig.ReadUInt("ReductMask2", MemoryMask.Default)));
-
             if (ContentFrame.Content is MainPage mainPage)
             {
                 mainPage.SetCleaningState(false);
                 mainPage.ApplyLocalization();
             }
-
             if (result.Success && result.BytesFreed > 0 && IniConfig.ReadBool("BalloonCleanResults", true))
                 ToastService.ShowCleanResult(result.BytesFreed, result.FreedFormatted);
         });
@@ -172,17 +153,8 @@ public sealed partial class MainWindow : Window
     private void OnNavItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
     {
         var tag = args.InvokedItemContainer?.Tag?.ToString();
-        if (tag == "main")
-        {
-            ContentFrame.Navigate(typeof(MainPage));
-        }
-        else if (tag == "settings")
-        {
-            ContentFrame.Navigate(typeof(SettingsPage));
-        }
-        else if (tag == "about")
-        {
-            ContentFrame.Navigate(typeof(AboutPage));
-        }
+        if (tag == "main") { ContentFrame.Navigate(typeof(MainPage)); }
+        else if (tag == "settings") { ContentFrame.Navigate(typeof(SettingsPage)); }
+        else if (tag == "about") { ContentFrame.Navigate(typeof(AboutPage)); }
     }
 }
