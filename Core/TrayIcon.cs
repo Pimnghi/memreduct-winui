@@ -189,7 +189,7 @@ public static class TrayIcon
     {
         var newIcon = nint.Zero;
         if (_iconPath != null)
-            newIcon = LoadImageW(nint.Zero, _iconPath, IMAGE_ICON, 0, 0, LR_LOADFROMFILE | LR_DEFAULTSIZE);
+            newIcon = LoadImageW(nint.Zero, _iconPath, IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
         if (newIcon == nint.Zero)
             newIcon = LoadIconW(nint.Zero, new nint(32512)); // IDI_APPLICATION fallback
 
@@ -358,7 +358,7 @@ public static class TrayIcon
 
         var icon = nint.Zero;
         if (_iconPath != null)
-            icon = LoadImageW(nint.Zero, _iconPath, IMAGE_ICON, 0, 0, LR_LOADFROMFILE | LR_DEFAULTSIZE);
+            icon = LoadImageW(nint.Zero, _iconPath, IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
         if (icon == nint.Zero)
             icon = LoadIconW(nint.Zero, new nint(32512));
 
