@@ -65,8 +65,14 @@
                         <CheckBox x:Name="ChkConfirmClean" Checked="OnBoolChanged" Unchecked="OnBoolChanged"/>
                         <CheckBox x:Name="ChkShowResults" Checked="OnBoolChanged" Unchecked="OnBoolChanged"/>
 
-                        <TextBlock Text="Theme:"/>
+                        <TextBlock x:Name="ThemeLabel" Text="Theme:"/>
                         <ComboBox x:Name="CmbTheme" SelectionChanged="OnThemeChanged"/>
+
+                        <TextBlock x:Name="TrayLeftLabel" Text="Left click:"/>
+                        <ComboBox x:Name="CmbTrayLeft" SelectionChanged="OnTrayActionChanged"/>
+
+                        <TextBlock x:Name="TrayMidLabel" Text="Middle click:"/>
+                        <ComboBox x:Name="CmbTrayMid" SelectionChanged="OnTrayActionChanged"/>
                     </StackPanel>
                 </Expander>
 

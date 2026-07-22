@@ -45,6 +45,7 @@ public sealed partial class MainWindow : Window
 
         TrayIcon.TrayCommand += OnTrayCommand;
         TrayIcon.HotkeyPressed += OnHotkeyPressed;
+        TrayIcon.TrayClickAction += OnTrayClickAction;
         Closed += (s, e) => TrayIcon.Destroy();
         AppWindow.Closing += AppWindow_Closing;
         UpdateTrayMenuTexts();
@@ -157,6 +158,22 @@ public sealed partial class MainWindow : Window
             if (result.Success && result.BytesFreed > 0 && IniConfig.ReadBool("BalloonCleanResults", true))
                 ToastService.ShowCleanResult(result.BytesFreed, result.FreedFormatted);
         });
+    }
+
+    private void OnTrayClickAction(int action)
+    {
+        switch (action)
+        {
+            case TrayIcon.ACTION_SHOW:
+                if (AppWindow.IsVisible) AppWindow.Hide(); else Activate();
+                break;
+            case TrayIcon.ACTION_CLEAN:
+                OnHotkeyPressed();
+                break;
+            case TrayIcon.ACTION_TASKMGR:
+                System.Diagnostics.Process.Start("taskmgr.exe");
+                break;
+        }
     }
 
     private void OnNavItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)

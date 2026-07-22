@@ -92,6 +92,9 @@ public sealed partial class SettingsPage : Page
         CmbTheme.Items.Add(new ComboBoxItem { Content = "Dark", Tag = "Dark" });
         CmbTheme.SelectedIndex = (IniConfig.ReadString("Theme", "System") ?? "System") switch { "Light" => 1, "Dark" => 2, _ => 0 };
 
+        PopulateTrayActions(CmbTrayLeft, IniConfig.ReadInt("TrayActionDc", TrayIcon.ACTION_SHOW));
+        PopulateTrayActions(CmbTrayMid, IniConfig.ReadInt("TrayActionMc", TrayIcon.ACTION_CLEAN));
+
         ChkHotkey.IsChecked = IniConfig.ReadBool("HotkeyCleanEnable");
         LoadHotkeyDisplay();
     }
@@ -228,6 +231,24 @@ public sealed partial class SettingsPage : Page
         };
         parts.Add(keyName);
         return string.Join(" + ", parts);
+    }
+
+    private static void PopulateTrayActions(ComboBox cmb, int current)
+    {
+        cmb.Items.Clear();
+        cmb.Items.Add(new ComboBoxItem { Content = "Show / Hide", Tag = TrayIcon.ACTION_SHOW });
+        cmb.Items.Add(new ComboBoxItem { Content = "Clean memory", Tag = TrayIcon.ACTION_CLEAN });
+        cmb.Items.Add(new ComboBoxItem { Content = "Open task manager", Tag = TrayIcon.ACTION_TASKMGR });
+        cmb.SelectedIndex = current switch { TrayIcon.ACTION_CLEAN => 1, TrayIcon.ACTION_TASKMGR => 2, _ => 0 };
+    }
+
+    private void OnTrayActionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loading) return;
+        if (ReferenceEquals(sender, CmbTrayLeft) && CmbTrayLeft.SelectedItem is ComboBoxItem left)
+            IniConfig.WriteInt("TrayActionDc", (int)(left.Tag ?? 0));
+        else if (ReferenceEquals(sender, CmbTrayMid) && CmbTrayMid.SelectedItem is ComboBoxItem mid)
+            IniConfig.WriteInt("TrayActionMc", (int)(mid.Tag ?? 1));
     }
 
     private static void SetAutoStart(bool enable)

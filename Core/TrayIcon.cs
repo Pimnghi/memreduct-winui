@@ -19,7 +19,6 @@ public static class TrayIcon
     private const uint NIM_ADD = 0;
     private const uint NIM_MODIFY = 1;
     private const uint NIM_DELETE = 2;
-    private const uint NIM_SETVERSION = 4;
     private const uint NIN_BALLOONUSERCLICK = 5;
     private const uint NIN_BALLOONTIMEOUT = 6;
     private const uint NIIF_NOSOUND = 0x00000010;
@@ -32,6 +31,13 @@ public static class TrayIcon
     public const int CMD_CLEAN = 2;
     public const int CMD_SETTINGS = 3;
     public const int CMD_EXIT = 4;
+    private const int CMD_REGION_BASE = 100;
+    private const int CMD_LIMIT_BASE = 200;
+    private const int CMD_INTERVAL_BASE = 300;
+
+    public const int ACTION_SHOW = 0;
+    public const int ACTION_CLEAN = 1;
+    public const int ACTION_TASKMGR = 2;
 
     [DllImport("shell32", CharSet = CharSet.Unicode)]
     private static extern bool Shell_NotifyIconW(uint dwMessage, ref NOTIFYICONDATAW lpData);
@@ -41,6 +47,9 @@ public static class TrayIcon
 
     [DllImport("user32", CharSet = CharSet.Unicode)]
     private static extern bool AppendMenuW(nint hMenu, uint uFlags, nuint uIDNewItem, string lpNewItem);
+
+    [DllImport("user32")]
+    private static extern bool CheckMenuItem(nint hMenu, nuint uIDCheckItem, uint uCheck);
 
     [DllImport("user32")]
     private static extern bool SetForegroundWindow(nint hWnd);
@@ -79,6 +88,16 @@ public static class TrayIcon
 
     [DllImport("user32")]
     private static extern nint LoadIconW(nint hInstance, nint lpIconName);
+
+    [DllImport("user32", CharSet = CharSet.Unicode)]
+    private static extern nint LoadImageW(nint hInst, string name, uint type, int cx, int cy, uint fuLoad);
+
+    [DllImport("user32")]
+    private static extern bool DestroyIcon(nint hIcon);
+
+    private const uint IMAGE_ICON = 1;
+    private const uint LR_LOADFROMFILE = 0x0010;
+    private const uint LR_DEFAULTSIZE = 0x0040;
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     private struct NOTIFYICONDATAW
@@ -125,11 +144,24 @@ public static class TrayIcon
 
     public static event Action<int>? TrayCommand;
     public static event Action? HotkeyPressed;
+    public static event Action<int>? TrayClickAction;
 
     private static string _textShow = "Show / Hide";
     private static string _textClean = "Clean memory";
     private static string _textSettings = "Settings";
     private static string _textExit = "Exit";
+
+    private static string _textRegions = "Clean areas";
+    private static string _textLimit = "Clean when above";
+    private static string _textInterval = "Clean every";
+    private static string _textMinutes = " min.";
+
+    private static readonly string[] _regionNames = { "Working set", "System file cache", "Modified file cache",
+        "Modified page list", "Standby list", "Standby list (low)", "Registry cache", "Combine memory lists" };
+    private static readonly uint[] _regionMasks = { 0x01, 0x02, 0x80, 0x10, 0x08, 0x04, 0x40, 0x20 };
+
+    private static nint _currentIcon;
+    private static string? _iconPath;
 
     public static void SetMenuTexts(string show, string clean, string settings, string exit)
     {
@@ -139,6 +171,39 @@ public static class TrayIcon
         _textExit = exit;
     }
 
+    public static void SetIcon(string path)
+    {
+        _iconPath = path;
+        if (_created)
+        {
+            UpdateTrayIcon();
+        }
+    }
+
+    private static void UpdateTrayIcon()
+    {
+        var newIcon = nint.Zero;
+        if (_iconPath != null)
+            newIcon = LoadImageW(nint.Zero, _iconPath, IMAGE_ICON, 0, 0, LR_LOADFROMFILE | LR_DEFAULTSIZE);
+        if (newIcon == nint.Zero)
+            newIcon = LoadIconW(nint.Zero, new nint(32512)); // IDI_APPLICATION fallback
+
+        var nid = new NOTIFYICONDATAW
+        {
+            cbSize = (uint)Marshal.SizeOf<NOTIFYICONDATAW>(),
+            hWnd = _hwnd,
+            uID = 0,
+            guidItem = IconGuid,
+            uFlags = NIF_ICON | NIF_GUID,
+            hIcon = newIcon,
+        };
+        Shell_NotifyIconW(NIM_MODIFY, ref nid);
+
+        if (_currentIcon != nint.Zero && _currentIcon != LoadIconW(nint.Zero, new nint(32512)))
+            DestroyIcon(_currentIcon);
+        _currentIcon = newIcon;
+    }
+
     private static nint WndProc(nint hwnd, uint msg, nuint wParam, nint lParam)
     {
         if (msg == WM_TRAYICON)
@@ -146,19 +211,22 @@ public static class TrayIcon
             var evt = (uint)lParam & 0xFFFF;
             if (evt == NIN_BALLOONUSERCLICK || evt == NIN_BALLOONTIMEOUT)
                 return 0;
+
+            if (evt == 0x0201) // WM_LBUTTONDOWN
+            {
+                var action = IniConfig.ReadInt("TrayActionDc", ACTION_SHOW);
+                TrayClickAction?.Invoke(action);
+                return 0;
+            }
+            if (evt == 0x0207) // WM_MBUTTONDOWN
+            {
+                var action = IniConfig.ReadInt("TrayActionMc", ACTION_CLEAN);
+                TrayClickAction?.Invoke(action);
+                return 0;
+            }
             if (evt == 0x0205) // WM_RBUTTONUP
             {
-                var hMenu = CreatePopupMenu();
-                AppendMenuW(hMenu, 0, CMD_SHOW, _textShow);
-                AppendMenuW(hMenu, 0, CMD_CLEAN, _textClean);
-                AppendMenuW(hMenu, 0x800, 0, "");
-                AppendMenuW(hMenu, 0, CMD_SETTINGS, _textSettings);
-                AppendMenuW(hMenu, 0x800, 0, "");
-                AppendMenuW(hMenu, 0, CMD_EXIT, _textExit);
-                SetForegroundWindow(hwnd);
-                GetCursorPos(out var pt);
-                var cmd = TrackPopupMenu(hMenu, 0x2 | 0x100 | 0x80, pt.X, pt.Y, 0, hwnd, 0);
-                if (cmd > 0) TrayCommand?.Invoke(cmd);
+                ShowContextMenu(hwnd);
                 return 0;
             }
         }
@@ -168,6 +236,105 @@ public static class TrayIcon
             return 0;
         }
         return DefWindowProcW(hwnd, msg, wParam, lParam);
+    }
+
+    private static void ShowContextMenu(nint hwnd)
+    {
+        var hMenu = CreatePopupMenu();
+        var mask = IniConfig.ReadUInt("ReductMask2", 0xE7);
+        var limitEnabled = IniConfig.ReadBool("AutoreductEnable");
+        var intervalEnabled = IniConfig.ReadBool("AutoreductIntervalEnable");
+        var limitVal = IniConfig.ReadUInt("AutoreductValue", 90);
+        var intervalVal = IniConfig.ReadUInt("AutoreductIntervalValue", 30);
+
+        AppendMenuW(hMenu, 0, CMD_SHOW, _textShow);
+        AppendMenuW(hMenu, 0, CMD_CLEAN, _textClean);
+
+        // Regions submenu
+        var hRegion = CreatePopupMenu();
+        for (int i = 0; i < _regionNames.Length; i++)
+        {
+            var id = CMD_REGION_BASE + i;
+            AppendMenuW(hRegion, 0, (nuint)id, _regionNames[i]);
+            if ((mask & _regionMasks[i]) != 0)
+                CheckMenuItem(hRegion, (nuint)id, 8); // MF_CHECKED = 8
+        }
+        AppendMenuW(hMenu, 0x10, (nuint)hRegion, _textRegions); // MF_POPUP = 0x10
+
+        // Clean when above submenu
+        var hLimit = CreatePopupMenu();
+        AppendMenuW(hLimit, 0, 0, "Disable");
+        if (!limitEnabled) CheckMenuItem(hLimit, 0, 8);
+        for (int p = 10; p <= 90; p += 10)
+        {
+            var id = CMD_LIMIT_BASE + p;
+            AppendMenuW(hLimit, 0, (nuint)id, $"{p}%");
+            if (limitEnabled && limitVal == p) CheckMenuItem(hLimit, (nuint)id, 8);
+        }
+        AppendMenuW(hMenu, 0x10, (nuint)hLimit, _textLimit);
+
+        // Clean every submenu
+        var hInterval = CreatePopupMenu();
+        AppendMenuW(hInterval, 0, 0, "Disable");
+        if (!intervalEnabled) CheckMenuItem(hInterval, 0, 8);
+        for (int m = 10; m <= 90; m += 10)
+        {
+            var id = CMD_INTERVAL_BASE + m;
+            AppendMenuW(hInterval, 0, (nuint)id, $"{m}{_textMinutes}");
+            if (intervalEnabled && intervalVal == m) CheckMenuItem(hInterval, (nuint)id, 8);
+        }
+        AppendMenuW(hMenu, 0x10, (nuint)hInterval, _textInterval);
+
+        AppendMenuW(hMenu, 0x800, 0, "");
+        AppendMenuW(hMenu, 0, CMD_SETTINGS, _textSettings);
+        AppendMenuW(hMenu, 0x800, 0, "");
+        AppendMenuW(hMenu, 0, CMD_EXIT, _textExit);
+
+        SetForegroundWindow(hwnd);
+        GetCursorPos(out var pt);
+        var cmd = TrackPopupMenu(hMenu, 0x2 | 0x100 | 0x80, pt.X, pt.Y, 0, hwnd, 0);
+
+        if (cmd == 0) return;
+
+        // Handle submenu actions
+        if (cmd >= CMD_REGION_BASE && cmd < CMD_LIMIT_BASE)
+        {
+            var idx = cmd - CMD_REGION_BASE;
+            var newMask = mask ^ _regionMasks[idx];
+            IniConfig.WriteUInt("ReductMask2", newMask);
+        }
+        else if (cmd >= CMD_LIMIT_BASE && cmd < CMD_INTERVAL_BASE)
+        {
+            var pct = cmd - CMD_LIMIT_BASE;
+            if (pct == 0)
+            {
+                IniConfig.WriteBool("AutoreductEnable", false);
+            }
+            else
+            {
+                IniConfig.WriteBool("AutoreductEnable", true);
+                IniConfig.WriteUInt("AutoreductValue", (uint)pct);
+            }
+            AutoCleanService.Refresh();
+        }
+        else if (cmd >= CMD_INTERVAL_BASE)
+        {
+            var min = cmd - CMD_INTERVAL_BASE;
+            if (min == 0)
+            {
+                IniConfig.WriteBool("AutoreductIntervalEnable", false);
+            }
+            else
+            {
+                IniConfig.WriteBool("AutoreductIntervalEnable", true);
+                IniConfig.WriteUInt("AutoreductIntervalValue", (uint)min);
+            }
+            AutoCleanService.Refresh();
+        }
+        else
+        {
+            TrayCommand?.Invoke(cmd);
+        }
     }
 
     public static bool Create(string tooltip)
@@ -182,7 +349,7 @@ public static class TrayIcon
             lpszClassName = "MemReductTrayWnd",
             lpfnWndProc = Marshal.GetFunctionPointerForDelegate(_wndProcDelegate),
             hInstance = GetModuleHandleW(null),
-            hbrBackground = 16, // COLOR_WINDOW + 1
+            hbrBackground = 16,
         };
 
         var atom = RegisterClassExW(ref wc);
@@ -192,6 +359,12 @@ public static class TrayIcon
             0, 0, 0, 0, nint.Zero, nint.Zero, GetModuleHandleW(null), nint.Zero);
         if (_hwnd == nint.Zero) return false;
 
+        var icon = nint.Zero;
+        if (_iconPath != null)
+            icon = LoadImageW(nint.Zero, _iconPath, IMAGE_ICON, 0, 0, LR_LOADFROMFILE | LR_DEFAULTSIZE);
+        if (icon == nint.Zero)
+            icon = LoadIconW(nint.Zero, new nint(32512));
+
         var nid = new NOTIFYICONDATAW
         {
             cbSize = (uint)Marshal.SizeOf<NOTIFYICONDATAW>(),
@@ -200,11 +373,12 @@ public static class TrayIcon
             guidItem = IconGuid,
             uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP | NIF_GUID,
             uCallbackMessage = WM_TRAYICON,
-            hIcon = LoadIconW(nint.Zero, new nint(32512)), // IDI_APPLICATION
+            hIcon = icon,
         };
         nid.szTip = tooltip;
 
         _created = Shell_NotifyIconW(NIM_ADD, ref nid);
+        _currentIcon = icon;
 
         return _created;
     }
@@ -217,17 +391,15 @@ public static class TrayIcon
         var enabled = IniConfig.ReadBool("HotkeyCleanEnable");
         if (!enabled) return;
 
-        var hotkey = IniConfig.ReadInt("HotkeyClean", unchecked((int)(0x0002 << 8 | VK_F1)));
+        var hotkey = IniConfig.ReadInt("HotkeyClean", (int)(0x0002 << 8 | VK_F1));
         var vk = (uint)(hotkey & 0xFF);
         var mod = (uint)((hotkey >> 8) & 0xFF);
 
-        // original app bit order: bit0=Shift(1), bit1=Ctrl(2), bit2=Alt(4), bit3=Win(8)
-        // remap to Windows MOD_* flags
         uint winMod = 0;
-        if ((mod & 1) != 0) winMod |= 0x0004; // Shift → MOD_SHIFT
-        if ((mod & 2) != 0) winMod |= 0x0002; // Ctrl → MOD_CONTROL
-        if ((mod & 4) != 0) winMod |= 0x0001; // Alt → MOD_ALT
-        if ((mod & 8) != 0) winMod |= 0x0008; // Win → MOD_WIN
+        if ((mod & 1) != 0) winMod |= 0x0004;
+        if ((mod & 2) != 0) winMod |= 0x0002;
+        if ((mod & 4) != 0) winMod |= 0x0001;
+        if ((mod & 8) != 0) winMod |= 0x0008;
 
         RegisterHotKey(_hwnd, (int)HOTKEY_ID, winMod, vk);
     }
@@ -246,6 +418,7 @@ public static class TrayIcon
         };
         Shell_NotifyIconW(NIM_DELETE, ref nid);
         if (_hwnd != nint.Zero) DestroyWindow(_hwnd);
+        if (_currentIcon != nint.Zero) DestroyIcon(_currentIcon);
         _created = false;
     }
 
