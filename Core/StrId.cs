@@ -14,6 +14,7 @@ public static class StrId
     public const uint ItemTotal = 23;
     public const uint SettingsGeneral = 24;
     public const uint SettingsMemory = 25;
+    public const uint SettingsAppearance = 26;
     public const uint TitleMemoryRegions = 31;
     public const uint TitleMemoryManagement = 32;
     public const uint TitleHotkeys = 33;

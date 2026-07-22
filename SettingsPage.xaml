@@ -6,75 +6,106 @@
     xmlns:controls="using:Microsoft.UI.Xaml.Controls">
 
     <Grid RowDefinitions="*">
-        <ScrollViewer>
-            <StackPanel Spacing="16" Padding="16">
+        <ScrollViewer Padding="16">
+            <StackPanel Spacing="16">
 
-                <Expander x:Name="RegionsExpander" Header="Memory regions to clean" IsExpanded="True">
-                    <StackPanel Spacing="6">
-                        <CheckBox x:Name="ChkWorkingSet" Checked="OnRegionChanged" Unchecked="OnRegionChanged"/>
-                        <CheckBox x:Name="ChkSystemFileCache" Checked="OnRegionChanged" Unchecked="OnRegionChanged"/>
-                        <CheckBox x:Name="ChkModifiedFileCache" Content="Modified file cache" Checked="OnRegionChanged" Unchecked="OnRegionChanged"/>
-                        <CheckBox x:Name="ChkModifiedList" Checked="OnRegionChanged" Unchecked="OnRegionChanged"/>
-                        <CheckBox x:Name="ChkStandbyList" Checked="OnRegionChanged" Unchecked="OnRegionChanged"/>
-                        <CheckBox x:Name="ChkStandbyPriority0" Checked="OnRegionChanged" Unchecked="OnRegionChanged"/>
-                        <CheckBox x:Name="ChkRegistryCache" Content="Registry cache (Win8.1+)" Checked="OnRegionChanged" Unchecked="OnRegionChanged"/>
-                        <CheckBox x:Name="ChkCombineLists" Checked="OnRegionChanged" Unchecked="OnRegionChanged"/>
-                    </StackPanel>
-                </Expander>
-
-                <Expander x:Name="AutoExpander" Header="Auto memory management" IsExpanded="False">
-                    <StackPanel Spacing="10">
-                        <CheckBox x:Name="ChkAutoClean" Checked="OnAutoCleanChanged" Unchecked="OnAutoCleanChanged"/>
-                        <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="8">
-                            <controls:NumberBox x:Name="NbAutoClean" Grid.Column="0" Minimum="1" Maximum="100" SpinButtonPlacementMode="Compact" ValueChanged="OnAutoCleanValueChanged" Width="80"/>
-                            <TextBlock Grid.Column="1" Text="%" VerticalAlignment="Center"/>
-                        </Grid>
-                        <CheckBox x:Name="ChkIntervalClean" Checked="OnIntervalCleanChanged" Unchecked="OnIntervalCleanChanged"/>
-                        <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="8">
-                            <controls:NumberBox x:Name="NbInterval" Grid.Column="0" Minimum="1" Maximum="1440" SpinButtonPlacementMode="Compact" ValueChanged="OnIntervalValueChanged" Width="80"/>
-                            <TextBlock x:Name="IntervalUnit" Grid.Column="1" Text="minutes" VerticalAlignment="Center"/>
-                        </Grid>
-                    </StackPanel>
-                </Expander>
-
-                <!-- Color Indication -->
-                <Expander x:Name="ColorExpander" Header="Color indication" IsExpanded="False">
-                    <StackPanel Spacing="8">
-                        <TextBlock x:Name="WarningLabel" Text="Warning level (%):"/>
-                        <controls:NumberBox x:Name="NbWarning" Minimum="0" Maximum="100" SpinButtonPlacementMode="Compact" ValueChanged="OnWarningValueChanged" Width="80"/>
-
-                        <TextBlock x:Name="DangerLabel" Text="Danger level (%):"/>
-                        <controls:NumberBox x:Name="NbDanger" Minimum="0" Maximum="100" SpinButtonPlacementMode="Compact" ValueChanged="OnDangerValueChanged" Width="80"/>
-                    </StackPanel>
-                </Expander>
-
-                <Expander x:Name="HotkeyExpander" Header="Hotkey (global)" IsExpanded="False">
-                    <StackPanel Spacing="10">
-                        <CheckBox x:Name="ChkHotkey" Content="Clean memory:" Checked="OnHotkeyChanged" Unchecked="OnHotkeyChanged"/>
-                        <TextBox x:Name="HotkeyBox" IsReadOnly="True" PlaceholderText="Click here and press a key combination..." KeyDown="OnHotkeyKeyDown" Tapped="OnHotkeyTapped"/>
-                    </StackPanel>
-                </Expander>
-
-                <Expander x:Name="GeneralExpander" Header="General" IsExpanded="False">
-                    <StackPanel Spacing="10">
+                <!-- 1. 常规 -->
+                <Grid RowSpacing="8" HorizontalAlignment="Stretch">
+                    <TextBlock x:Name="GeneralHeader" Text="General" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="4,0,0,4"/>
+                    <StackPanel Spacing="10" Margin="4,0,0,0">
                         <TextBlock x:Name="LanguageLabel" Text="Language:"/>
-                        <ComboBox x:Name="CmbLanguage" SelectionChanged="OnLanguageChanged"/>
+                        <ComboBox x:Name="CmbLanguage" SelectionChanged="OnLanguageChanged" HorizontalAlignment="Stretch"/>
+
                         <CheckBox x:Name="ChkAlwaysOnTop" Checked="OnBoolChanged" Unchecked="OnBoolChanged"/>
                         <CheckBox x:Name="ChkLoadOnStartup" Checked="OnBoolChanged" Unchecked="OnBoolChanged"/>
                         <CheckBox x:Name="ChkStartMinimized" Checked="OnBoolChanged" Unchecked="OnBoolChanged"/>
                         <CheckBox x:Name="ChkConfirmClean" Checked="OnBoolChanged" Unchecked="OnBoolChanged"/>
-                        <CheckBox x:Name="ChkShowResults" Checked="OnBoolChanged" Unchecked="OnBoolChanged"/>
-
-                        <TextBlock x:Name="ThemeLabel" Text="Theme:"/>
-                        <ComboBox x:Name="CmbTheme" SelectionChanged="OnThemeChanged"/>
-
-                        <TextBlock x:Name="TrayLeftLabel" Text="Left click:"/>
-                        <ComboBox x:Name="CmbTrayLeft" SelectionChanged="OnTrayActionChanged"/>
-
-                        <TextBlock x:Name="TrayMidLabel" Text="Middle click:"/>
-                        <ComboBox x:Name="CmbTrayMid" SelectionChanged="OnTrayActionChanged"/>
                     </StackPanel>
-                </Expander>
+                </Grid>
+
+                <Border Height="1" Background="{ThemeResource DividerStrokeColorDefaultBrush}" Margin="-16,0"/>
+
+                <!-- 2. 外观 -->
+                <Grid RowSpacing="8" HorizontalAlignment="Stretch">
+                    <TextBlock x:Name="AppearanceHeader" Text="Appearance" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="4,0,0,4"/>
+                    <StackPanel Spacing="10" Margin="4,0,0,0">
+                        <TextBlock x:Name="ThemeLabel" Text="Theme:"/>
+                        <ComboBox x:Name="CmbTheme" SelectionChanged="OnThemeChanged" HorizontalAlignment="Stretch"/>
+
+                        <TextBlock x:Name="WarningLabel" Text="Warning level (%):"/>
+                        <controls:NumberBox x:Name="NbWarning" Minimum="0" Maximum="100" SpinButtonPlacementMode="Compact" ValueChanged="OnWarningValueChanged" Width="80"/>
+                        <TextBlock x:Name="DangerLabel" Text="Danger level (%):"/>
+                        <controls:NumberBox x:Name="NbDanger" Minimum="0" Maximum="100" SpinButtonPlacementMode="Compact" ValueChanged="OnDangerValueChanged" Width="80"/>
+                    </StackPanel>
+                </Grid>
+
+                <Border Height="1" Background="{ThemeResource DividerStrokeColorDefaultBrush}" Margin="-16,0"/>
+
+                <!-- 3. 内存清理 -->
+                <Grid RowSpacing="8" HorizontalAlignment="Stretch">
+                    <TextBlock x:Name="MemoryHeader" Text="Memory cleaning" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="4,0,0,4"/>
+                    <StackPanel Spacing="12" Margin="4,0,0,0">
+                        <Grid RowSpacing="4">
+                            <TextBlock x:Name="RegionsHeader" Text="Memory regions to clean" Style="{StaticResource CaptionTextBlockStyle}" TextWrapping="Wrap"/>
+                            <StackPanel Spacing="6" Margin="0,6,0,0">
+                                <CheckBox x:Name="ChkWorkingSet" Checked="OnRegionChanged" Unchecked="OnRegionChanged"/>
+                                <CheckBox x:Name="ChkSystemFileCache" Checked="OnRegionChanged" Unchecked="OnRegionChanged"/>
+                                <CheckBox x:Name="ChkModifiedFileCache" Content="Modified file cache" Checked="OnRegionChanged" Unchecked="OnRegionChanged"/>
+                                <CheckBox x:Name="ChkModifiedList" Checked="OnRegionChanged" Unchecked="OnRegionChanged"/>
+                                <CheckBox x:Name="ChkStandbyList" Checked="OnRegionChanged" Unchecked="OnRegionChanged"/>
+                                <CheckBox x:Name="ChkStandbyPriority0" Checked="OnRegionChanged" Unchecked="OnRegionChanged"/>
+                                <CheckBox x:Name="ChkRegistryCache" Content="Registry cache (Win8.1+)" Checked="OnRegionChanged" Unchecked="OnRegionChanged"/>
+                                <CheckBox x:Name="ChkCombineLists" Checked="OnRegionChanged" Unchecked="OnRegionChanged"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Border Height="1" Background="{ThemeResource DividerStrokeColorDefaultBrush}"/>
+
+                        <Grid RowSpacing="4">
+                            <TextBlock x:Name="AutoHeader" Text="Auto memory management" Style="{StaticResource CaptionTextBlockStyle}"/>
+                            <StackPanel Spacing="8" Margin="0,6,0,0">
+                                <CheckBox x:Name="ChkAutoClean" Checked="OnAutoCleanChanged" Unchecked="OnAutoCleanChanged"/>
+                                <controls:NumberBox x:Name="NbAutoClean" Minimum="1" Maximum="100" SpinButtonPlacementMode="Compact" ValueChanged="OnAutoCleanValueChanged" Width="80"/>
+                                <CheckBox x:Name="ChkIntervalClean" Checked="OnIntervalCleanChanged" Unchecked="OnIntervalCleanChanged"/>
+                                <controls:NumberBox x:Name="NbInterval" Minimum="1" Maximum="1440" SpinButtonPlacementMode="Compact" ValueChanged="OnIntervalValueChanged" Width="80"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Border Height="1" Background="{ThemeResource DividerStrokeColorDefaultBrush}"/>
+
+                        <Grid RowSpacing="4">
+                            <TextBlock x:Name="HotkeyHeader" Text="Hotkey (global)" Style="{StaticResource CaptionTextBlockStyle}"/>
+                            <StackPanel Spacing="8" Margin="0,6,0,0">
+                                <CheckBox x:Name="ChkHotkey" Content="Clean memory:" Checked="OnHotkeyChanged" Unchecked="OnHotkeyChanged"/>
+                                <TextBox x:Name="HotkeyBox" IsReadOnly="True" PlaceholderText="Click here and press a key combination..." KeyDown="OnHotkeyKeyDown" Tapped="OnHotkeyTapped"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+
+                <Border Height="1" Background="{ThemeResource DividerStrokeColorDefaultBrush}" Margin="-16,0"/>
+
+                <!-- 4. 通知 -->
+                <Grid RowSpacing="8" HorizontalAlignment="Stretch">
+                    <TextBlock x:Name="NotifyHeader" Text="Notifications" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="4,0,0,4"/>
+                    <StackPanel Spacing="6" Margin="4,0,0,0">
+                        <CheckBox x:Name="ChkShowResults" Checked="OnBoolChanged" Unchecked="OnBoolChanged"/>
+                        <CheckBox x:Name="ChkNotificationSound" Content="Enable notifications sound" Checked="OnBoolChanged" Unchecked="OnBoolChanged"/>
+                    </StackPanel>
+                </Grid>
+
+                <Border Height="1" Background="{ThemeResource DividerStrokeColorDefaultBrush}" Margin="-16,0"/>
+
+                <!-- 5. 托盘图标 -->
+                <Grid RowSpacing="8" HorizontalAlignment="Stretch">
+                    <TextBlock x:Name="TrayHeader" Text="Tray icon" Style="{StaticResource BodyStrongTextBlockStyle}" Margin="4,0,0,4"/>
+                    <StackPanel Spacing="10" Margin="4,0,0,0">
+                        <TextBlock x:Name="TrayLeftLabel" Text="Left click:"/>
+                        <ComboBox x:Name="CmbTrayLeft" SelectionChanged="OnTrayActionChanged" HorizontalAlignment="Stretch"/>
+                        <TextBlock x:Name="TrayMidLabel" Text="Middle click:"/>
+                        <ComboBox x:Name="CmbTrayMid" SelectionChanged="OnTrayActionChanged" HorizontalAlignment="Stretch"/>
+                    </StackPanel>
+                </Grid>
 
             </StackPanel>
         </ScrollViewer>

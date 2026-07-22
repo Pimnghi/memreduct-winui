@@ -25,39 +25,42 @@ public sealed partial class SettingsPage : Page
     {
         var s = (uint id) => CoreService.GetString(id);
 
-        var v = s(StrId.TitleMemoryRegions);
-        if (v != null) RegionsExpander.Header = v;
-        v = s(StrId.TitleMemoryManagement);
-        if (v != null) AutoExpander.Header = v;
-        v = s(StrId.SettingsGeneral);
+        // General
+        var v = s(StrId.SettingsGeneral);
         if (v != null) GeneralExpander.Header = v;
         v = s(StrId.LanguageHint);
         if (v != null) LanguageLabel.Text = v + ":";
+        v = s(StrId.AlwaysOnTop);       if (v != null) ChkAlwaysOnTop.Content = v;
+        v = s(StrId.LoadOnStartup);      if (v != null) ChkLoadOnStartup.Content = v;
+        v = s(StrId.StartMinimized);    if (v != null) ChkStartMinimized.Content = v;
+        v = s(StrId.ConfirmCleaning);   if (v != null) ChkConfirmClean.Content = v;
 
-        v = s(StrId.WorkingSet);           if (v != null) ChkWorkingSet.Content = v;
-        v = s(StrId.SystemFileCache);       if (v != null) ChkSystemFileCache.Content = v;
-        v = s(StrId.ModifiedList);          if (v != null) ChkModifiedList.Content = v;
-        v = s(StrId.StandbyList);           if (v != null) ChkStandbyList.Content = v;
-        v = s(StrId.StandbyPriority0);      if (v != null) ChkStandbyPriority0.Content = v;
-        v = s(StrId.CombineMemoryLists);    if (v != null) ChkCombineLists.Content = v;
+        // Appearance
+        v = s(StrId.SettingsAppearance); if (v != null) AppearanceExpander.Header = v;
+        v = s(StrId.WarningLevel);       if (v != null) WarningLabel.Text = v;
+        v = s(StrId.DangerLevel);        if (v != null) DangerLabel.Text = v;
 
-        v = s(StrId.AutoCleanEnable);       if (v != null) ChkAutoClean.Content = v;
-        v = s(StrId.AutoCleanInterval);     if (v != null) ChkIntervalClean.Content = v;
+        // Memory cleaning
+        v = s(StrId.SettingsMemory);     if (v != null) MemoryExpander.Header = v;
+        v = s(StrId.TitleMemoryRegions); if (v != null) RegionsExpander.Header = v;
+        v = s(StrId.TitleMemoryManagement); if (v != null) AutoExpander.Header = v;
+        v = s(StrId.WorkingSet);         if (v != null) ChkWorkingSet.Content = v;
+        v = s(StrId.SystemFileCache);    if (v != null) ChkSystemFileCache.Content = v;
+        v = s(StrId.ModifiedList);       if (v != null) ChkModifiedList.Content = v;
+        v = s(StrId.StandbyList);        if (v != null) ChkStandbyList.Content = v;
+        v = s(StrId.StandbyPriority0);   if (v != null) ChkStandbyPriority0.Content = v;
+        v = s(StrId.CombineMemoryLists); if (v != null) ChkCombineLists.Content = v;
+        v = s(StrId.AutoCleanEnable);    if (v != null) ChkAutoClean.Content = v;
+        v = s(StrId.AutoCleanInterval);  if (v != null) ChkIntervalClean.Content = v;
+        v = s(StrId.HotkeyClean);        if (v != null) ChkHotkey.Content = v;
+        v = s(StrId.TitleHotkeys);       if (v != null) HotkeyExpander.Header = v;
 
-        v = s(StrId.AlwaysOnTop);           if (v != null) ChkAlwaysOnTop.Content = v;
-        v = s(StrId.LoadOnStartup);          if (v != null) ChkLoadOnStartup.Content = v;
-        v = s(StrId.StartMinimized);        if (v != null) ChkStartMinimized.Content = v;
-        v = s(StrId.ConfirmCleaning);       if (v != null) ChkConfirmClean.Content = v;
-        v = s(StrId.ShowCleanResult);       if (v != null) ChkShowResults.Content = v;
+        // Notifications
+        v = s(StrId.ShowCleanResult);    if (v != null) ChkShowResults.Content = v;
 
-        v = s(StrId.HotkeyClean);            if (v != null) ChkHotkey.Content = v;
-        v = s(StrId.TitleHotkeys);           if (v != null) HotkeyExpander.Header = v;
-        v = s(StrId.ColorIndication);        if (v != null) ColorExpander.Header = v;
-        v = s(StrId.WarningLevel);           if (v != null) WarningLabel.Text = v;
-        v = s(StrId.DangerLevel);            if (v != null) DangerLabel.Text = v;
-
-        v = s(StrId.TrayActionScHint);       if (v != null) TrayLeftLabel.Text = v;
-        v = s(StrId.TrayActionMcHint);       if (v != null) TrayMidLabel.Text = v;
+        // Tray icon
+        v = s(StrId.TrayActionScHint);   if (v != null) TrayLeftLabel.Text = v;
+        v = s(StrId.TrayActionMcHint);   if (v != null) TrayMidLabel.Text = v;
     }
 
     private void LoadSettings()
@@ -85,6 +88,7 @@ public sealed partial class SettingsPage : Page
         ChkStartMinimized.IsChecked = IniConfig.ReadBool("IsStartMinimized");
         ChkConfirmClean.IsChecked = IniConfig.ReadBool("IsShowReductConfirmation", true);
         ChkShowResults.IsChecked = IniConfig.ReadBool("BalloonCleanResults", true);
+        ChkNotificationSound.IsChecked = IniConfig.ReadBool("IsNotificationsSound", true);
 
         NbWarning.Value = IniConfig.ReadUInt("TrayLevelWarning", 70);
         NbDanger.Value = IniConfig.ReadUInt("TrayLevelDanger", 90);
@@ -169,6 +173,8 @@ public sealed partial class SettingsPage : Page
             IniConfig.WriteBool("IsShowReductConfirmation", ChkConfirmClean.IsChecked == true);
         else if (ReferenceEquals(sender, ChkShowResults))
             IniConfig.WriteBool("BalloonCleanResults", ChkShowResults.IsChecked == true);
+        else if (ReferenceEquals(sender, ChkNotificationSound))
+            IniConfig.WriteBool("IsNotificationsSound", ChkNotificationSound.IsChecked == true);
     }
 
     private void OnLanguageChanged(object sender, SelectionChangedEventArgs e)
