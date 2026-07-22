@@ -55,6 +55,9 @@ public sealed partial class SettingsPage : Page
         v = s(StrId.ColorIndication);        if (v != null) ColorExpander.Header = v;
         v = s(StrId.WarningLevel);           if (v != null) WarningLabel.Text = v;
         v = s(StrId.DangerLevel);            if (v != null) DangerLabel.Text = v;
+
+        v = s(StrId.TrayActionScHint);       if (v != null) TrayLeftLabel.Text = v;
+        v = s(StrId.TrayActionMcHint);       if (v != null) TrayMidLabel.Text = v;
     }
 
     private void LoadSettings()
@@ -236,9 +239,9 @@ public sealed partial class SettingsPage : Page
     private static void PopulateTrayActions(ComboBox cmb, int current)
     {
         cmb.Items.Clear();
-        cmb.Items.Add(new ComboBoxItem { Content = "Show / Hide", Tag = TrayIcon.ACTION_SHOW });
-        cmb.Items.Add(new ComboBoxItem { Content = "Clean memory", Tag = TrayIcon.ACTION_CLEAN });
-        cmb.Items.Add(new ComboBoxItem { Content = "Open task manager", Tag = TrayIcon.ACTION_TASKMGR });
+        cmb.Items.Add(new ComboBoxItem { Content = CoreService.GetString(StrId.TrayAction1) ?? "Show / Hide", Tag = TrayIcon.ACTION_SHOW });
+        cmb.Items.Add(new ComboBoxItem { Content = CoreService.GetString(StrId.TrayAction2) ?? "Clean memory", Tag = TrayIcon.ACTION_CLEAN });
+        cmb.Items.Add(new ComboBoxItem { Content = CoreService.GetString(StrId.TrayAction3) ?? "Open task manager", Tag = TrayIcon.ACTION_TASKMGR });
         cmb.SelectedIndex = current switch { TrayIcon.ACTION_CLEAN => 1, TrayIcon.ACTION_TASKMGR => 2, _ => 0 };
     }
 

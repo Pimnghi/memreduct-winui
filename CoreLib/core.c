@@ -269,6 +269,10 @@ static LPCWSTR core_get_string_en(ULONG uid)
 	{
 		case 4:  return L"Settings";
 		case 10: return L"About";
+		case 13: return L"Disable";
+		case 14: return L"Clean areas";
+		case 15: return L"Clean when above";
+		case 16: return L"Clean every";
 		case 17: return L"Clean memory";
 		case 18: return L"Physical memory";
 		case 19: return L"Pagefile";
@@ -300,6 +304,11 @@ static LPCWSTR core_get_string_en(ULONG uid)
 		case 35: return L"Color indication";
 		case 64: return L"Warning level (%)";
 		case 65: return L"Danger level (%)";
+		case 66: return L"Single click:";
+		case 67: return L"Middle click:";
+		case 68: return L"Show / Hide";
+		case 69: return L"Clean memory";
+		case 70: return L"Open task manager";
 		case 91: return L"Theme";
 		case 92: return L"System default";
 		case 93: return L"Light";

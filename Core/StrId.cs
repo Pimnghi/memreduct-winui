@@ -41,4 +41,13 @@ public static class StrId
     public const uint ThemeSystem = 92;
     public const uint ThemeLight = 93;
     public const uint ThemeDark = 94;
+    public const uint TrayPopUp1 = 14;  // Clean areas
+    public const uint TrayPopUp2 = 15;  // Clean when above
+    public const uint TrayPopUp3 = 16;  // Clean every
+    public const uint TrayDisable = 13; // Disable
+    public const uint TrayActionScHint = 66; // Single click:
+    public const uint TrayActionMcHint = 67; // Middle click:
+    public const uint TrayAction1 = 68; // Show / Hide
+    public const uint TrayAction2 = 69; // Clean memory
+    public const uint TrayAction3 = 70; // Open task manager
 }

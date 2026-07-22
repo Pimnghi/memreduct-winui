@@ -154,11 +154,16 @@ public static class TrayIcon
     private static string _textRegions = "Clean areas";
     private static string _textLimit = "Clean when above";
     private static string _textInterval = "Clean every";
+    private static string _textDisable = "Disable";
     private static string _textMinutes = " min.";
 
     private static readonly string[] _regionNames = { "Working set", "System file cache", "Modified file cache",
         "Modified page list", "Standby list", "Standby list (low)", "Registry cache", "Combine memory lists" };
     private static readonly uint[] _regionMasks = { 0x01, 0x02, 0x80, 0x10, 0x08, 0x04, 0x40, 0x20 };
+
+    private static string _actionShowHide = "Show / Hide";
+    private static string _actionClean = "Clean memory"; 
+    private static string _actionTaskmgr = "Open task manager";
 
     private static nint _currentIcon;
     private static string? _iconPath;
@@ -247,43 +252,51 @@ public static class TrayIcon
         var limitVal = IniConfig.ReadUInt("AutoreductValue", 90);
         var intervalVal = IniConfig.ReadUInt("AutoreductIntervalValue", 30);
 
+        var sRegions = CoreService.GetString(14) ?? "Clean areas";
+        var sLimit = CoreService.GetString(15) ?? "Clean when above";
+        var sInterval = CoreService.GetString(16) ?? "Clean every";
+        var sDisable = CoreService.GetString(13) ?? "Disable";
+
         AppendMenuW(hMenu, 0, CMD_SHOW, _textShow);
+        AppendMenuW(hMenu, 0x800, 0, "");
         AppendMenuW(hMenu, 0, CMD_CLEAN, _textClean);
+        AppendMenuW(hMenu, 0x800, 0, "");
 
         // Regions submenu
         var hRegion = CreatePopupMenu();
         for (int i = 0; i < _regionNames.Length; i++)
         {
             var id = CMD_REGION_BASE + i;
-            AppendMenuW(hRegion, 0, (nuint)id, _regionNames[i]);
+            var rname = CoreService.GetString((uint)(45 + i)) ?? _regionNames[i];
+            AppendMenuW(hRegion, 0, (nuint)id, rname);
             if ((mask & _regionMasks[i]) != 0)
-                CheckMenuItem(hRegion, (nuint)id, 8); // MF_CHECKED = 8
+                CheckMenuItem(hRegion, (nuint)id, 8);
         }
-        AppendMenuW(hMenu, 0x10, (nuint)hRegion, _textRegions); // MF_POPUP = 0x10
+        AppendMenuW(hMenu, 0x10, (nuint)hRegion, sRegions);
 
         // Clean when above submenu
         var hLimit = CreatePopupMenu();
-        AppendMenuW(hLimit, 0, 0, "Disable");
-        if (!limitEnabled) CheckMenuItem(hLimit, 0, 8);
+        AppendMenuW(hLimit, 0, CMD_LIMIT_BASE, sDisable);
+        if (!limitEnabled) CheckMenuItem(hLimit, (nuint)CMD_LIMIT_BASE, 8);
         for (int p = 10; p <= 90; p += 10)
         {
             var id = CMD_LIMIT_BASE + p;
             AppendMenuW(hLimit, 0, (nuint)id, $"{p}%");
             if (limitEnabled && limitVal == p) CheckMenuItem(hLimit, (nuint)id, 8);
         }
-        AppendMenuW(hMenu, 0x10, (nuint)hLimit, _textLimit);
+        AppendMenuW(hMenu, 0x10, (nuint)hLimit, sLimit);
 
         // Clean every submenu
         var hInterval = CreatePopupMenu();
-        AppendMenuW(hInterval, 0, 0, "Disable");
-        if (!intervalEnabled) CheckMenuItem(hInterval, 0, 8);
+        AppendMenuW(hInterval, 0, CMD_INTERVAL_BASE, sDisable);
+        if (!intervalEnabled) CheckMenuItem(hInterval, (nuint)CMD_INTERVAL_BASE, 8);
         for (int m = 10; m <= 90; m += 10)
         {
             var id = CMD_INTERVAL_BASE + m;
-            AppendMenuW(hInterval, 0, (nuint)id, $"{m}{_textMinutes}");
+            AppendMenuW(hInterval, 0, (nuint)id, $"{m} min.");
             if (intervalEnabled && intervalVal == m) CheckMenuItem(hInterval, (nuint)id, 8);
         }
-        AppendMenuW(hMenu, 0x10, (nuint)hInterval, _textInterval);
+        AppendMenuW(hMenu, 0x10, (nuint)hInterval, sInterval);
 
         AppendMenuW(hMenu, 0x800, 0, "");
         AppendMenuW(hMenu, 0, CMD_SETTINGS, _textSettings);
@@ -296,39 +309,23 @@ public static class TrayIcon
 
         if (cmd == 0) return;
 
-        // Handle submenu actions
         if (cmd >= CMD_REGION_BASE && cmd < CMD_LIMIT_BASE)
         {
             var idx = cmd - CMD_REGION_BASE;
-            var newMask = mask ^ _regionMasks[idx];
-            IniConfig.WriteUInt("ReductMask2", newMask);
+            IniConfig.WriteUInt("ReductMask2", mask ^ _regionMasks[idx]);
         }
         else if (cmd >= CMD_LIMIT_BASE && cmd < CMD_INTERVAL_BASE)
         {
             var pct = cmd - CMD_LIMIT_BASE;
-            if (pct == 0)
-            {
-                IniConfig.WriteBool("AutoreductEnable", false);
-            }
-            else
-            {
-                IniConfig.WriteBool("AutoreductEnable", true);
-                IniConfig.WriteUInt("AutoreductValue", (uint)pct);
-            }
+            if (pct == 0) { IniConfig.WriteBool("AutoreductEnable", false); }
+            else { IniConfig.WriteBool("AutoreductEnable", true); IniConfig.WriteUInt("AutoreductValue", (uint)pct); }
             AutoCleanService.Refresh();
         }
         else if (cmd >= CMD_INTERVAL_BASE)
         {
             var min = cmd - CMD_INTERVAL_BASE;
-            if (min == 0)
-            {
-                IniConfig.WriteBool("AutoreductIntervalEnable", false);
-            }
-            else
-            {
-                IniConfig.WriteBool("AutoreductIntervalEnable", true);
-                IniConfig.WriteUInt("AutoreductIntervalValue", (uint)min);
-            }
+            if (min == 0) { IniConfig.WriteBool("AutoreductIntervalEnable", false); }
+            else { IniConfig.WriteBool("AutoreductIntervalEnable", true); IniConfig.WriteUInt("AutoreductIntervalValue", (uint)min); }
             AutoCleanService.Refresh();
         }
         else
