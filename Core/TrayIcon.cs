@@ -160,6 +160,7 @@ public static class TrayIcon
     private static readonly string[] _regionNames = { "Working set", "System file cache", "Modified file cache",
         "Modified page list", "Standby list", "Standby list (low)", "Registry cache", "Combine memory lists" };
     private static readonly uint[] _regionMasks = { 0x01, 0x02, 0x80, 0x10, 0x08, 0x04, 0x40, 0x20 };
+    private static readonly uint[] _regionIds = { 45, 46, 95, 49, 48, 47, 96, 50 };
 
     private static string _actionShowHide = "Show / Hide";
     private static string _actionClean = "Clean memory"; 
@@ -267,7 +268,7 @@ public static class TrayIcon
         for (int i = 0; i < _regionNames.Length; i++)
         {
             var id = CMD_REGION_BASE + i;
-            var rname = CoreService.GetString((uint)(45 + i)) ?? _regionNames[i];
+            var rname = CoreService.GetString(_regionIds[i]) ?? _regionNames[i];
             AppendMenuW(hRegion, 0, (nuint)id, rname);
             if ((mask & _regionMasks[i]) != 0)
                 CheckMenuItem(hRegion, (nuint)id, 8);
