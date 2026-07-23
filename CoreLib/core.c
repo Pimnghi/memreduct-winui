@@ -283,6 +283,7 @@ static LPCWSTR core_get_string_en(ULONG uid)
 		case 24: return L"General";
 		case 25: return L"Memory cleaning";
 		case 26: return L"Appearance";
+		case 27: return L"Tray icon";
 		case 31: return L"Memory regions to be cleaned";
 		case 32: return L"Memory management";
 		case 38: return L"Always on top";
@@ -293,11 +294,13 @@ static LPCWSTR core_get_string_en(ULONG uid)
 		case 45: return L"Working set";
 		case 46: return L"System file cache";
 		case 47: return L"Standby list (without priority)";
-		case 48: return L"Standby list";
-		case 49: return L"Modified page list";
-		case 50: return L"Combine memory lists";
+		case 48: return L"Standby list*";
+		case 49: return L"Modified page list*";
+		case 50: return L"Combine memory lists(win10+)";
 		case 51: return L"Clean when above: (%)";
 		case 52: return L"Clean every: (min.)";
+		case 95: return L"Registry cache (win8.1+)";
+		case 96: return L"Modified file cache";
 		case 71: return L"Show memory cleaning results";
 		case 75: return L"Memory was released.";
 		case 76: return L"Required administrator privileges.";

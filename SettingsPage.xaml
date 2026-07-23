@@ -8,187 +8,152 @@
     <ScrollViewer HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="16">
         <StackPanel Spacing="24" HorizontalAlignment="Stretch">
 
+            <!-- General -->
             <StackPanel Spacing="8">
-                <TextBlock x:Name="GeneralHeader" Text="常规" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                <TextBlock x:Name="GeneralHeader" Text="General" Style="{StaticResource BodyStrongTextBlockStyle}"/>
                 <StackPanel Spacing="6">
-                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="8">
+                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
                         <Grid Padding="16,12" ColumnDefinitions="*,Auto">
-                            <TextBlock x:Name="LanguageLabel" Text="语言 (Language):" VerticalAlignment="Center" Style="{StaticResource BodyTextBlockStyle}"/>
+                            <TextBlock x:Name="LanguageLabel" Text="Language:" VerticalAlignment="Center"/>
                             <ComboBox x:Name="CmbLanguage" Grid.Column="1" Width="180" SelectionChanged="OnLanguageChanged"/>
                         </Grid>
                     </Border>
-
-                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="8">
+                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
                         <Grid Padding="16,12" ColumnDefinitions="*,Auto">
-                            <TextBlock x:Name="AlwaysOnTopLabel" Text="窗口始终置顶" VerticalAlignment="Center" Style="{StaticResource BodyTextBlockStyle}"/>
+                            <TextBlock x:Name="AlwaysOnTopLabel" Text="Always on top" VerticalAlignment="Center"/>
                             <ToggleSwitch x:Name="ToggleAlwaysOnTop" Grid.Column="1" Toggled="OnToggleChanged"/>
                         </Grid>
                     </Border>
-
-                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="8">
+                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
                         <Grid Padding="16,12" ColumnDefinitions="*,Auto">
-                            <TextBlock x:Name="LoadOnStartupLabel" Text="开机自动启动" VerticalAlignment="Center" Style="{StaticResource BodyTextBlockStyle}"/>
+                            <TextBlock x:Name="LoadOnStartupLabel" Text="Load on system startup" VerticalAlignment="Center"/>
                             <ToggleSwitch x:Name="ToggleLoadOnStartup" Grid.Column="1" Toggled="OnToggleChanged"/>
                         </Grid>
                     </Border>
-
-                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="8">
+                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
                         <Grid Padding="16,12" ColumnDefinitions="*,Auto">
-                            <TextBlock x:Name="StartMinimizedLabel" Text="启动时最小化到系统托盘" VerticalAlignment="Center" Style="{StaticResource BodyTextBlockStyle}"/>
+                            <TextBlock x:Name="StartMinimizedLabel" Text="Start minimized" VerticalAlignment="Center"/>
                             <ToggleSwitch x:Name="ToggleStartMinimized" Grid.Column="1" Toggled="OnToggleChanged"/>
                         </Grid>
                     </Border>
-
-                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="8">
+                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
                         <Grid Padding="16,12" ColumnDefinitions="*,Auto">
-                            <TextBlock x:Name="ConfirmCleanLabel" Text="清理前弹窗确认" VerticalAlignment="Center" Style="{StaticResource BodyTextBlockStyle}"/>
+                            <TextBlock x:Name="ConfirmCleanLabel" Text="Confirm memory cleaning" VerticalAlignment="Center"/>
                             <ToggleSwitch x:Name="ToggleConfirmClean" Grid.Column="1" Toggled="OnToggleChanged"/>
                         </Grid>
                     </Border>
                 </StackPanel>
             </StackPanel>
 
+            <!-- Appearance -->
             <StackPanel Spacing="8">
-                <TextBlock x:Name="AppearanceHeader" Text="外观" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                <TextBlock x:Name="AppearanceHeader" Text="Appearance" Style="{StaticResource BodyStrongTextBlockStyle}"/>
                 <StackPanel Spacing="6">
-                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="8">
+                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
                         <Grid Padding="16,12" ColumnDefinitions="*,Auto">
-                            <TextBlock x:Name="ThemeLabel" Text="应用主题" VerticalAlignment="Center" Style="{StaticResource BodyTextBlockStyle}"/>
+                            <TextBlock x:Name="ThemeLabel" Text="Theme:" VerticalAlignment="Center"/>
                             <ComboBox x:Name="CmbTheme" Grid.Column="1" Width="180" SelectionChanged="OnThemeChanged"/>
+                        </Grid>
+                    </Border>
+                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+                        <Grid Padding="16,12" ColumnDefinitions="*,Auto">
+                            <TextBlock x:Name="WarningLabel" Text="Warning level (%):" VerticalAlignment="Center"/>
+                            <controls:NumberBox x:Name="NbWarning" Grid.Column="1" Minimum="0" Maximum="100" SpinButtonPlacementMode="Compact" ValueChanged="OnWarningValueChanged" Width="80"/>
+                        </Grid>
+                    </Border>
+                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+                        <Grid Padding="16,12" ColumnDefinitions="*,Auto">
+                            <TextBlock x:Name="DangerLabel" Text="Danger level (%):" VerticalAlignment="Center"/>
+                            <controls:NumberBox x:Name="NbDanger" Grid.Column="1" Minimum="0" Maximum="100" SpinButtonPlacementMode="Compact" ValueChanged="OnDangerValueChanged" Width="80"/>
                         </Grid>
                     </Border>
                 </StackPanel>
             </StackPanel>
 
+            <!-- Memory Cleaning -->
             <StackPanel Spacing="8">
-                <TextBlock x:Name="NotificationHeader" Text="通知" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                <TextBlock x:Name="MemoryHeader" Text="Memory cleaning" Style="{StaticResource BodyStrongTextBlockStyle}"/>
                 <StackPanel Spacing="6">
-                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="8">
+                    <!-- Regions Expander -->
+                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+                        <Expander x:Name="RegionsExpander" Header="Memory regions to clean" IsExpanded="False" Padding="16,8">
+                            <StackPanel Spacing="6">
+                                <CheckBox x:Name="ChkWorkingSet" Click="OnRegionChanged"/>
+                                <CheckBox x:Name="ChkSystemFileCache" Click="OnRegionChanged"/>
+                                <CheckBox x:Name="ChkStandbyPriority0" Click="OnRegionChanged"/>
+                                <CheckBox x:Name="ChkStandbyList" Click="OnRegionChanged"/>
+                                <CheckBox x:Name="ChkModifiedList" Click="OnRegionChanged"/>
+                                <CheckBox x:Name="ChkCombineMemoryLists" Click="OnRegionChanged"/>
+                                <CheckBox x:Name="ChkRegistryCache" Click="OnRegionChanged"/>
+                                <CheckBox x:Name="ChkModifiedFileCache" Click="OnRegionChanged"/>
+                            </StackPanel>
+                        </Expander>
+                    </Border>
+                    <!-- Auto clean -->
+                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
                         <Grid Padding="16,12" ColumnDefinitions="*,Auto">
-                            <TextBlock x:Name="ShowResultsLabel" Text="清理完成后显示结果通知" VerticalAlignment="Center" Style="{StaticResource BodyTextBlockStyle}"/>
+                            <TextBlock x:Name="AutoCleanLabel" Text="Clean when above (%):" VerticalAlignment="Center"/>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                <controls:NumberBox x:Name="NbAutoClean" Minimum="1" Maximum="100" SpinButtonPlacementMode="Compact" ValueChanged="OnAutoCleanValueChanged" Width="80"/>
+                                <ToggleSwitch x:Name="ToggleAutoClean" Toggled="OnToggleChanged"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                    <!-- Interval clean -->
+                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+                        <Grid Padding="16,12" ColumnDefinitions="*,Auto">
+                            <TextBlock x:Name="IntervalCleanLabel" Text="Clean every (min.):" VerticalAlignment="Center"/>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                <controls:NumberBox x:Name="NbInterval" Minimum="1" Maximum="1440" SpinButtonPlacementMode="Compact" ValueChanged="OnIntervalValueChanged" Width="80"/>
+                                <ToggleSwitch x:Name="ToggleIntervalClean" Toggled="OnToggleChanged"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                    <!-- Hotkey -->
+                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+                        <Grid Padding="16,12" ColumnDefinitions="*,Auto">
+                            <TextBlock x:Name="HotkeyLabel" Text="Hotkey (global)" VerticalAlignment="Center"/>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                <TextBox x:Name="HotkeyBox" IsReadOnly="True" Width="160" PlaceholderText="Click to set..." KeyDown="OnHotkeyKeyDown" Tapped="OnHotkeyTapped"/>
+                                <ToggleSwitch x:Name="ToggleHotkey" Toggled="OnHotkeyChanged"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Notifications -->
+            <StackPanel Spacing="8">
+                <TextBlock x:Name="NotificationHeader" Text="Notifications" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                <StackPanel Spacing="6">
+                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+                        <Grid Padding="16,12" ColumnDefinitions="*,Auto">
+                            <TextBlock x:Name="ShowResultsLabel" Text="Show memory cleaning results" VerticalAlignment="Center"/>
                             <ToggleSwitch x:Name="ToggleShowResults" Grid.Column="1" Toggled="OnToggleChanged"/>
                         </Grid>
                     </Border>
-
-                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="8">
+                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
                         <Grid Padding="16,12" ColumnDefinitions="*,Auto">
-                            <TextBlock x:Name="NotificationSoundLabel" Text="清理完成后播放提示音" VerticalAlignment="Center" Style="{StaticResource BodyTextBlockStyle}"/>
+                            <TextBlock x:Name="NotificationSoundLabel" Text="Enable notifications sound" VerticalAlignment="Center"/>
                             <ToggleSwitch x:Name="ToggleNotificationSound" Grid.Column="1" Toggled="OnToggleChanged"/>
                         </Grid>
                     </Border>
                 </StackPanel>
             </StackPanel>
 
+            <!-- Tray icon -->
             <StackPanel Spacing="8">
-                <TextBlock x:Name="RegionsHeader" Text="内存清理区域" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                <TextBlock x:Name="TrayHeader" Text="Tray icon" Style="{StaticResource BodyStrongTextBlockStyle}"/>
                 <StackPanel Spacing="6">
-                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="8">
+                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
                         <Grid Padding="16,12" ColumnDefinitions="*,Auto">
-                            <TextBlock x:Name="WorkingSetLabel" Text="工作集 (Working Set)" VerticalAlignment="Center" Style="{StaticResource BodyTextBlockStyle}"/>
-                            <CheckBox x:Name="ChkWorkingSet" Grid.Column="1" Click="OnRegionChanged"/>
-                        </Grid>
-                    </Border>
-
-                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="8">
-                        <Grid Padding="16,12" ColumnDefinitions="*,Auto">
-                            <TextBlock x:Name="SystemFileCacheLabel" Text="系统文件缓存" VerticalAlignment="Center" Style="{StaticResource BodyTextBlockStyle}"/>
-                            <CheckBox x:Name="ChkSystemFileCache" Grid.Column="1" Click="OnRegionChanged"/>
-                        </Grid>
-                    </Border>
-
-                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="8">
-                        <Grid Padding="16,12" ColumnDefinitions="*,Auto">
-                            <TextBlock x:Name="StandbyListLowPriorityLabel" Text="低优先级 Standby 列表" VerticalAlignment="Center" Style="{StaticResource BodyTextBlockStyle}"/>
-                            <CheckBox x:Name="ChkStandbyPriority0" Grid.Column="1" Click="OnRegionChanged"/>
-                        </Grid>
-                    </Border>
-
-                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="8">
-                        <Grid Padding="16,12" ColumnDefinitions="*,Auto">
-                            <TextBlock x:Name="StandbyListLabel" Text="Standby 列表" VerticalAlignment="Center" Style="{StaticResource BodyTextBlockStyle}"/>
-                            <CheckBox x:Name="ChkStandbyList" Grid.Column="1" Click="OnRegionChanged"/>
-                        </Grid>
-                    </Border>
-
-                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="8">
-                        <Grid Padding="16,12" ColumnDefinitions="*,Auto">
-                            <TextBlock x:Name="ModifiedListLabel" Text="Modified 列表" VerticalAlignment="Center" Style="{StaticResource BodyTextBlockStyle}"/>
-                            <CheckBox x:Name="ChkModifiedList" Grid.Column="1" Click="OnRegionChanged"/>
-                        </Grid>
-                    </Border>
-
-                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="8">
-                        <Grid Padding="16,12" ColumnDefinitions="*,Auto">
-                            <TextBlock x:Name="CombineMemoryListsLabel" Text="合并内存列表" VerticalAlignment="Center" Style="{StaticResource BodyTextBlockStyle}"/>
-                            <CheckBox x:Name="ChkCombineMemoryLists" Grid.Column="1" Click="OnRegionChanged"/>
-                        </Grid>
-                    </Border>
-
-                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="8">
-                        <Grid Padding="16,12" ColumnDefinitions="*,Auto">
-                            <TextBlock x:Name="RegistryCacheLabel" Text="注册表缓存" VerticalAlignment="Center" Style="{StaticResource BodyTextBlockStyle}"/>
-                            <CheckBox x:Name="ChkRegistryCache" Grid.Column="1" Click="OnRegionChanged"/>
-                        </Grid>
-                    </Border>
-
-                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="8">
-                        <Grid Padding="16,12" ColumnDefinitions="*,Auto">
-                            <TextBlock x:Name="ModifiedFileCacheLabel" Text="修改的文件缓存" VerticalAlignment="Center" Style="{StaticResource BodyTextBlockStyle}"/>
-                            <CheckBox x:Name="ChkModifiedFileCache" Grid.Column="1" Click="OnRegionChanged"/>
-                        </Grid>
-                    </Border>
-                </StackPanel>
-            </StackPanel>
-
-            <StackPanel Spacing="8">
-                <TextBlock x:Name="TrayHeader" Text="托盘图标" Style="{StaticResource BodyStrongTextBlockStyle}"/>
-                <StackPanel Spacing="6">
-                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="8">
-                        <Grid Padding="16,12" ColumnDefinitions="*,Auto">
-                            <TextBlock x:Name="TrayLeftLabel" Text="双击左键动作:" VerticalAlignment="Center" Style="{StaticResource BodyTextBlockStyle}"/>
+                            <TextBlock x:Name="TrayLeftLabel" Text="Single click:" VerticalAlignment="Center"/>
                             <ComboBox x:Name="CmbTrayLeft" Grid.Column="1" Width="180" SelectionChanged="OnTrayActionChanged"/>
                         </Grid>
                     </Border>
-
-                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                            BorderThickness="1" CornerRadius="8">
+                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
                         <Grid Padding="16,12" ColumnDefinitions="*,Auto">
-                            <TextBlock x:Name="TrayMidLabel" Text="单击中键动作:" VerticalAlignment="Center" Style="{StaticResource BodyTextBlockStyle}"/>
+                            <TextBlock x:Name="TrayMidLabel" Text="Middle click:" VerticalAlignment="Center"/>
                             <ComboBox x:Name="CmbTrayMid" Grid.Column="1" Width="180" SelectionChanged="OnTrayActionChanged"/>
                         </Grid>
                     </Border>

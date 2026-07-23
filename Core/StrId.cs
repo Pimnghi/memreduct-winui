@@ -15,6 +15,7 @@ public static class StrId
     public const uint SettingsGeneral = 24;
     public const uint SettingsMemory = 25;
     public const uint SettingsAppearance = 26;
+    public const uint SettingsTray = 27;
     public const uint TitleMemoryRegions = 31;
     public const uint TitleMemoryManagement = 32;
     public const uint TitleHotkeys = 33;
@@ -30,6 +31,8 @@ public static class StrId
     public const uint StandbyList = 48;
     public const uint ModifiedList = 49;
     public const uint CombineMemoryLists = 50;
+    public const uint RegistryCache = 95;
+    public const uint ModifiedFileCache = 96;
     public const uint AutoCleanEnable = 51;
     public const uint AutoCleanInterval = 52;
     public const uint HotkeyClean = 53;
