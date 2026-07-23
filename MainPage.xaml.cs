@@ -66,37 +66,39 @@ public sealed partial class MainPage : Page
         var s = (uint id) => CoreService.GetString(id);
 
         var v = s(StrId.GroupPhysical);
-        if (v != null) PhysicalExpander.Header = v;
+        if (v != null) PhysicalTitle.Text = v;
         v = s(StrId.GroupPagefile);
-        if (v != null) PageFileExpander.Header = v;
+        if (v != null) PageFileTitle.Text = v;
         v = s(StrId.GroupSystemCache);
-        if (v != null) CacheExpander.Header = v;
+        if (v != null) CacheTitle.Text = v;
 
         var usage = s(StrId.ItemUsage);
         var avail = s(StrId.ItemAvailable);
         var total = s(StrId.ItemTotal);
 
-        if (usage != null) { PhysicalUsageLabel.Text = usage + ":"; PageFileUsageLabel.Text = usage + ":"; CacheUsageLabel.Text = usage + ":"; }
+        if (usage != null) { PhysicalPctLabel.Text = usage + ":"; PageFilePctLabel.Text = usage + ":"; CachePctLabel.Text = usage + ":"; }
         if (avail != null) { PhysicalFreeLabel.Text = avail + ":"; PageFileFreeLabel.Text = avail + ":"; CacheFreeLabel.Text = avail + ":"; }
         if (total != null) { PhysicalTotalLabel.Text = total + ":"; PageFileTotalLabel.Text = total + ":"; CacheTotalLabel.Text = total + ":"; }
 
         v = s(StrId.CleanMemory);
         if (v != null) CleanBtn.Content = v;
-
-        if (App.MainWindow is MainWindow w)
-            w.RefreshTrayMenu();
     }
 
     private void UpdateDisplay()
     {
         var stats = CoreService.GetMemoryStats();
         PhysicalBar.Value = stats.PhysicalPercent;
+        PhysicalPctText.Text = $"{stats.PhysicalPercent:F1}%";
         PhysicalFreeText.Text = FormatBytes(stats.PhysicalFree);
         PhysicalTotalText.Text = FormatBytes(stats.PhysicalTotal);
+
         PageFileBar.Value = stats.PageFilePercent;
+        PageFilePctText.Text = $"{stats.PageFilePercent:F1}%";
         PageFileFreeText.Text = FormatBytes(stats.PageFileFree);
         PageFileTotalText.Text = FormatBytes(stats.PageFileTotal);
+
         CacheBar.Value = stats.SystemCachePercent;
+        CachePctText.Text = $"{stats.SystemCachePercent:F1}%";
         CacheFreeText.Text = FormatBytes(stats.SystemCacheFree);
         CacheTotalText.Text = FormatBytes(stats.SystemCacheTotal);
 

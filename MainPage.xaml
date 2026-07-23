@@ -5,53 +5,100 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:Microsoft.UI.Xaml.Controls">
 
-    <Grid RowDefinitions="Auto,*" Padding="12" RowSpacing="12">
+    <Grid Padding="12" RowSpacing="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
         <controls:InfoBar x:Name="ResultBar" Grid.Row="0" IsOpen="False" IsClosable="True" />
 
-        <ScrollViewer Grid.Row="1">
-            <StackPanel Spacing="12">
+        <!-- Horizontal memory cards -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="16">
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="12">
+                    <!-- Physical Memory -->
+                    <Border Grid.Column="0" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+                        <StackPanel Spacing="12">
+                            <TextBlock x:Name="PhysicalTitle" Text="Physical memory" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                            <ProgressBar x:Name="PhysicalBar" Minimum="0" Maximum="100" Height="8"/>
+                            <StackPanel Spacing="4">
+                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                    <TextBlock x:Name="PhysicalPctLabel" Text="Usage:" VerticalAlignment="Center" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                    <TextBlock x:Name="PhysicalPctText" Grid.Column="2" Text="" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Right"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                    <TextBlock x:Name="PhysicalFreeLabel" Text="Available:" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                    <TextBlock x:Name="PhysicalFreeText" Grid.Column="2" Text="" FontSize="12" HorizontalAlignment="Right"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                    <TextBlock x:Name="PhysicalTotalLabel" Text="Total:" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                    <TextBlock x:Name="PhysicalTotalText" Grid.Column="2" Text="" FontSize="12" HorizontalAlignment="Right"/>
+                                </Grid>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
 
-                <Expander x:Name="PhysicalExpander" Header="Physical Memory" IsExpanded="True">
-                    <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*" RowSpacing="6" ColumnSpacing="12">
-                        <TextBlock x:Name="PhysicalUsageLabel" Grid.Row="0" Grid.Column="0" Text="Usage:" VerticalAlignment="Center"/>
-                        <ProgressBar x:Name="PhysicalBar" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="100"/>
-                        <TextBlock x:Name="PhysicalFreeLabel" Grid.Row="1" Grid.Column="0" Text="Available:"/>
-                        <TextBlock x:Name="PhysicalFreeText" Grid.Row="1" Grid.Column="1"/>
-                        <TextBlock x:Name="PhysicalTotalLabel" Grid.Row="2" Grid.Column="0" Text="Total:"/>
-                        <TextBlock x:Name="PhysicalTotalText" Grid.Row="2" Grid.Column="1"/>
-                    </Grid>
-                </Expander>
+                    <!-- Pagefile -->
+                    <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+                        <StackPanel Spacing="12">
+                            <TextBlock x:Name="PageFileTitle" Text="Pagefile" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                            <ProgressBar x:Name="PageFileBar" Minimum="0" Maximum="100" Height="8"/>
+                            <StackPanel Spacing="4">
+                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                    <TextBlock x:Name="PageFilePctLabel" Text="Usage:" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                    <TextBlock x:Name="PageFilePctText" Grid.Column="2" Text="" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Right"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                    <TextBlock x:Name="PageFileFreeLabel" Text="Available:" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                    <TextBlock x:Name="PageFileFreeText" Grid.Column="2" Text="" FontSize="12" HorizontalAlignment="Right"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                    <TextBlock x:Name="PageFileTotalLabel" Text="Total:" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                    <TextBlock x:Name="PageFileTotalText" Grid.Column="2" Text="" FontSize="12" HorizontalAlignment="Right"/>
+                                </Grid>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
 
-                <Expander x:Name="PageFileExpander" Header="Pagefile">
-                    <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*" RowSpacing="6" ColumnSpacing="12">
-                        <TextBlock x:Name="PageFileUsageLabel" Grid.Row="0" Grid.Column="0" Text="Usage:"/>
-                        <ProgressBar x:Name="PageFileBar" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="100"/>
-                        <TextBlock x:Name="PageFileFreeLabel" Grid.Row="1" Grid.Column="0" Text="Available:"/>
-                        <TextBlock x:Name="PageFileFreeText" Grid.Row="1" Grid.Column="1"/>
-                        <TextBlock x:Name="PageFileTotalLabel" Grid.Row="2" Grid.Column="0" Text="Total:"/>
-                        <TextBlock x:Name="PageFileTotalText" Grid.Row="2" Grid.Column="1"/>
-                    </Grid>
-                </Expander>
-
-                <Expander x:Name="CacheExpander" Header="System Working Set">
-                    <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="Auto,*" RowSpacing="6" ColumnSpacing="12">
-                        <TextBlock x:Name="CacheUsageLabel" Grid.Row="0" Grid.Column="0" Text="Usage:"/>
-                        <ProgressBar x:Name="CacheBar" Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="100"/>
-                        <TextBlock x:Name="CacheFreeLabel" Grid.Row="1" Grid.Column="0" Text="Available:"/>
-                        <TextBlock x:Name="CacheFreeText" Grid.Row="1" Grid.Column="1"/>
-                        <TextBlock x:Name="CacheTotalLabel" Grid.Row="2" Grid.Column="0" Text="Total:"/>
-                        <TextBlock x:Name="CacheTotalText" Grid.Row="2" Grid.Column="1"/>
-                    </Grid>
-                </Expander>
-
-                <Button x:Name="CleanBtn" HorizontalAlignment="Stretch" Click="OnCleanClick" Padding="8">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <SymbolIcon Symbol="Refresh"/>
-                        <TextBlock Text="Clean memory"/>
-                    </StackPanel>
-                </Button>
-
+                    <!-- System Cache -->
+                    <Border Grid.Column="2" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+                        <StackPanel Spacing="12">
+                            <TextBlock x:Name="CacheTitle" Text="System working set" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                            <ProgressBar x:Name="CacheBar" Minimum="0" Maximum="100" Height="8"/>
+                            <StackPanel Spacing="4">
+                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                    <TextBlock x:Name="CachePctLabel" Text="Usage:" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                    <TextBlock x:Name="CachePctText" Grid.Column="2" Text="" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Right"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                    <TextBlock x:Name="CacheFreeLabel" Text="Available:" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                    <TextBlock x:Name="CacheFreeText" Grid.Column="2" Text="" FontSize="12" HorizontalAlignment="Right"/>
+                                </Grid>
+                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                    <TextBlock x:Name="CacheTotalLabel" Text="Total:" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                    <TextBlock x:Name="CacheTotalText" Grid.Column="2" Text="" FontSize="12" HorizontalAlignment="Right"/>
+                                </Grid>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </Grid>
             </StackPanel>
         </ScrollViewer>
+
+        <!-- Clean button bottom-right -->
+        <Grid Grid.Row="2">
+            <Button x:Name="CleanBtn" Click="OnCleanClick" HorizontalAlignment="Right" Padding="16,8"
+                    Style="{StaticResource AccentButtonStyle}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <SymbolIcon Symbol="Refresh"/>
+                    <TextBlock Text="Clean memory"/>
+                </StackPanel>
+            </Button>
+        </Grid>
     </Grid>
 </Page>
