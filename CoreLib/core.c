@@ -303,6 +303,7 @@ static LPCWSTR core_get_string_en(ULONG uid)
 		case 95: return L"Registry cache (win8.1+)";
 		case 96: return L"Modified file cache";
 		case 71: return L"Show memory cleaning results";
+		case 72: return L"Are you sure you want to clean the memory?";
 		case 75: return L"Memory was released.";
 		case 76: return L"Required administrator privileges.";
 		case 35: return L"Color indication";

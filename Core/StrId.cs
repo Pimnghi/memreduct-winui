@@ -40,6 +40,7 @@ public static class StrId
     public const uint WarningLevel = 64;
     public const uint DangerLevel = 65;
     public const uint ShowCleanResult = 71;
+    public const uint Question = 72;
     public const uint StatusCleaned = 75;
     public const uint StatusNoPrivileges = 76;
     public const uint Theme = 91;

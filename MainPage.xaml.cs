@@ -172,6 +172,20 @@ public sealed partial class MainPage : Page
             return;
         }
 
+        if (IniConfig.ReadBool("IsShowReductConfirmation", true))
+        {
+            var dialog = new ContentDialog
+            {
+                Title = CoreService.GetString(StrId.CleanMemory) ?? "Memory cleaning",
+                Content = CoreService.GetString(StrId.Question) ?? "Are you sure you want to clean the memory?",
+                PrimaryButtonText = "Yes",
+                CloseButtonText = "No",
+                XamlRoot = XamlRoot,
+            };
+            if (await dialog.ShowAsync() != ContentDialogResult.Primary)
+                return;
+        }
+
         CleanBtn.IsEnabled = false;
         CleanBtn.Content = (CoreService.GetString(StrId.CleanMemory) ?? "Cleaning") + "…";
 
