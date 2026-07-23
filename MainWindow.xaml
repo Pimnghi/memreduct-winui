@@ -33,6 +33,7 @@
             IsSettingsVisible="False"
             IsPaneToggleButtonVisible="True"
             PaneDisplayMode="Left"
+            IsPaneOpen="False"
             OpenPaneLength="240">
 
             <controls:NavigationView.MenuItems/>
