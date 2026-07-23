@@ -71,7 +71,7 @@ public partial class App : Application
         }
 
         MemReduct.Core.TrayIcon.SetIcon(System.IO.Path.Combine(AppContext.BaseDirectory, "Assets", "AppIcon.ico"));
-        MemReduct.Core.TrayIcon.Create("Mem Reduct");
+        MemReduct.Core.TrayIcon.Create("Mem Reduct WinUI");
 
         MainWindow = new MainWindow();
         MainWindow.Activate();
