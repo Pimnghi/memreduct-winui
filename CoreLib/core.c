@@ -268,6 +268,7 @@ static LPCWSTR core_get_string_en(ULONG uid)
 	switch (uid)
 	{
 		case 4:  return L"Settings";
+		case 5:  return L"Exit";
 		case 10: return L"About";
 		case 13: return L"Disable";
 		case 14: return L"Clean areas";

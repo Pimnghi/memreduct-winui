@@ -133,7 +133,8 @@ public sealed partial class MainWindow : Window
         TrayIcon.SetMenuTexts(
             CoreService.GetString(StrId.TrayShow) ?? "Show / Hide",
             CoreService.GetString(StrId.CleanMemory) ?? "Clean memory",
-            CoreService.GetString(StrId.Settings) ?? "Settings", "Exit");
+            CoreService.GetString(StrId.Settings) ?? "Settings",
+            CoreService.GetString(StrId.Exit) ?? "Exit");
     }
 
     public void RefreshTrayMenu() => UpdateTrayMenuTexts();
