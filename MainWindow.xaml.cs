@@ -20,6 +20,9 @@ public sealed partial class MainWindow : Window
     [DllImport("user32")]
     private static extern bool SetWindowPos(nint hWnd, nint hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
 
+    [DllImport("user32")]
+    private static extern int GetSystemMetrics(int nIndex);
+
     public MainWindow()
     {
         InitializeComponent();
@@ -52,6 +55,13 @@ public sealed partial class MainWindow : Window
         TrayIcon.RefreshHotkey();
         ApplyTopmost();
         ApplyNavLocalization();
+        RestoreWindowBounds();
+
+        AppWindow.Changed += (s, e) =>
+        {
+            if (e.DidPositionChange || e.DidSizeChange)
+                SaveWindowBounds();
+        };
     }
 
     // 注意：已删除多余的 OnHamburgerClick 方法，NavigationView 内置汉堡按钮会自动处理点击展开/折叠推移动画
@@ -88,6 +98,42 @@ public sealed partial class MainWindow : Window
         var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
         if (hwnd == nint.Zero) return;
         SetWindowPos(hwnd, topmost ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
+    }
+
+    private void RestoreWindowBounds()
+    {
+        var w = IniConfig.ReadInt("WindowWidth", 0);
+        var h = IniConfig.ReadInt("WindowHeight", 0);
+        var x = IniConfig.ReadInt("WindowLeft", int.MinValue);
+        var y = IniConfig.ReadInt("WindowTop", int.MinValue);
+
+        if (w > 0 && h > 0 && x != int.MinValue && y != int.MinValue)
+        {
+            AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(x, y, w, h));
+        }
+        else if (w > 0 && h > 0)
+        {
+            AppWindow.Resize(new Windows.Graphics.SizeInt32(w, h));
+        }
+        else
+        {
+            // default: 1600x900 centered
+            var screenW = GetSystemMetrics(0);
+            var screenH = GetSystemMetrics(1);
+            var cx = (screenW - 1600) / 2;
+            var cy = (screenH - 1000) / 2;
+            AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(cx, cy, 1600, 1000));
+        }
+    }
+
+    private void SaveWindowBounds()
+    {
+        var pos = AppWindow.Position;
+        var size = AppWindow.Size;
+        IniConfig.WriteInt("WindowLeft", pos.X);
+        IniConfig.WriteInt("WindowTop", pos.Y);
+        IniConfig.WriteInt("WindowWidth", size.Width);
+        IniConfig.WriteInt("WindowHeight", size.Height);
     }
 
     private void OnTrayCommand(int cmd)
