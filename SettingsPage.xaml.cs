@@ -1,10 +1,9 @@
 using MemReduct.Core;
-using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using System;
 using System.Diagnostics;
-using Windows.UI.Core;
-using Windows.System;
+using System.IO;
 
 namespace memreduct_winui;
 
@@ -18,236 +17,177 @@ public sealed partial class SettingsPage : Page
         _loading = true;
         LoadSettings();
         LoadLocales();
+        LoadThemes();
+        LoadTrayActions();
+        ApplyLocalization();
         _loading = false;
+    }
+
+    private void LoadSettings()
+    {
+        // 1. 常规设置
+        ToggleAlwaysOnTop.IsOn = IniConfig.ReadBool("AlwaysOnTop");
+        ToggleLoadOnStartup.IsOn = IniConfig.ReadBool("LoadOnStartup");
+        ToggleStartMinimized.IsOn = IniConfig.ReadBool("StartMinimized");
+        ToggleConfirmClean.IsOn = IniConfig.ReadBool("ConfirmCleaning");
+
+        // 2. 通知设置
+        ToggleShowResults.IsOn = IniConfig.ReadBool("BalloonCleanResults", true);
+        ToggleNotificationSound.IsOn = IniConfig.ReadBool("SoundCleanResults", true);
+
+        // 3. 内存清理区域
+        uint mask = IniConfig.ReadUInt("ReductMask2", MemoryMask.Default);
+        ChkWorkingSet.IsChecked = (mask & MemoryMask.WorkingSet) != 0;
+        ChkSystemFileCache.IsChecked = (mask & MemoryMask.SystemFileCache) != 0;
+        ChkStandbyPriority0.IsChecked = (mask & MemoryMask.StandbyPriority0List) != 0;
+        ChkStandbyList.IsChecked = (mask & MemoryMask.StandbyList) != 0;
+        ChkModifiedList.IsChecked = (mask & MemoryMask.ModifiedList) != 0;
+        ChkCombineMemoryLists.IsChecked = (mask & MemoryMask.CombineMemoryLists) != 0;
+        ChkRegistryCache.IsChecked = (mask & MemoryMask.RegistryCache) != 0;
+        ChkModifiedFileCache.IsChecked = (mask & MemoryMask.ModifiedFileCache) != 0;
     }
 
     public void ApplyLocalization()
     {
         var s = (uint id) => CoreService.GetString(id);
 
-        // General
-        var v = s(StrId.SettingsGeneral);
-        if (v != null) GeneralExpander.Header = v;
-        v = s(StrId.LanguageHint);
-        if (v != null) LanguageLabel.Text = v + ":";
-        v = s(StrId.AlwaysOnTop);       if (v != null) ChkAlwaysOnTop.Content = v;
-        v = s(StrId.LoadOnStartup);      if (v != null) ChkLoadOnStartup.Content = v;
-        v = s(StrId.StartMinimized);    if (v != null) ChkStartMinimized.Content = v;
-        v = s(StrId.ConfirmCleaning);   if (v != null) ChkConfirmClean.Content = v;
+        var v = s(StrId.SettingsGeneral);      if (v != null) GeneralHeader.Text = v;
+        v = s(StrId.LanguageHint);              if (v != null) LanguageLabel.Text = v + ":";
+        v = s(StrId.AlwaysOnTop);               if (v != null) AlwaysOnTopLabel.Text = v;
+        v = s(StrId.LoadOnStartup);             if (v != null) LoadOnStartupLabel.Text = v;
+        v = s(StrId.StartMinimized);            if (v != null) StartMinimizedLabel.Text = v;
+        v = s(StrId.ConfirmCleaning);           if (v != null) ConfirmCleanLabel.Text = v;
 
-        // Appearance
-        v = s(StrId.SettingsAppearance); if (v != null) AppearanceExpander.Header = v;
-        v = s(StrId.WarningLevel);       if (v != null) WarningLabel.Text = v;
-        v = s(StrId.DangerLevel);        if (v != null) DangerLabel.Text = v;
+        v = s(StrId.SettingsAppearance);        if (v != null) AppearanceHeader.Text = v;
+        v = s(StrId.Theme);                     if (v != null) ThemeLabel.Text = v;
 
-        // Memory cleaning
-        v = s(StrId.SettingsMemory);     if (v != null) MemoryExpander.Header = v;
-        v = s(StrId.TitleMemoryRegions); if (v != null) RegionsExpander.Header = v;
-        v = s(StrId.TitleMemoryManagement); if (v != null) AutoExpander.Header = v;
-        v = s(StrId.WorkingSet);         if (v != null) ChkWorkingSet.Content = v;
-        v = s(StrId.SystemFileCache);    if (v != null) ChkSystemFileCache.Content = v;
-        v = s(StrId.ModifiedList);       if (v != null) ChkModifiedList.Content = v;
-        v = s(StrId.StandbyList);        if (v != null) ChkStandbyList.Content = v;
-        v = s(StrId.StandbyPriority0);   if (v != null) ChkStandbyPriority0.Content = v;
-        v = s(StrId.CombineMemoryLists); if (v != null) ChkCombineLists.Content = v;
-        v = s(StrId.AutoCleanEnable);    if (v != null) ChkAutoClean.Content = v;
-        v = s(StrId.AutoCleanInterval);  if (v != null) ChkIntervalClean.Content = v;
-        v = s(StrId.HotkeyClean);        if (v != null) ChkHotkey.Content = v;
-        v = s(StrId.TitleHotkeys);       if (v != null) HotkeyExpander.Header = v;
+        v = s(StrId.ShowCleanResult);           if (v != null) ShowResultsLabel.Text = v;
 
-        // Notifications
-        v = s(StrId.ShowCleanResult);    if (v != null) ChkShowResults.Content = v;
+        v = s(StrId.TitleMemoryRegions);        if (v != null) RegionsHeader.Text = v;
+        v = s(StrId.WorkingSet);               if (v != null) WorkingSetLabel.Text = v;
+        v = s(StrId.SystemFileCache);           if (v != null) SystemFileCacheLabel.Text = v;
+        v = s(StrId.StandbyPriority0);          if (v != null) StandbyListLowPriorityLabel.Text = v;
+        v = s(StrId.StandbyList);              if (v != null) StandbyListLabel.Text = v;
+        v = s(StrId.ModifiedList);             if (v != null) ModifiedListLabel.Text = v;
+        v = s(StrId.CombineMemoryLists);       if (v != null) CombineMemoryListsLabel.Text = v;
 
-        // Tray icon
-        v = s(StrId.TrayActionScHint);   if (v != null) TrayLeftLabel.Text = v;
-        v = s(StrId.TrayActionMcHint);   if (v != null) TrayMidLabel.Text = v;
-    }
-
-    private void LoadSettings()
-    {
-        var mask = IniConfig.ReadUInt("ReductMask2", MemoryMask.Default);
-        ChkWorkingSet.IsChecked       = (mask & MemoryMask.WorkingSet) != 0;
-        ChkSystemFileCache.IsChecked   = (mask & MemoryMask.SystemFileCache) != 0;
-        ChkModifiedFileCache.IsChecked = (mask & MemoryMask.ModifiedFileCache) != 0;
-        ChkModifiedList.IsChecked      = (mask & MemoryMask.ModifiedList) != 0;
-        ChkStandbyList.IsChecked       = (mask & MemoryMask.StandbyList) != 0;
-        ChkStandbyPriority0.IsChecked  = (mask & MemoryMask.StandbyPriority0List) != 0;
-        ChkRegistryCache.IsChecked     = (mask & MemoryMask.RegistryCache) != 0;
-        ChkCombineLists.IsChecked      = (mask & MemoryMask.CombineMemoryLists) != 0;
-
-        ChkAutoClean.IsChecked = IniConfig.ReadBool("AutoreductEnable");
-        NbAutoClean.Value = IniConfig.ReadUInt("AutoreductValue", 90);
-        NbAutoClean.IsEnabled = ChkAutoClean.IsChecked == true;
-
-        ChkIntervalClean.IsChecked = IniConfig.ReadBool("AutoreductIntervalEnable");
-        NbInterval.Value = IniConfig.ReadUInt("AutoreductIntervalValue", 30);
-        NbInterval.IsEnabled = ChkIntervalClean.IsChecked == true;
-
-        ChkAlwaysOnTop.IsChecked = IniConfig.ReadBool("AlwaysOnTop");
-        ChkLoadOnStartup.IsChecked = IniConfig.ReadBool("LoadOnStartup");
-        ChkStartMinimized.IsChecked = IniConfig.ReadBool("IsStartMinimized");
-        ChkConfirmClean.IsChecked = IniConfig.ReadBool("IsShowReductConfirmation", true);
-        ChkShowResults.IsChecked = IniConfig.ReadBool("BalloonCleanResults", true);
-        ChkNotificationSound.IsChecked = IniConfig.ReadBool("IsNotificationsSound", true);
-
-        NbWarning.Value = IniConfig.ReadUInt("TrayLevelWarning", 70);
-        NbDanger.Value = IniConfig.ReadUInt("TrayLevelDanger", 90);
-
-        CmbTheme.Items.Clear();
-        CmbTheme.Items.Add(new ComboBoxItem { Content = "System default", Tag = "System" });
-        CmbTheme.Items.Add(new ComboBoxItem { Content = "Light", Tag = "Light" });
-        CmbTheme.Items.Add(new ComboBoxItem { Content = "Dark", Tag = "Dark" });
-        CmbTheme.SelectedIndex = (IniConfig.ReadString("Theme", "System") ?? "System") switch { "Light" => 1, "Dark" => 2, _ => 0 };
-
-        PopulateTrayActions(CmbTrayLeft, IniConfig.ReadInt("TrayActionDc", TrayIcon.ACTION_SHOW));
-        PopulateTrayActions(CmbTrayMid, IniConfig.ReadInt("TrayActionMc", TrayIcon.ACTION_CLEAN));
-
-        ChkHotkey.IsChecked = IniConfig.ReadBool("HotkeyCleanEnable");
-        LoadHotkeyDisplay();
+        v = s(StrId.TrayShow);                  if (v != null) TrayHeader.Text = v;
     }
 
     private void LoadLocales()
     {
         CmbLanguage.Items.Clear();
-        var count = CoreService.GetLocaleCount();
-        var current = CoreService.GetCurrentLocaleIndex();
-        for (uint i = 0; i <= count; i++)
+        var locales = CoreService.GetAvailableLocales();
+        var currentLocale = IniConfig.ReadString("Language", "");
+
+        int selectIndex = 0;
+        for (int i = 0; i < locales.Count; i++)
         {
-            var name = i == 0 ? "System default" : CoreService.GetLocaleName((uint)(i - 1));
-            if (name != null)
-            {
-                CmbLanguage.Items.Add(new ComboBoxItem { Content = name, Tag = i });
-                if (i == current)
-                    CmbLanguage.SelectedIndex = (int)i;
-            }
+            var item = new ComboBoxItem { Content = locales[i].Name, Tag = locales[i].Code };
+            CmbLanguage.Items.Add(item);
+            if (locales[i].Code.Equals(currentLocale, StringComparison.OrdinalIgnoreCase))
+                selectIndex = i;
+        }
+        CmbLanguage.SelectedIndex = selectIndex;
+    }
+
+    private void LoadThemes()
+    {
+        CmbTheme.Items.Clear();
+        CmbTheme.Items.Add(new ComboBoxItem { Content = CoreService.GetString(StrId.ThemeSystem) ?? "跟随系统", Tag = ElementTheme.Default });
+        CmbTheme.Items.Add(new ComboBoxItem { Content = CoreService.GetString(StrId.ThemeLight) ?? "浅色", Tag = ElementTheme.Light });
+        CmbTheme.Items.Add(new ComboBoxItem { Content = CoreService.GetString(StrId.ThemeDark) ?? "深色", Tag = ElementTheme.Dark });
+
+        var themeStr = IniConfig.ReadString("Theme", "System");
+        CmbTheme.SelectedIndex = themeStr switch
+        {
+            "Light" => 1,
+            "Dark" => 2,
+            _ => 0
+        };
+    }
+
+    private void OnToggleChanged(object sender, RoutedEventArgs e)
+    {
+        if (_loading) return;
+
+        if (ReferenceEquals(sender, ToggleAlwaysOnTop))
+        {
+            IniConfig.WriteBool("AlwaysOnTop", ToggleAlwaysOnTop.IsOn);
+            if (App.MainWindow is MainWindow mw) mw.SetAlwaysOnTop(ToggleAlwaysOnTop.IsOn);
+        }
+        else if (ReferenceEquals(sender, ToggleLoadOnStartup))
+        {
+            IniConfig.WriteBool("LoadOnStartup", ToggleLoadOnStartup.IsOn);
+            SetAutoStart(ToggleLoadOnStartup.IsOn);
+        }
+        else if (ReferenceEquals(sender, ToggleStartMinimized))
+        {
+            IniConfig.WriteBool("StartMinimized", ToggleStartMinimized.IsOn);
+        }
+        else if (ReferenceEquals(sender, ToggleConfirmClean))
+        {
+            IniConfig.WriteBool("ConfirmCleaning", ToggleConfirmClean.IsOn);
+        }
+        else if (ReferenceEquals(sender, ToggleShowResults))
+        {
+            IniConfig.WriteBool("BalloonCleanResults", ToggleShowResults.IsOn);
+        }
+        else if (ReferenceEquals(sender, ToggleNotificationSound))
+        {
+            IniConfig.WriteBool("SoundCleanResults", ToggleNotificationSound.IsOn);
+        }
+    }
+
+    private void OnRegionChanged(object sender, RoutedEventArgs e)
+    {
+        if (_loading) return;
+
+        uint mask = 0;
+        if (ChkWorkingSet.IsChecked == true) mask |= MemoryMask.WorkingSet;
+        if (ChkSystemFileCache.IsChecked == true) mask |= MemoryMask.SystemFileCache;
+        if (ChkStandbyPriority0.IsChecked == true) mask |= MemoryMask.StandbyPriority0List;
+        if (ChkStandbyList.IsChecked == true) mask |= MemoryMask.StandbyList;
+        if (ChkModifiedList.IsChecked == true) mask |= MemoryMask.ModifiedList;
+        if (ChkCombineMemoryLists.IsChecked == true) mask |= MemoryMask.CombineMemoryLists;
+        if (ChkRegistryCache.IsChecked == true) mask |= MemoryMask.RegistryCache;
+        if (ChkModifiedFileCache.IsChecked == true) mask |= MemoryMask.ModifiedFileCache;
+
+        IniConfig.WriteUInt("ReductMask2", mask);
+    }
+
+    private void OnLanguageChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loading) return;
+        if (CmbLanguage.SelectedItem is ComboBoxItem item && item.Tag is string code)
+        {
+            IniConfig.WriteString("Language", code);
+            ApplyLocalization();
         }
     }
 
     private void OnThemeChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (_loading || CmbTheme.SelectedItem is not ComboBoxItem item) return;
-        var theme = item.Tag?.ToString() ?? "System";
-        IniConfig.WriteString("Theme", theme);
-        App.ApplyTheme(theme);
-    }
-
-    private void SaveMask()
-    {
-        uint mask = 0;
-        if (ChkWorkingSet.IsChecked == true)        mask |= MemoryMask.WorkingSet;
-        if (ChkSystemFileCache.IsChecked == true)    mask |= MemoryMask.SystemFileCache;
-        if (ChkModifiedFileCache.IsChecked == true)  mask |= MemoryMask.ModifiedFileCache;
-        if (ChkModifiedList.IsChecked == true)       mask |= MemoryMask.ModifiedList;
-        if (ChkStandbyList.IsChecked == true)        mask |= MemoryMask.StandbyList;
-        if (ChkStandbyPriority0.IsChecked == true)   mask |= MemoryMask.StandbyPriority0List;
-        if (ChkRegistryCache.IsChecked == true)      mask |= MemoryMask.RegistryCache;
-        if (ChkCombineLists.IsChecked == true)       mask |= MemoryMask.CombineMemoryLists;
-        IniConfig.WriteUInt("ReductMask2", mask);
-    }
-
-    private void OnRegionChanged(object sender, RoutedEventArgs e) { if (!_loading) SaveMask(); }
-    private void OnAutoCleanChanged(object sender, RoutedEventArgs e) { if (_loading) return; NbAutoClean.IsEnabled = ChkAutoClean.IsChecked == true; IniConfig.WriteBool("AutoreductEnable", ChkAutoClean.IsChecked == true); AutoCleanService.Refresh(); }
-    private void OnIntervalCleanChanged(object sender, RoutedEventArgs e) { if (_loading) return; NbInterval.IsEnabled = ChkIntervalClean.IsChecked == true; IniConfig.WriteBool("AutoreductIntervalEnable", ChkIntervalClean.IsChecked == true); AutoCleanService.Refresh(); }
-    private void OnAutoCleanValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args) { if (_loading || double.IsNaN(args.NewValue)) return; IniConfig.WriteUInt("AutoreductValue", (uint)args.NewValue); }
-    private void OnIntervalValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args) { if (_loading || double.IsNaN(args.NewValue)) return; IniConfig.WriteUInt("AutoreductIntervalValue", (uint)args.NewValue); }
-
-    private void OnWarningValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args) { if (_loading || double.IsNaN(args.NewValue)) return; IniConfig.WriteUInt("TrayLevelWarning", (uint)args.NewValue); }
-    private void OnDangerValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args) { if (_loading || double.IsNaN(args.NewValue)) return; IniConfig.WriteUInt("TrayLevelDanger", (uint)args.NewValue); }
-
-    private void OnBoolChanged(object sender, RoutedEventArgs e)
-    {
         if (_loading) return;
-        if (ReferenceEquals(sender, ChkAlwaysOnTop))
+        if (CmbTheme.SelectedItem is ComboBoxItem item && item.Tag is ElementTheme theme)
         {
-            IniConfig.WriteBool("AlwaysOnTop", ChkAlwaysOnTop.IsChecked == true);
-            if (App.MainWindow is MainWindow w) w.ApplyTopmost();
+            IniConfig.WriteString("Theme", theme.ToString());
+            App.ApplyTheme(theme == ElementTheme.Dark ? "Dark" : theme == ElementTheme.Light ? "Light" : "System");
         }
-        else if (ReferenceEquals(sender, ChkStartMinimized))
-            IniConfig.WriteBool("IsStartMinimized", ChkStartMinimized.IsChecked == true);
-        else if (ReferenceEquals(sender, ChkLoadOnStartup))
-        {
-            IniConfig.WriteBool("LoadOnStartup", ChkLoadOnStartup.IsChecked == true);
-            SetAutoStart(ChkLoadOnStartup.IsChecked == true);
-        }
-        else if (ReferenceEquals(sender, ChkConfirmClean))
-            IniConfig.WriteBool("IsShowReductConfirmation", ChkConfirmClean.IsChecked == true);
-        else if (ReferenceEquals(sender, ChkShowResults))
-            IniConfig.WriteBool("BalloonCleanResults", ChkShowResults.IsChecked == true);
-        else if (ReferenceEquals(sender, ChkNotificationSound))
-            IniConfig.WriteBool("IsNotificationsSound", ChkNotificationSound.IsChecked == true);
     }
 
-    private void OnLanguageChanged(object sender, SelectionChangedEventArgs e)
+    private void LoadTrayActions()
     {
-        if (_loading || CmbLanguage.SelectedItem is not ComboBoxItem item) return;
-        var name = (string?)item.Content ?? "";
-        IniConfig.WriteString("Language", name == "System default" ? "" : name);
-        CoreService.SetLocale((uint)(item.Tag ?? 0u));
-        ApplyLocalization();
-        if (App.MainWindow is MainWindow w) w.ApplyNavLocalization();
+        SetupTrayCmb(CmbTrayLeft, IniConfig.ReadInt("TrayActionDc", TrayIcon.ACTION_SHOW));
+        SetupTrayCmb(CmbTrayMid, IniConfig.ReadInt("TrayActionMc", TrayIcon.ACTION_CLEAN));
     }
 
-    private void LoadHotkeyDisplay()
-    {
-        var hotkey = IniConfig.ReadInt("HotkeyClean", (0x02 << 8 | 0x70));
-        var vk = hotkey & 0xFF;
-        var mods = (hotkey >> 8) & 0xFF;
-        HotkeyBox.Text = HotkeyToString((uint)mods, (uint)vk);
-    }
-
-    private void OnHotkeyChanged(object sender, RoutedEventArgs e) { if (_loading) return; IniConfig.WriteBool("HotkeyCleanEnable", ChkHotkey.IsChecked == true); if (App.MainWindow is MainWindow w) TrayIcon.RefreshHotkey(); }
-    private void OnHotkeyTapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e) { HotkeyBox.PlaceholderText = "Press a key combination..."; HotkeyBox.Focus(FocusState.Keyboard); }
-
-    private void OnHotkeyKeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
-    {
-        var vk = (uint)e.Key;
-        if (vk is 0xA0 or 0xA1 or 0xA2 or 0xA3 or 0xA4 or 0xA5) { e.Handled = false; return; }
-
-        uint mods = 0;
-        var ctrl = InputKeyboardSource.GetKeyStateForCurrentThread(Windows.System.VirtualKey.Control);
-        var alt = InputKeyboardSource.GetKeyStateForCurrentThread(Windows.System.VirtualKey.Menu);
-        var shift = InputKeyboardSource.GetKeyStateForCurrentThread(Windows.System.VirtualKey.Shift);
-        var lwin = InputKeyboardSource.GetKeyStateForCurrentThread(Windows.System.VirtualKey.LeftWindows);
-        var rwin = InputKeyboardSource.GetKeyStateForCurrentThread(Windows.System.VirtualKey.RightWindows);
-
-        if (ctrl.HasFlag(CoreVirtualKeyStates.Down)) mods |= 2;
-        if (alt.HasFlag(CoreVirtualKeyStates.Down)) mods |= 4;
-        if (shift.HasFlag(CoreVirtualKeyStates.Down)) mods |= 1;
-        if (lwin.HasFlag(CoreVirtualKeyStates.Down) || rwin.HasFlag(CoreVirtualKeyStates.Down)) mods |= 8;
-
-        var hotkey = ((int)mods << 8) | (int)vk;
-        IniConfig.WriteInt("HotkeyClean", hotkey);
-        HotkeyBox.Text = HotkeyToString(mods, vk);
-        if (App.MainWindow is MainWindow w) TrayIcon.RefreshHotkey();
-        e.Handled = true;
-    }
-
-    private static string HotkeyToString(uint mods, uint vk)
-    {
-        var parts = new System.Collections.Generic.List<string>();
-        if ((mods & 2) != 0) parts.Add("Ctrl");
-        if ((mods & 1) != 0) parts.Add("Alt");
-        if ((mods & 4) != 0) parts.Add("Shift");
-        if ((mods & 8) != 0) parts.Add("Win");
-        var keyName = vk switch
-        {
-            >= 0x70 and <= 0x87 => "F" + (vk - 0x70 + 1),
-            0x2E => "Del", 0x08 => "Back", 0x09 => "Tab", 0x0D => "Enter",
-            0x20 => "Space", 0x21 => "PgUp", 0x22 => "PgDn",
-            0x23 => "End", 0x24 => "Home", 0x25 => "Left", 0x26 => "Up",
-            0x27 => "Right", 0x28 => "Down", 0x2D => "Ins",
-            _ => ((char)vk).ToString()
-        };
-        parts.Add(keyName);
-        return string.Join(" + ", parts);
-    }
-
-    private static void PopulateTrayActions(ComboBox cmb, int current)
+    private static void SetupTrayCmb(ComboBox cmb, int current)
     {
         cmb.Items.Clear();
-        cmb.Items.Add(new ComboBoxItem { Content = CoreService.GetString(StrId.TrayAction1) ?? "Show / Hide", Tag = TrayIcon.ACTION_SHOW });
-        cmb.Items.Add(new ComboBoxItem { Content = CoreService.GetString(StrId.TrayAction2) ?? "Clean memory", Tag = TrayIcon.ACTION_CLEAN });
-        cmb.Items.Add(new ComboBoxItem { Content = CoreService.GetString(StrId.TrayAction3) ?? "Open task manager", Tag = TrayIcon.ACTION_TASKMGR });
+        cmb.Items.Add(new ComboBoxItem { Content = CoreService.GetString(StrId.TrayShow) ?? "显示 / 隐藏", Tag = TrayIcon.ACTION_SHOW });
+        cmb.Items.Add(new ComboBoxItem { Content = CoreService.GetString(StrId.CleanMemory) ?? "清理内存", Tag = TrayIcon.ACTION_CLEAN });
+        cmb.Items.Add(new ComboBoxItem { Content = CoreService.GetString(StrId.TrayAction3) ?? "打开任务管理器", Tag = TrayIcon.ACTION_TASKMGR });
         cmb.SelectedIndex = current switch { TrayIcon.ACTION_CLEAN => 1, TrayIcon.ACTION_TASKMGR => 2, _ => 0 };
     }
 

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.IO;
 using System.Runtime.InteropServices;
 using static MemReduct.Core.NativeMethods;
 
@@ -122,5 +124,25 @@ public static class CoreService
     {
         var ptr = core_get_string(uid);
         return ptr != IntPtr.Zero ? Marshal.PtrToStringUni(ptr) : null;
+    }
+
+    public static List<(string Name, string Code)> GetAvailableLocales()
+    {
+        var result = new List<(string Name, string Code)> { ("English", "") };
+        var dir = Path.Combine(AppContext.BaseDirectory, "locales");
+        if (Directory.Exists(dir))
+        {
+            foreach (var f in Directory.GetFiles(dir, "*.ini"))
+            {
+                var name = Path.GetFileNameWithoutExtension(f);
+                result.Add((name, name));
+            }
+        }
+        return result;
+    }
+
+    public static void SetLanguage(string langCode)
+    {
+        IniConfig.WriteString("Language", langCode);
     }
 }

@@ -80,9 +80,13 @@ public sealed partial class MainWindow : Window
 
     public void ApplyTopmost()
     {
+        SetAlwaysOnTop(IniConfig.ReadBool("AlwaysOnTop"));
+    }
+
+    public void SetAlwaysOnTop(bool topmost)
+    {
         var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
         if (hwnd == nint.Zero) return;
-        var topmost = IniConfig.ReadBool("AlwaysOnTop");
         SetWindowPos(hwnd, topmost ? HWND_TOPMOST : HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
     }
 
