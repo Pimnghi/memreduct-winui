@@ -35,6 +35,11 @@ public sealed partial class SettingsPage : Page
         ToggleShowResults.IsOn = IniConfig.ReadBool("BalloonCleanResults", true);
         ToggleNotificationSound.IsOn = IniConfig.ReadBool("IsNotificationsSound", true);
 
+        ToggleAllowStandby.IsOn = IniConfig.ReadBool("IsAllowStandbyListCleanup", false);
+        ToggleLogResults.IsOn = IniConfig.ReadBool("LogCleanResults", false);
+
+        UpdateStandbyCheckboxes();
+
         // 3. 内存清理区域
         uint mask = IniConfig.ReadUInt("ReductMask2", MemoryMask.Default);
         ChkWorkingSet.IsChecked = (mask & MemoryMask.WorkingSet) != 0;
@@ -94,6 +99,10 @@ public sealed partial class SettingsPage : Page
         v = s(StrId.ShowCleanResult);           if (v != null) ShowResultsLabel.Text = v;
         v = s(StrId.NotificationSound);         if (v != null) NotificationSoundLabel.Text = v;
         v = s(StrId.BalloonTips);               if (v != null) NotificationHeader.Text = v;
+
+        v = s(StrId.AllowStandbyCleanup);       if (v != null) AllowStandbyLabel.Text = v;
+        v = s(StrId.LogCleanResults);           if (v != null) LogResultsLabel.Text = v;
+        v = s(StrId.TitleAdvanced);             if (v != null) AdvancedHeader.Text = v;
 
         v = s(StrId.SettingsTray);              if (v != null) TrayHeader.Text = v;
         v = s(StrId.TrayActionScHint);          if (v != null) TrayLeftLabel.Text = v;
@@ -184,6 +193,15 @@ public sealed partial class SettingsPage : Page
             IniConfig.WriteBool("AutoreductIntervalEnable", ToggleIntervalClean.IsOn);
             NbInterval.IsEnabled = ToggleIntervalClean.IsOn;
             AutoCleanService.Refresh();
+        }
+        else if (ReferenceEquals(sender, ToggleAllowStandby))
+        {
+            IniConfig.WriteBool("IsAllowStandbyListCleanup", ToggleAllowStandby.IsOn);
+            UpdateStandbyCheckboxes();
+        }
+        else if (ReferenceEquals(sender, ToggleLogResults))
+        {
+            IniConfig.WriteBool("LogCleanResults", ToggleLogResults.IsOn);
         }
     }
 
@@ -324,5 +342,12 @@ public sealed partial class SettingsPage : Page
         };
         parts.Add(keyName);
         return string.Join(" + ", parts);
+    }
+
+    private void UpdateStandbyCheckboxes()
+    {
+        var enabled = ToggleAllowStandby.IsOn;
+        ChkStandbyList.IsEnabled = enabled;
+        ChkModifiedList.IsEnabled = enabled;
     }
 }

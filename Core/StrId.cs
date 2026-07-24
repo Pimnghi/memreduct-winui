@@ -43,6 +43,9 @@ public static class StrId
     public const uint ShowCleanResult = 71;
     public const uint Question = 72;
     public const uint NotificationSound = 84;
+    public const uint TitleAdvanced = 85;
+    public const uint AllowStandbyCleanup = 89;
+    public const uint LogCleanResults = 90;
     public const uint StatusCleaned = 75;
     public const uint StatusNoPrivileges = 76;
     public const uint Theme = 91;

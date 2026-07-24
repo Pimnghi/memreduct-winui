@@ -160,6 +160,25 @@
                 </StackPanel>
             </StackPanel>
 
+            <!-- Advanced -->
+            <StackPanel Spacing="8">
+                <TextBlock x:Name="AdvancedHeader" Text="Advanced" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                <StackPanel Spacing="6">
+                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+                        <Grid Padding="16,12" ColumnDefinitions="*,Auto">
+                            <TextBlock x:Name="AllowStandbyLabel" Text="Allow Standby lists cleanup on auto-reduction" VerticalAlignment="Center"/>
+                            <ToggleSwitch x:Name="ToggleAllowStandby" Grid.Column="1" Toggled="OnToggleChanged"/>
+                        </Grid>
+                    </Border>
+                    <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+                        <Grid Padding="16,12" ColumnDefinitions="*,Auto">
+                            <TextBlock x:Name="LogResultsLabel" Text="Log cleaning results into a debug log" VerticalAlignment="Center"/>
+                            <ToggleSwitch x:Name="ToggleLogResults" Grid.Column="1" Toggled="OnToggleChanged"/>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </StackPanel>
+
         </StackPanel>
     </ScrollViewer>
 </Page>

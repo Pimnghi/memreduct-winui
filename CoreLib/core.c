@@ -301,6 +301,9 @@ static LPCWSTR core_get_string_en(ULONG uid)
 		case 51: return L"Clean when above: (%)";
 		case 52: return L"Clean every: (min.)";
 		case 84: return L"Enable notifications sound";
+		case 85: return L"Advanced";
+		case 89: return L"Allow Standby lists cleanup on auto-reduction";
+		case 90: return L"Log cleaning results into a debug log";
 		case 95: return L"Registry cache (win8.1+)";
 		case 96: return L"Modified file cache";
 		case 71: return L"Show memory cleaning results";
