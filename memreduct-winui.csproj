@@ -32,7 +32,7 @@
 
     <ItemGroup>
         <Content Include="CoreLib\bin\x64\CoreLib.dll" Link="CoreLib.dll" CopyToOutputDirectory="PreserveNewest" />
-        <Content Include="..\bin\memreduct.lng" Link="language\memreduct-winui.lng" CopyToOutputDirectory="PreserveNewest" />
+        <Content Include="language\memreduct-winui.lng" Link="language\memreduct-winui.lng" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
     <ItemGroup>

@@ -41,22 +41,22 @@
 
   <ItemGroup>
     <ClCompile Include="core.c" />
-    <ClCompile Include="..\..\routine\src\routine.c" />
-    <ClCompile Include="..\..\routine\src\rapp.c" />
+    <ClCompile Include="routine\routine.c" />
+    <ClCompile Include="routine\rapp.c" />
   </ItemGroup>
 
   <ItemGroup>
     <ClInclude Include="core.h" />
-    <ClInclude Include="..\..\routine\src\ntapi.h" />
-    <ClInclude Include="..\..\routine\src\ntrtl.h" />
-    <ClInclude Include="..\..\routine\src\rapp.h" />
-    <ClInclude Include="..\..\routine\src\rconfig.h" />
-    <ClInclude Include="..\..\routine\src\routine.h" />
-    <ClInclude Include="..\..\routine\src\rtypes.h" />
+    <ClInclude Include="routine\ntapi.h" />
+    <ClInclude Include="routine\ntrtl.h" />
+    <ClInclude Include="routine\rapp.h" />
+    <ClInclude Include="routine\rconfig.h" />
+    <ClInclude Include="routine\routine.h" />
+    <ClInclude Include="routine\rtypes.h" />
   </ItemGroup>
 
   <PropertyGroup>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)..\..\routine\src\;$(ProjectDir)..\..\src\</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)routine\;$(ProjectDir)</IncludePath>
     <OutDir>$(SolutionDir)bin\$(Platform)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
