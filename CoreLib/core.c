@@ -300,6 +300,7 @@ static LPCWSTR core_get_string_en(ULONG uid)
 		case 50: return L"Combine memory lists(win10+)";
 		case 51: return L"Clean when above: (%)";
 		case 52: return L"Clean every: (min.)";
+		case 84: return L"Enable notifications sound";
 		case 95: return L"Registry cache (win8.1+)";
 		case 96: return L"Modified file cache";
 		case 71: return L"Show memory cleaning results";
@@ -307,6 +308,7 @@ static LPCWSTR core_get_string_en(ULONG uid)
 		case 75: return L"Memory was released.";
 		case 76: return L"Required administrator privileges.";
 		case 35: return L"Color indication";
+		case 37: return L"Balloon tips";
 		case 64: return L"Warning level (%)";
 		case 65: return L"Danger level (%)";
 		case 66: return L"Single click:";

@@ -21,6 +21,7 @@ public static class StrId
     public const uint TitleMemoryManagement = 32;
     public const uint TitleHotkeys = 33;
     public const uint ColorIndication = 35;
+    public const uint BalloonTips = 37;
     public const uint AlwaysOnTop = 38;
     public const uint LoadOnStartup = 39;
     public const uint StartMinimized = 40;
@@ -41,6 +42,7 @@ public static class StrId
     public const uint DangerLevel = 65;
     public const uint ShowCleanResult = 71;
     public const uint Question = 72;
+    public const uint NotificationSound = 84;
     public const uint StatusCleaned = 75;
     public const uint StatusNoPrivileges = 76;
     public const uint Theme = 91;

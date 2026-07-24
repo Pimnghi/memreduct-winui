@@ -92,6 +92,8 @@ public sealed partial class SettingsPage : Page
         v = s(StrId.TitleHotkeys);              if (v != null) HotkeyLabel.Text = v;
 
         v = s(StrId.ShowCleanResult);           if (v != null) ShowResultsLabel.Text = v;
+        v = s(StrId.NotificationSound);         if (v != null) NotificationSoundLabel.Text = v;
+        v = s(StrId.BalloonTips);               if (v != null) NotificationHeader.Text = v;
 
         v = s(StrId.SettingsTray);              if (v != null) TrayHeader.Text = v;
         v = s(StrId.TrayActionScHint);          if (v != null) TrayLeftLabel.Text = v;
