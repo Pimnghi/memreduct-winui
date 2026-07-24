@@ -257,6 +257,7 @@ public static class TrayIcon
         var sLimit = CoreService.GetString(15) ?? "Clean when above";
         var sInterval = CoreService.GetString(16) ?? "Clean every";
         var sDisable = CoreService.GetString(13) ?? "Disable";
+        var allowStandby = IniConfig.ReadBool("IsAllowStandbyListCleanup", false);
 
         AppendMenuW(hMenu, 0, CMD_SHOW, _textShow);
         AppendMenuW(hMenu, 0x800, 0, "");
@@ -269,7 +270,8 @@ public static class TrayIcon
         {
             var id = CMD_REGION_BASE + i;
             var rname = CoreService.GetString(_regionIds[i]) ?? _regionNames[i];
-            AppendMenuW(hRegion, 0, (nuint)id, rname);
+            var flag = (!allowStandby && (i == 3 || i == 4)) ? 1u : 0u; // MF_GRAYED
+            AppendMenuW(hRegion, flag, (nuint)id, rname);
             if ((mask & _regionMasks[i]) != 0)
                 CheckMenuItem(hRegion, (nuint)id, 8);
         }
