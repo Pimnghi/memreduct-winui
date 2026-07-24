@@ -166,7 +166,7 @@
                 <StackPanel Spacing="6">
                     <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
                         <Grid Padding="16,12" ColumnDefinitions="*,Auto">
-                            <TextBlock x:Name="AllowStandbyLabel" Text="Allow Standby lists cleanup on auto-reduction" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="AllowStandbyLabel" Text="Allow Standby lists and Modified page list cleanup on autoreduct" VerticalAlignment="Center"/>
                             <ToggleSwitch x:Name="ToggleAllowStandby" Grid.Column="1" Toggled="OnToggleChanged"/>
                         </Grid>
                     </Border>
