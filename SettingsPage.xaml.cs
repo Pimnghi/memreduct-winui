@@ -51,8 +51,10 @@ public sealed partial class SettingsPage : Page
         ChkRegistryCache.IsChecked = (mask & MemoryMask.RegistryCache) != 0;
         ChkModifiedFileCache.IsChecked = (mask & MemoryMask.ModifiedFileCache) != 0;
 
-        NbWarning.Value = IniConfig.ReadUInt("TrayLevelWarning", 70);
-        NbDanger.Value = IniConfig.ReadUInt("TrayLevelDanger", 90);
+        SliderWarning.Value = IniConfig.ReadUInt("TrayLevelWarning", 70);
+        WarningValueText.Text = ((int)SliderWarning.Value).ToString();
+        SliderDanger.Value = IniConfig.ReadUInt("TrayLevelDanger", 90);
+        DangerValueText.Text = ((int)SliderDanger.Value).ToString();
 
         ToggleAutoClean.IsOn = IniConfig.ReadBool("AutoreductEnable");
         NbAutoClean.Value = IniConfig.ReadUInt("AutoreductValue", 90);
@@ -293,8 +295,8 @@ public sealed partial class SettingsPage : Page
         }
     }
 
-    private void OnWarningValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args) { if (_loading || double.IsNaN(args.NewValue)) return; IniConfig.WriteUInt("TrayLevelWarning", (uint)args.NewValue); }
-    private void OnDangerValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args) { if (_loading || double.IsNaN(args.NewValue)) return; IniConfig.WriteUInt("TrayLevelDanger", (uint)args.NewValue); }
+    private void OnWarningValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs args) { if (_loading || WarningValueText == null) return; var v = (uint)args.NewValue; IniConfig.WriteUInt("TrayLevelWarning", v); WarningValueText.Text = v.ToString(); }
+    private void OnDangerValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs args) { if (_loading || DangerValueText == null) return; var v = (uint)args.NewValue; IniConfig.WriteUInt("TrayLevelDanger", v); DangerValueText.Text = v.ToString(); }
     private void OnAutoCleanValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args) { if (_loading || double.IsNaN(args.NewValue)) return; IniConfig.WriteUInt("AutoreductValue", (uint)args.NewValue); }
     private void OnIntervalValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args) { if (_loading || double.IsNaN(args.NewValue)) return; IniConfig.WriteUInt("AutoreductIntervalValue", (uint)args.NewValue); }
 

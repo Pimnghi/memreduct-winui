@@ -56,15 +56,17 @@
                         </Grid>
                     </Border>
                     <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
-                        <Grid Padding="16,12" ColumnDefinitions="*,Auto">
+                        <Grid Padding="16,12" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                             <TextBlock x:Name="WarningLabel" Text="Warning level (%):" VerticalAlignment="Center"/>
-                            <controls:NumberBox x:Name="NbWarning" Grid.Column="1" Minimum="0" Maximum="100" SpinButtonPlacementMode="Compact" ValueChanged="OnWarningValueChanged" Width="80"/>
+                            <Slider x:Name="SliderWarning" Grid.Column="1" Minimum="1" Maximum="100" ValueChanged="OnWarningValueChanged"/>
+                            <TextBlock x:Name="WarningValueText" Grid.Column="2" Text="70" VerticalAlignment="Center" FontWeight="SemiBold" Width="30" TextAlignment="Right"/>
                         </Grid>
                     </Border>
                     <Border HorizontalAlignment="Stretch" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
-                        <Grid Padding="16,12" ColumnDefinitions="*,Auto">
+                        <Grid Padding="16,12" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
                             <TextBlock x:Name="DangerLabel" Text="Danger level (%):" VerticalAlignment="Center"/>
-                            <controls:NumberBox x:Name="NbDanger" Grid.Column="1" Minimum="0" Maximum="100" SpinButtonPlacementMode="Compact" ValueChanged="OnDangerValueChanged" Width="80"/>
+                            <Slider x:Name="SliderDanger" Grid.Column="1" Minimum="1" Maximum="100" ValueChanged="OnDangerValueChanged"/>
+                            <TextBlock x:Name="DangerValueText" Grid.Column="2" Text="90" VerticalAlignment="Center" FontWeight="SemiBold" Width="30" TextAlignment="Right"/>
                         </Grid>
                     </Border>
                 </StackPanel>
