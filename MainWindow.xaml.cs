@@ -230,8 +230,8 @@ public sealed partial class MainWindow : Window
     private void OnNavItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
     {
         var tag = args.InvokedItemContainer?.Tag?.ToString();
-        if (tag == "main") { ContentFrame.Navigate(typeof(MainPage)); }
-        else if (tag == "settings") { ContentFrame.Navigate(typeof(SettingsPage)); }
-        else if (tag == "about") { ContentFrame.Navigate(typeof(AboutPage)); }
+        if (tag == "main" && ContentFrame.Content is not MainPage) { ContentFrame.Navigate(typeof(MainPage)); }
+        else if (tag == "settings" && ContentFrame.Content is not SettingsPage) { ContentFrame.Navigate(typeof(SettingsPage)); }
+        else if (tag == "about" && ContentFrame.Content is not AboutPage) { ContentFrame.Navigate(typeof(AboutPage)); }
     }
 }
