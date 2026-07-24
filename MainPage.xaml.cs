@@ -199,9 +199,8 @@ public sealed partial class MainPage : Page
 
         if (result.Success && result.BytesFreed > 0)
         {
-            var title = CoreService.GetString(StrId.CleanMemory) ?? "Memory cleaned";
-            ResultBar.Title = title;
-            ResultBar.Message = $"Released: {result.FreedFormatted}";
+            var msg = CoreService.GetString(StrId.StatusCleaned);
+            ResultBar.Message = msg != null ? msg.Replace("%s", result.FreedFormatted) : $"Released: {result.FreedFormatted}";
             ResultBar.Severity = InfoBarSeverity.Success;
 
             if (IniConfig.ReadBool("BalloonCleanResults", true))
