@@ -10,6 +10,8 @@ namespace memreduct_winui;
 
 public partial class App : Application
 {
+    [DllImport("shell32", CharSet = CharSet.Unicode)]
+    private static extern void SetCurrentProcessExplicitAppUserModelID(string AppID);
     public static Window? MainWindow { get; private set; }
 
     [DllImport("kernel32")]

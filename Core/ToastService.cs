@@ -13,6 +13,6 @@ public static class ToastService
             msg = msg.Replace("%s", formatted);
         else
             msg = $"Memory released: {formatted}";
-        TrayIcon.ShowBalloon(title, msg, noSound);
+        TrayIcon.ShowBalloon("Mem Reduct WinUI", msg, noSound);
     }
 }
