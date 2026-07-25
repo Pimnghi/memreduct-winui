@@ -13,6 +13,13 @@ public enum CleanupSource : uint
     CommandLine = 3
 }
 
+public enum CleanupStatus
+{
+    Success,
+    PartialSuccess,
+    Failed
+}
+
 public static class MemoryMask
 {
     public const uint WorkingSet = 0x01;
@@ -49,19 +56,17 @@ public class CleanupResult
     public ulong BytesAfter { get; set; }
     public ulong BytesFreed { get; set; }
     public uint MaskUsed { get; set; }
+    public uint SucceededMask { get; set; }
+    public uint FailedMask { get; set; }
     public string FreedFormatted { get; set; } = string.Empty;
-    public bool Success { get; set; }
+    public CleanupStatus Status { get; set; }
+    public string? ErrorMessage { get; set; }
+    public bool Success => Status is CleanupStatus.Success or CleanupStatus.PartialSuccess;
 }
 
 public static class CoreService
 {
-    public static uint GetLimitValue() => core_get_limit_value();
-    public static uint GetIntervalValue() => core_get_interval_value();
-    public static uint GetDangerValue() => core_get_danger_value();
-    public static uint GetWarningValue() => core_get_warning_value();
     public static bool IsElevated() => core_is_elevated();
-    public static bool ShouldAutoClean() => core_should_autoclean();
-    public static bool ShouldIntervalClean() => core_should_interval_clean();
 
     public static MemoryStats GetMemoryStats()
     {
@@ -87,10 +92,16 @@ public static class CoreService
         };
     }
 
-    public static CleanupResult CleanMemory(uint mask = 0)
+    public static CleanupResult CleanMemory(uint mask, CleanupSource source)
     {
         var native = new CleanupResultNative();
-        var success = core_clean_memory((uint)CleanupSource.Manual, mask, ref native);
+        var nativeSuccess = core_clean_memory((uint)source, mask, ref native);
+        var status =
+            native.failed_mask == 0 && native.succeeded_mask != 0 && nativeSuccess
+                ? CleanupStatus.Success
+                : native.succeeded_mask != 0
+                    ? CleanupStatus.PartialSuccess
+                    : CleanupStatus.Failed;
 
         return new CleanupResult
         {
@@ -98,8 +109,10 @@ public static class CoreService
             BytesAfter = native.bytes_after,
             BytesFreed = native.bytes_freed,
             MaskUsed = native.mask_used,
-            FreedFormatted = native.formatted,
-            Success = success
+            SucceededMask = native.succeeded_mask,
+            FailedMask = native.failed_mask,
+            FreedFormatted = native.formatted ?? string.Empty,
+            Status = status
         };
     }
 

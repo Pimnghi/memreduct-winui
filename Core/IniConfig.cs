@@ -9,6 +9,7 @@ internal static class IniConfig
 
     private static readonly string Path = System.IO.Path.Combine(
         AppContext.BaseDirectory, "data", "memreduct-winui.ini");
+    internal static readonly string DataDirectory = System.IO.Path.GetDirectoryName(Path)!;
 
     static IniConfig()
     {
@@ -73,6 +74,17 @@ internal static class IniConfig
     }
 
     public static void WriteInt(string key, int value)
+    {
+        WriteString(key, value.ToString());
+    }
+
+    public static long ReadLong(string key, long defaultValue = 0)
+    {
+        var s = ReadString(key);
+        return long.TryParse(s, out var value) ? value : defaultValue;
+    }
+
+    public static void WriteLong(string key, long value)
     {
         WriteString(key, value.ToString());
     }

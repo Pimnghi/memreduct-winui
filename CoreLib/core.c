@@ -28,6 +28,8 @@ static NTSTATUS flush_volume_cache(void)
 	UNICODE_STRING us;
 	HANDLE hdev, hvol;
 	NTSTATUS st;
+	NTSTATUS last_failure = STATUS_UNSUCCESSFUL;
+	BOOLEAN flushed_any = FALSE;
 	ULONG bufsz = 0x2000;
 
 	RtlInitUnicodeString(&us, MOUNTMGR_DEVICE_NAME);
@@ -62,9 +64,21 @@ static NTSTATUS flush_volume_cache(void)
 			{
 				st = _r_fs_flushfile(hvol);
 				NtClose(hvol);
+
+				if (NT_SUCCESS(st))
+					flushed_any = TRUE;
+				else
+					last_failure = st;
 			}
+			else
+				last_failure = st;
 		}
 	}
+
+	if (flushed_any)
+		st = STATUS_SUCCESS;
+	else if (NT_SUCCESS(st))
+		st = last_failure;
 
 free_mounts:
 	_r_mem_free(mounts);
@@ -73,64 +87,9 @@ close_dev:
 	return st;
 }
 
-ULONG core_get_limit_value(void)
-{
-	return _r_calc_clamp(_r_config_getulong(L"AutoreductValue", DEFAULT_AUTOREDUCT_VAL), 0, 100);
-}
-
-ULONG core_get_interval_value(void)
-{
-	return _r_calc_clamp(_r_config_getulong(L"AutoreductIntervalValue", DEFAULT_AUTOREDUCTINTERVAL_VAL), 1, 1440);
-}
-
-ULONG core_get_danger_value(void)
-{
-	return _r_calc_clamp(_r_config_getulong(L"TrayLevelDanger", DEFAULT_DANGER_LEVEL), 0, 100);
-}
-
-ULONG core_get_warning_value(void)
-{
-	return _r_calc_clamp(_r_config_getulong(L"TrayLevelWarning", DEFAULT_WARNING_LEVEL), 0, 100);
-}
-
-
 BOOLEAN core_is_elevated(void)
 {
 	return _r_sys_iselevated();
-}
-
-BOOLEAN core_should_autoclean(void)
-{
-	R_MEMORY_INFO info;
-	LONG64 ts;
-
-	if (!_r_config_getboolean(L"AutoreductEnable", FALSE))
-		return FALSE;
-
-	_r_sys_getmemoryinfo(&info);
-
-	if (info.physical_memory.percent < core_get_limit_value())
-		return FALSE;
-
-	ts = _r_unixtime_now() - _r_config_getlong64(L"StatisticLastReduct", 0);
-	if (ts < AUTOREDUCT_COOLDOWN)
-		return FALSE;
-
-	return TRUE;
-}
-
-BOOLEAN core_should_interval_clean(void)
-{
-	LONG64 ts;
-
-	if (!_r_config_getboolean(L"AutoreductIntervalEnable", FALSE))
-		return FALSE;
-
-	ts = _r_unixtime_now() - _r_config_getlong64(L"StatisticLastReduct", 0);
-	if (ts < (LONG64)core_get_interval_value() * 60)
-		return FALSE;
-
-	return TRUE;
 }
 
 void core_get_memory_info(
@@ -164,16 +123,11 @@ BOOLEAN core_clean_memory(ULONG source, ULONG mask, CLEANUP_RESULT *result)
 	SYSTEM_MEMORY_LIST_COMMAND cmd;
 	R_MEMORY_INFO info;
 	ULONG64 before, after;
+	ULONG succeeded_mask = 0;
+	ULONG failed_mask = 0;
 	NTSTATUS st;
 
-	if (mask == 0)
-		mask = _r_config_getulong(L"ReductMask2", REDUCT_MASK_DEFAULT);
-
-	if (source == SOURCE_AUTO)
-	{
-		if (!_r_config_getboolean(L"IsAllowStandbyListCleanup", FALSE))
-			mask &= ~REDUCT_MASK_FREEZES;
-	}
+	(void)source;
 
 	// enable required privileges (critical for memory cleanup to work)
 	ULONG privileges[] = {
@@ -188,58 +142,83 @@ BOOLEAN core_clean_memory(ULONG source, ULONG mask, CLEANUP_RESULT *result)
 	if (mask & REDUCT_WORKINGSET) {
 		cmd = MemoryEmptyWorkingSets;
 		st = NtSetSystemInformation(SystemMemoryListInformation, &cmd, sizeof(cmd));
-		if (!NT_SUCCESS(st))
-			_r_log(LOG_LEVEL_ERROR, NULL, L"NtSetSystemInformation", st, L"MemoryEmptyWorkingSets");
+		if (NT_SUCCESS(st))
+			succeeded_mask |= REDUCT_WORKINGSET;
+		else
+			failed_mask |= REDUCT_WORKINGSET;
 	}
 
 	if (mask & REDUCT_SYSTEMFILECACHE) {
 		sfci.MinimumWorkingSet = MAXSIZE_T;
 		sfci.MaximumWorkingSet = MAXSIZE_T;
 		st = NtSetSystemInformation(SystemFileCacheInformationEx, &sfci, sizeof(sfci));
-		if (!NT_SUCCESS(st))
-			_r_log(LOG_LEVEL_ERROR, NULL, L"NtSetSystemInformation", st, L"SystemFileCacheInformation");
+		if (NT_SUCCESS(st))
+			succeeded_mask |= REDUCT_SYSTEMFILECACHE;
+		else
+			failed_mask |= REDUCT_SYSTEMFILECACHE;
 	}
 
-	if (mask & REDUCT_MODIFIEDFILECACHE)
-		flush_volume_cache();
+	if (mask & REDUCT_MODIFIEDFILECACHE) {
+		st = flush_volume_cache();
+		if (NT_SUCCESS(st))
+			succeeded_mask |= REDUCT_MODIFIEDFILECACHE;
+		else
+			failed_mask |= REDUCT_MODIFIEDFILECACHE;
+	}
 
 	if (mask & REDUCT_MODIFIEDLIST) {
 		cmd = MemoryFlushModifiedList;
 		st = NtSetSystemInformation(SystemMemoryListInformation, &cmd, sizeof(cmd));
-		if (!NT_SUCCESS(st))
-			_r_log(LOG_LEVEL_ERROR, NULL, L"NtSetSystemInformation", st, L"MemoryFlushModifiedList");
+		if (NT_SUCCESS(st))
+			succeeded_mask |= REDUCT_MODIFIEDLIST;
+		else
+			failed_mask |= REDUCT_MODIFIEDLIST;
 	}
 
 	if (mask & REDUCT_STANDBYLIST) {
 		cmd = MemoryPurgeStandbyList;
 		st = NtSetSystemInformation(SystemMemoryListInformation, &cmd, sizeof(cmd));
-		if (!NT_SUCCESS(st))
-			_r_log(LOG_LEVEL_ERROR, NULL, L"NtSetSystemInformation", st, L"MemoryPurgeStandbyList");
+		if (NT_SUCCESS(st))
+			succeeded_mask |= REDUCT_STANDBYLIST;
+		else
+			failed_mask |= REDUCT_STANDBYLIST;
 	}
 
 	if (mask & REDUCT_STANDBYPRIORITY0LIST) {
 		cmd = MemoryPurgeLowPriorityStandbyList;
 		st = NtSetSystemInformation(SystemMemoryListInformation, &cmd, sizeof(cmd));
-		if (!NT_SUCCESS(st))
-			_r_log(LOG_LEVEL_ERROR, NULL, L"NtSetSystemInformation", st, L"MemoryPurgeLowPriorityStandbyList");
+		if (NT_SUCCESS(st))
+			succeeded_mask |= REDUCT_STANDBYPRIORITY0LIST;
+		else
+			failed_mask |= REDUCT_STANDBYPRIORITY0LIST;
 	}
 
-	if (_r_sys_isosversiongreaterorequal(WINDOWS_8_1) && (mask & REDUCT_REGISTRYCACHE)) {
-		st = NtSetSystemInformation(SystemRegistryReconciliationInformation, NULL, 0);
-		if (!NT_SUCCESS(st))
-			_r_log(LOG_LEVEL_ERROR, NULL, L"NtSetSystemInformation", st, L"SystemRegistryReconciliationInformation");
+	if (mask & REDUCT_REGISTRYCACHE) {
+		if (_r_sys_isosversiongreaterorequal(WINDOWS_8_1))
+			st = NtSetSystemInformation(SystemRegistryReconciliationInformation, NULL, 0);
+		else
+			st = STATUS_NOT_SUPPORTED;
+
+		if (NT_SUCCESS(st))
+			succeeded_mask |= REDUCT_REGISTRYCACHE;
+		else
+			failed_mask |= REDUCT_REGISTRYCACHE;
 	}
 
-	if (_r_sys_isosversiongreaterorequal(WINDOWS_10) && (mask & REDUCT_COMBINEMEMORYLISTS)) {
-		st = NtSetSystemInformation(SystemCombinePhysicalMemoryInformation, &combine_ex, sizeof(combine_ex));
-		if (!NT_SUCCESS(st))
-			_r_log(LOG_LEVEL_ERROR, NULL, L"NtSetSystemInformation", st, L"SystemCombinePhysicalMemoryInformation");
+	if (mask & REDUCT_COMBINEMEMORYLISTS) {
+		if (_r_sys_isosversiongreaterorequal(WINDOWS_10))
+			st = NtSetSystemInformation(SystemCombinePhysicalMemoryInformation, &combine_ex, sizeof(combine_ex));
+		else
+			st = STATUS_NOT_SUPPORTED;
+
+		if (NT_SUCCESS(st))
+			succeeded_mask |= REDUCT_COMBINEMEMORYLISTS;
+		else
+			failed_mask |= REDUCT_COMBINEMEMORYLISTS;
 	}
 
 	after = _r_sys_getmemoryinfo(&info);
 	after = info.physical_memory.used_bytes;
-
-	_r_config_setlong64(L"StatisticLastReduct", _r_unixtime_now());
 
 	if (result)
 	{
@@ -247,20 +226,12 @@ BOOLEAN core_clean_memory(ULONG source, ULONG mask, CLEANUP_RESULT *result)
 		result->bytes_after = after;
 		result->bytes_freed = (after < before) ? (before - after) : 0;
 		result->mask_used = mask;
+		result->succeeded_mask = succeeded_mask;
+		result->failed_mask = failed_mask;
 		_r_format_bytesize64(result->formatted, 64, result->bytes_freed);
 	}
 
-	if (_r_config_getboolean(L"LogCleanResults", FALSE))
-	{
-		WCHAR buf[64];
-		_r_format_bytesize64(buf, 64, result ? result->bytes_freed : 0);
-		_r_log_v(LOG_LEVEL_INFO, NULL, source == SOURCE_AUTO ? L"Cleanup (Auto)" :
-			source == SOURCE_MANUAL ? L"Cleanup (Manual)" :
-			source == SOURCE_HOTKEY ? L"Cleanup (Hotkey)" :
-			source == SOURCE_CMDLINE ? L"Cleanup (Command-line)" : L"Unknown", 0, buf);
-	}
-
-	return TRUE;
+	return succeeded_mask != 0 && failed_mask == 0;
 }
 
 static LPCWSTR core_get_string_en(ULONG uid)

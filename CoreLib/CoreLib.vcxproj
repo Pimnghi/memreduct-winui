@@ -56,8 +56,8 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)routine\;$(ProjectDir)</IncludePath>
-    <OutDir>$(SolutionDir)bin\$(Platform)\</OutDir>
+    <IncludePath>$(ProjectDir)..\..\src\;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)routine\;$(ProjectDir)</IncludePath>
+    <OutDir>$(ProjectDir)bin\$(Platform)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
 
@@ -68,7 +68,7 @@
       <ConformanceMode>true</ConformanceMode>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard_C>stdclatest</LanguageStandard_C>
-      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;_UNICODE;UNICODE;APP_HAVE_AUTORUN;APP_HAVE_SKIPUAC;APP_HAVE_TRAY;APP_HAVE_UPDATES;NDEBUG;CORELIB_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;_UNICODE;UNICODE;NDEBUG;CORELIB_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>

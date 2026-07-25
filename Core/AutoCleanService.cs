@@ -42,13 +42,29 @@ public static class AutoCleanService
     {
         if (!CoreService.IsElevated()) return;
 
-        var shouldClean = CoreService.ShouldAutoClean() || CoreService.ShouldIntervalClean();
+        var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        var lastClean = IniConfig.ReadLong("StatisticLastReduct");
+        var elapsed = Math.Max(0, now - lastClean);
+
+        var thresholdEnabled = IniConfig.ReadBool("AutoreductEnable");
+        var threshold = Math.Clamp(IniConfig.ReadUInt("AutoreductValue", 90), 1u, 100u);
+        var thresholdReached = thresholdEnabled
+            && elapsed >= 30
+            && CoreService.GetMemoryStats().PhysicalPercent >= threshold;
+
+        var intervalEnabled = IniConfig.ReadBool("AutoreductIntervalEnable");
+        var interval = Math.Clamp(IniConfig.ReadUInt("AutoreductIntervalValue", 30), 1u, 1440u);
+        var intervalReached = intervalEnabled && elapsed >= interval * 60L;
+
+        var shouldClean = thresholdReached || intervalReached;
         if (!shouldClean) return;
 
-        var result = await Task.Run(() =>
-            CoreService.CleanMemory(IniConfig.ReadUInt("ReductMask2", MemoryMask.Default)));
+        var result = await CleanupCoordinator.CleanAsync(
+            CleanupSource.Auto,
+            waitForTurn: false);
 
-        if (result.Success && result.BytesFreed > 0 && IniConfig.ReadBool("BalloonCleanResults", true))
+        if (result is { Success: true, BytesFreed: > 0 }
+            && IniConfig.ReadBool("BalloonCleanResults", true))
             ToastService.ShowCleanResult(result.BytesFreed, result.FreedFormatted);
     }
 }

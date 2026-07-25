@@ -193,20 +193,27 @@ public sealed partial class MainPage : Page
         CleanBtn.IsEnabled = false;
         CleanBtn.Content = (CoreService.GetString(StrId.CleanMemory) ?? "Cleaning") + "…";
 
-        var result = await System.Threading.Tasks.Task.Run(() =>
-            CoreService.CleanMemory(IniConfig.ReadUInt("ReductMask2", MemoryMask.Default)));
+        var result = await CleanupCoordinator.CleanAsync(CleanupSource.Manual);
         CleanBtn.IsEnabled = true;
 
         ApplyLocalization();
 
-        if (result.Success && result.BytesFreed > 0)
+        if (result is { Success: true, BytesFreed: > 0 })
         {
             var msg = CoreService.GetString(StrId.StatusCleaned);
             ResultBar.Message = msg != null ? msg.Replace("%s", result.FreedFormatted) : $"Released: {result.FreedFormatted}";
-            ResultBar.Severity = InfoBarSeverity.Success;
+            ResultBar.Severity = result.Status == CleanupStatus.PartialSuccess
+                ? InfoBarSeverity.Warning
+                : InfoBarSeverity.Success;
 
             if (IniConfig.ReadBool("BalloonCleanResults", true))
                 ToastService.ShowCleanResult(result.BytesFreed, result.FreedFormatted);
+        }
+        else if (result is { Status: CleanupStatus.Failed })
+        {
+            ResultBar.Title = "Memory cleaning failed";
+            ResultBar.Message = result.ErrorMessage ?? $"Failed areas: 0x{result.FailedMask:X2}";
+            ResultBar.Severity = InfoBarSeverity.Error;
         }
         else
         {

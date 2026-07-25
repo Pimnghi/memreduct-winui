@@ -1,15 +1,18 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "memreduct-winui", "memreduct-winui.csproj", "{6653AF2F-A77F-4E83-8474-7B39B6CA8E8C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D1E2F3A4-B5C6-7890-ABCD-EF1234567890} = {D1E2F3A4-B5C6-7890-ABCD-EF1234567890}
+	EndProjectSection
+EndProject
+Project("{BC8A1FFA-BEE3-4634-8014-F334798102B3}") = "CoreLib", "CoreLib\CoreLib.vcxproj", "{D1E2F3A4-B5C6-7890-ABCD-EF1234567890}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM64 = Debug|ARM64
 		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
 		Release|ARM64 = Release|ARM64
 		Release|x64 = Release|x64
-		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{6653AF2F-A77F-4E83-8474-7B39B6CA8E8C}.Debug|ARM64.ActiveCfg = Debug|ARM64
@@ -18,17 +21,19 @@ Global
 		{6653AF2F-A77F-4E83-8474-7B39B6CA8E8C}.Debug|x64.ActiveCfg = Debug|x64
 		{6653AF2F-A77F-4E83-8474-7B39B6CA8E8C}.Debug|x64.Build.0 = Debug|x64
 		{6653AF2F-A77F-4E83-8474-7B39B6CA8E8C}.Debug|x64.Deploy.0 = Debug|x64
-		{6653AF2F-A77F-4E83-8474-7B39B6CA8E8C}.Debug|x86.ActiveCfg = Debug|x86
-		{6653AF2F-A77F-4E83-8474-7B39B6CA8E8C}.Debug|x86.Build.0 = Debug|x86
-		{6653AF2F-A77F-4E83-8474-7B39B6CA8E8C}.Debug|x86.Deploy.0 = Debug|x86
 		{6653AF2F-A77F-4E83-8474-7B39B6CA8E8C}.Release|ARM64.ActiveCfg = Release|ARM64
 		{6653AF2F-A77F-4E83-8474-7B39B6CA8E8C}.Release|ARM64.Build.0 = Release|ARM64
 		{6653AF2F-A77F-4E83-8474-7B39B6CA8E8C}.Release|ARM64.Deploy.0 = Release|ARM64
 		{6653AF2F-A77F-4E83-8474-7B39B6CA8E8C}.Release|x64.ActiveCfg = Release|x64
 		{6653AF2F-A77F-4E83-8474-7B39B6CA8E8C}.Release|x64.Build.0 = Release|x64
 		{6653AF2F-A77F-4E83-8474-7B39B6CA8E8C}.Release|x64.Deploy.0 = Release|x64
-		{6653AF2F-A77F-4E83-8474-7B39B6CA8E8C}.Release|x86.ActiveCfg = Release|x86
-		{6653AF2F-A77F-4E83-8474-7B39B6CA8E8C}.Release|x86.Build.0 = Release|x86
-		{6653AF2F-A77F-4E83-8474-7B39B6CA8E8C}.Release|x86.Deploy.0 = Release|x86
+		{D1E2F3A4-B5C6-7890-ABCD-EF1234567890}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{D1E2F3A4-B5C6-7890-ABCD-EF1234567890}.Debug|ARM64.Build.0 = Debug|ARM64
+		{D1E2F3A4-B5C6-7890-ABCD-EF1234567890}.Debug|x64.ActiveCfg = Debug|x64
+		{D1E2F3A4-B5C6-7890-ABCD-EF1234567890}.Debug|x64.Build.0 = Debug|x64
+		{D1E2F3A4-B5C6-7890-ABCD-EF1234567890}.Release|ARM64.ActiveCfg = Release|ARM64
+		{D1E2F3A4-B5C6-7890-ABCD-EF1234567890}.Release|ARM64.Build.0 = Release|ARM64
+		{D1E2F3A4-B5C6-7890-ABCD-EF1234567890}.Release|x64.ActiveCfg = Release|x64
+		{D1E2F3A4-B5C6-7890-ABCD-EF1234567890}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 EndGlobal

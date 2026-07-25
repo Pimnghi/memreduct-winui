@@ -2,8 +2,6 @@ using MemReduct.Core;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
-using System.Diagnostics;
-using System.IO;
 
 namespace memreduct_winui;
 
@@ -37,8 +35,6 @@ public sealed partial class SettingsPage : Page
 
         ToggleAllowStandby.IsOn = IniConfig.ReadBool("IsAllowStandbyListCleanup", false);
         ToggleLogResults.IsOn = IniConfig.ReadBool("LogCleanResults", false);
-
-        UpdateStandbyCheckboxes();
 
         // 3. 内存清理区域
         uint mask = IniConfig.ReadUInt("ReductMask2", MemoryMask.Default);
@@ -165,8 +161,13 @@ public sealed partial class SettingsPage : Page
         }
         else if (ReferenceEquals(sender, ToggleLoadOnStartup))
         {
-            IniConfig.WriteBool("LoadOnStartup", ToggleLoadOnStartup.IsOn);
-            SetAutoStart(ToggleLoadOnStartup.IsOn);
+            var requested = ToggleLoadOnStartup.IsOn;
+            if (!AutoStartService.SetEnabled(requested))
+            {
+                _loading = true;
+                ToggleLoadOnStartup.IsOn = !requested;
+                _loading = false;
+            }
         }
         else if (ReferenceEquals(sender, ToggleStartMinimized))
         {
@@ -199,7 +200,6 @@ public sealed partial class SettingsPage : Page
         else if (ReferenceEquals(sender, ToggleAllowStandby))
         {
             IniConfig.WriteBool("IsAllowStandbyListCleanup", ToggleAllowStandby.IsOn);
-            UpdateStandbyCheckboxes();
         }
         else if (ReferenceEquals(sender, ToggleLogResults))
         {
@@ -233,8 +233,10 @@ public sealed partial class SettingsPage : Page
             IniConfig.WriteString("Language", code);
             if (CmbLanguage.SelectedIndex > 0)
                 CoreService.SetLocale((uint)(CmbLanguage.SelectedIndex - 1));
-            ApplyLocalization();
-            if (App.MainWindow is MainWindow w) w.RefreshTrayMenu();
+            if (App.MainWindow is MainWindow window)
+                window.ApplyLocalization();
+            else
+                ApplyLocalization();
         }
     }
 
@@ -272,29 +274,6 @@ public sealed partial class SettingsPage : Page
             IniConfig.WriteInt("TrayActionMc", (int)(mid.Tag ?? 1));
     }
 
-    private static void SetAutoStart(bool enable)
-    {
-        var exePath = Process.GetCurrentProcess().MainModule?.FileName ?? "";
-        if (string.IsNullOrEmpty(exePath)) return;
-
-        if (enable)
-        {
-            Process.Start(new ProcessStartInfo("schtasks.exe", $"/create /tn \"MemReductWinUI\" /tr \"\\\"{exePath}\\\" -autostart\" /sc onlogon /rl highest /f")
-            {
-                UseShellExecute = false,
-                CreateNoWindow = true,
-            })?.WaitForExit();
-        }
-        else
-        {
-            Process.Start(new ProcessStartInfo("schtasks.exe", "/delete /tn \"MemReductWinUI\" /f")
-            {
-                UseShellExecute = false,
-                CreateNoWindow = true,
-            })?.WaitForExit();
-        }
-    }
-
     private void OnWarningValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs args) { if (_loading || WarningValueText == null) return; var v = (uint)args.NewValue; IniConfig.WriteUInt("TrayLevelWarning", v); WarningValueText.Text = v.ToString(); }
     private void OnDangerValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs args) { if (_loading || DangerValueText == null) return; var v = (uint)args.NewValue; IniConfig.WriteUInt("TrayLevelDanger", v); DangerValueText.Text = v.ToString(); }
     private void OnAutoCleanValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args) { if (_loading || double.IsNaN(args.NewValue)) return; IniConfig.WriteUInt("AutoreductValue", (uint)args.NewValue); }
@@ -308,7 +287,18 @@ public sealed partial class SettingsPage : Page
         HotkeyBox.Text = HotkeyToString((uint)mods, (uint)vk);
     }
 
-    private void OnHotkeyChanged(object sender, RoutedEventArgs e) { if (_loading) return; IniConfig.WriteBool("HotkeyCleanEnable", ToggleHotkey.IsOn); TrayIcon.RefreshHotkey(); }
+    private void OnHotkeyChanged(object sender, RoutedEventArgs e)
+    {
+        if (_loading) return;
+        IniConfig.WriteBool("HotkeyCleanEnable", ToggleHotkey.IsOn);
+        if (TrayIcon.RefreshHotkey()) return;
+
+        IniConfig.WriteBool("HotkeyCleanEnable", false);
+        _loading = true;
+        ToggleHotkey.IsOn = false;
+        _loading = false;
+        HotkeyBox.PlaceholderText = "This hotkey is already in use.";
+    }
     private void OnHotkeyTapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e) { HotkeyBox.PlaceholderText = "Press a key combination..."; HotkeyBox.Focus(FocusState.Keyboard); }
 
     private void OnHotkeyKeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
@@ -322,7 +312,14 @@ public sealed partial class SettingsPage : Page
         var hotkey = ((int)mods << 8) | (int)vk;
         IniConfig.WriteInt("HotkeyClean", hotkey);
         HotkeyBox.Text = HotkeyToString(mods, vk);
-        TrayIcon.RefreshHotkey();
+        if (ToggleHotkey.IsOn && !TrayIcon.RefreshHotkey())
+        {
+            IniConfig.WriteBool("HotkeyCleanEnable", false);
+            _loading = true;
+            ToggleHotkey.IsOn = false;
+            _loading = false;
+            HotkeyBox.PlaceholderText = "This hotkey is already in use.";
+        }
         e.Handled = true;
     }
 
@@ -346,10 +343,4 @@ public sealed partial class SettingsPage : Page
         return string.Join(" + ", parts);
     }
 
-    private void UpdateStandbyCheckboxes()
-    {
-        var enabled = ToggleAllowStandby.IsOn;
-        ChkStandbyList.IsEnabled = enabled;
-        ChkModifiedList.IsEnabled = enabled;
-    }
 }

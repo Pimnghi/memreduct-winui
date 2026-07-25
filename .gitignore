@@ -1,5 +1,48 @@
+# .NET / WinUI build output
 bin/
 obj/
-/packages/
-riderModule.iml
+/artifacts/
+
+# Native CoreLib build output
+/CoreLib/bin/
+/CoreLib/x64/
+/CoreLib/ARM64/
+
+# IDE local state
+/.vs/
+/.idea/
+/.vscode/
 /_ReSharper.Caches/
+riderModule.iml
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.pubxml.user
+
+# Local application data
+/data/
+*.log
+
+# Temporary package caches
+/packages/
+/.nuget/
+/.arm64-packages/
+
+# Native intermediate files
+*.obj
+*.pdb
+*.iobj
+*.ipdb
+*.tlog
+*.lastbuildstate
+*.recipe
+*.lib
+*.exp
+*.ilk
+*.idb
+*.FileListAbsolute.txt
+
+# OS files
+Thumbs.db
+Desktop.ini

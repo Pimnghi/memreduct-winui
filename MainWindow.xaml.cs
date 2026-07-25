@@ -23,6 +23,18 @@ public sealed partial class MainWindow : Window
     [DllImport("user32")]
     private static extern int GetSystemMetrics(int nIndex);
 
+    [DllImport("user32")]
+    private static extern nint MonitorFromRect(ref RECT lprc, uint dwFlags);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct RECT
+    {
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
+    }
+
     public MainWindow()
     {
         InitializeComponent();
@@ -52,7 +64,8 @@ public sealed partial class MainWindow : Window
         Closed += (s, e) => TrayIcon.Destroy();
         AppWindow.Closing += AppWindow_Closing;
         UpdateTrayMenuTexts();
-        TrayIcon.RefreshHotkey();
+        if (!TrayIcon.RefreshHotkey())
+            IniConfig.WriteBool("HotkeyCleanEnable", false);
         ApplyTopmost();
         ApplyNavLocalization();
         RestoreWindowBounds();
@@ -107,7 +120,8 @@ public sealed partial class MainWindow : Window
         var x = IniConfig.ReadInt("WindowLeft", int.MinValue);
         var y = IniConfig.ReadInt("WindowTop", int.MinValue);
 
-        if (w > 0 && h > 0 && x != int.MinValue && y != int.MinValue)
+        if (w > 0 && h > 0 && x != int.MinValue && y != int.MinValue
+            && IsWindowRectVisible(x, y, w, h))
         {
             AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(x, y, w, h));
         }
@@ -117,13 +131,26 @@ public sealed partial class MainWindow : Window
         }
         else
         {
-            // default: 1600x900 centered
             var screenW = GetSystemMetrics(0);
             var screenH = GetSystemMetrics(1);
-            var cx = (screenW - 1600) / 2;
-            var cy = (screenH - 1000) / 2;
-            AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(cx, cy, 1600, 1000));
+            var width = Math.Min(1600, screenW);
+            var height = Math.Min(1000, screenH);
+            var cx = Math.Max(0, (screenW - width) / 2);
+            var cy = Math.Max(0, (screenH - height) / 2);
+            AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(cx, cy, width, height));
         }
+    }
+
+    private static bool IsWindowRectVisible(int x, int y, int width, int height)
+    {
+        var rect = new RECT
+        {
+            Left = x,
+            Top = y,
+            Right = x + width,
+            Bottom = y + height
+        };
+        return MonitorFromRect(ref rect, 0) != nint.Zero;
     }
 
     private void SaveWindowBounds()
@@ -185,6 +212,17 @@ public sealed partial class MainWindow : Window
 
     public void RefreshTrayMenu() => UpdateTrayMenuTexts();
 
+    public void ApplyLocalization()
+    {
+        ApplyNavLocalization();
+        UpdateTrayMenuTexts();
+
+        if (ContentFrame.Content is MainPage mainPage)
+            mainPage.ApplyLocalization();
+        else if (ContentFrame.Content is SettingsPage settingsPage)
+            settingsPage.ApplyLocalization();
+    }
+
     public void ApplyNavLocalization()
     {
         var s = (uint id) => CoreService.GetString(id);
@@ -199,14 +237,14 @@ public sealed partial class MainWindow : Window
         DispatcherQueue.TryEnqueue(async () =>
         {
             if (ContentFrame.Content is MainPage mp) mp.SetCleaningState(true);
-            var result = await System.Threading.Tasks.Task.Run(() =>
-                CoreService.CleanMemory(IniConfig.ReadUInt("ReductMask2", MemoryMask.Default)));
+            var result = await CleanupCoordinator.CleanAsync(CleanupSource.Hotkey);
             if (ContentFrame.Content is MainPage mainPage)
             {
                 mainPage.SetCleaningState(false);
                 mainPage.ApplyLocalization();
             }
-            if (result.Success && result.BytesFreed > 0 && IniConfig.ReadBool("BalloonCleanResults", true))
+            if (result is { Success: true, BytesFreed: > 0 }
+                && IniConfig.ReadBool("BalloonCleanResults", true))
                 ToastService.ShowCleanResult(result.BytesFreed, result.FreedFormatted);
         });
     }

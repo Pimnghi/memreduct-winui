@@ -12,12 +12,6 @@
 extern "C" {
 #endif
 
-#define DEFAULT_AUTOREDUCT_VAL 90
-#define DEFAULT_AUTOREDUCTINTERVAL_VAL 30
-#define AUTOREDUCT_COOLDOWN 30
-#define DEFAULT_DANGER_LEVEL 90
-#define DEFAULT_WARNING_LEVEL 70
-
 #define REDUCT_WORKINGSET           0x01
 #define REDUCT_SYSTEMFILECACHE      0x02
 #define REDUCT_STANDBYPRIORITY0LIST 0x04
@@ -33,15 +27,18 @@ extern "C" {
 
 typedef enum _CLEANUP_SOURCE { SOURCE_AUTO, SOURCE_MANUAL, SOURCE_HOTKEY, SOURCE_CMDLINE } CLEANUP_SOURCE;
 
-typedef struct _CLEANUP_RESULT { ULONG64 bytes_before; ULONG64 bytes_after; ULONG64 bytes_freed; ULONG mask_used; WCHAR formatted[64]; } CLEANUP_RESULT;
+typedef struct _CLEANUP_RESULT
+{
+	ULONG64 bytes_before;
+	ULONG64 bytes_after;
+	ULONG64 bytes_freed;
+	ULONG mask_used;
+	ULONG succeeded_mask;
+	ULONG failed_mask;
+	WCHAR formatted[64];
+} CLEANUP_RESULT;
 
-CORE_API ULONG    core_get_limit_value(void);
-CORE_API ULONG    core_get_interval_value(void);
-CORE_API ULONG    core_get_danger_value(void);
-CORE_API ULONG    core_get_warning_value(void);
 CORE_API BOOLEAN  core_is_elevated(void);
-CORE_API BOOLEAN  core_should_autoclean(void);
-CORE_API BOOLEAN  core_should_interval_clean(void);
 CORE_API void     core_get_memory_info(ULONG64 *pt, ULONG64 *pu, ULONG64 *pf, double *pp, ULONG64 *gt, ULONG64 *gu, ULONG64 *gf, double *gp, ULONG64 *ct, ULONG64 *cu, ULONG64 *cf, double *cp);
 CORE_API BOOLEAN  core_clean_memory(ULONG source, ULONG mask, CLEANUP_RESULT *result);
 

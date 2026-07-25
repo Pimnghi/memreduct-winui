@@ -30,15 +30,28 @@ Real-time memory management application with WinUI 3 native interface. Built on 
 ### Build Steps
 
 ```powershell
-# Build native C DLL
-msbuild CoreLib\CoreLib.vcxproj -p:Configuration=Release -p:Platform=x64
+# Build and publish both portable architectures
+.\build_winui.ps1
 
-# Build WinUI app
-dotnet build memreduct-winui.csproj -c Release
-dotnet build memreduct-winui.csproj -c Release -p:Platform=ARM64
+# Build one architecture only
+.\build_winui.ps1 -Platform x64
 ```
 
-Output: `bin\Release\net9.0-windows10.0.26100.0\win-x64\memreduct-winui.exe`
+Outputs: `artifacts\win-x64\` and `artifacts\win-arm64\`.
+
+The script performs a clean native build, verifies version consistency, and
+checks that each published `CoreLib.dll` matches its target architecture.
+
+## Command Line
+
+```powershell
+memreduct-winui.exe -clean
+memreduct-winui.exe -clean:full
+```
+
+`-clean` uses the saved cleanup mask and `-clean:full` selects every region.
+Exit code `0` means full success, `1` means failure or partial failure, and `2`
+means invalid arguments or elevation failure.
 
 ## Project Structure
 
@@ -71,7 +84,9 @@ memreduct-winui/
 
 ## Configuration
 
-All settings stored in `data\memreduct-winui.ini` alongside the executable (portable mode).
+All settings are stored in `data\memreduct-winui.ini` alongside the executable
+(portable mode). When cleanup logging is enabled, results are written to
+`data\memreduct-winui.log`.
 
 ## License
 

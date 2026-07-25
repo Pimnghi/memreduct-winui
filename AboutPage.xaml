@@ -19,7 +19,7 @@
             <StackPanel Spacing="4" HorizontalAlignment="Center">
                 <TextBlock x:Name="AuthorText" Text="Author: Pimnghi" HorizontalAlignment="Center" FontSize="12"
                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"/>
-                <TextBlock x:Name="CopyrightText" Text="(c) 2024-2025 Pimnghi" HorizontalAlignment="Center" FontSize="12"
+                <TextBlock x:Name="CopyrightText" Text="(c) 2024-2026 Pimnghi" HorizontalAlignment="Center" FontSize="12"
                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"/>
                 <TextBlock x:Name="BasedOnText" Text="Based on Mem Reduct by Henry++" HorizontalAlignment="Center" FontSize="11"
                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"/>

@@ -9,6 +9,7 @@ public static class TrayIcon
     private static nint _hwnd;
     private static bool _created;
     private static WndProcDelegate? _wndProcDelegate;
+    private static uint _taskbarCreatedMessage;
 
     private const uint WM_TRAYICON = 0x8001;
     private const uint NIF_MESSAGE = 0x00000001;
@@ -45,6 +46,9 @@ public static class TrayIcon
     [DllImport("user32")]
     private static extern nint CreatePopupMenu();
 
+    [DllImport("user32")]
+    private static extern bool DestroyMenu(nint hMenu);
+
     [DllImport("user32", CharSet = CharSet.Unicode)]
     private static extern bool AppendMenuW(nint hMenu, uint uFlags, nuint uIDNewItem, string lpNewItem);
 
@@ -79,6 +83,9 @@ public static class TrayIcon
 
     [DllImport("user32")]
     private static extern nint DefWindowProcW(nint hWnd, uint msg, nuint wParam, nint lParam);
+
+    [DllImport("user32", CharSet = CharSet.Unicode)]
+    private static extern uint RegisterWindowMessageW(string lpString);
 
     [DllImport("user32", SetLastError = true, CharSet = CharSet.Unicode)]
     private static extern ushort RegisterClassExW(ref WNDCLASSEXW lpWndClass);
@@ -151,23 +158,15 @@ public static class TrayIcon
     private static string _textSettings = "Settings";
     private static string _textExit = "Exit";
 
-    private static string _textRegions = "Clean areas";
-    private static string _textLimit = "Clean when above";
-    private static string _textInterval = "Clean every";
-    private static string _textDisable = "Disable";
-    private static string _textMinutes = " min.";
-
     private static readonly string[] _regionNames = { "Working set", "System file cache", "Modified file cache",
         "Modified page list", "Standby list", "Standby list (low)", "Registry cache", "Combine memory lists" };
     private static readonly uint[] _regionMasks = { 0x01, 0x02, 0x80, 0x10, 0x08, 0x04, 0x40, 0x20 };
     private static readonly uint[] _regionIds = { 45, 46, 95, 49, 48, 47, 96, 50 };
 
-    private static string _actionShowHide = "Show / Hide";
-    private static string _actionClean = "Clean memory"; 
-    private static string _actionTaskmgr = "Open task manager";
-
     private static nint _currentIcon;
+    private static bool _ownsCurrentIcon;
     private static string? _iconPath;
+    private static string _tooltip = "Mem Reduct WinUI";
 
     public static void SetMenuTexts(string show, string clean, string settings, string exit)
     {
@@ -188,11 +187,7 @@ public static class TrayIcon
 
     private static void UpdateTrayIcon()
     {
-        var newIcon = nint.Zero;
-        if (_iconPath != null)
-            newIcon = LoadImageW(nint.Zero, _iconPath, IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
-        if (newIcon == nint.Zero)
-            newIcon = LoadIconW(nint.Zero, new nint(32512)); // IDI_APPLICATION fallback
+        var newIcon = LoadTrayIcon(out var ownsNewIcon);
 
         var nid = new NOTIFYICONDATAW
         {
@@ -203,11 +198,17 @@ public static class TrayIcon
             uFlags = NIF_ICON | NIF_GUID,
             hIcon = newIcon,
         };
-        Shell_NotifyIconW(NIM_MODIFY, ref nid);
+        if (!Shell_NotifyIconW(NIM_MODIFY, ref nid))
+        {
+            if (ownsNewIcon && newIcon != nint.Zero)
+                DestroyIcon(newIcon);
+            return;
+        }
 
-        if (_currentIcon != nint.Zero && _currentIcon != LoadIconW(nint.Zero, new nint(32512)))
+        if (_ownsCurrentIcon && _currentIcon != nint.Zero)
             DestroyIcon(_currentIcon);
         _currentIcon = newIcon;
+        _ownsCurrentIcon = ownsNewIcon;
     }
 
     private static nint WndProc(nint hwnd, uint msg, nuint wParam, nint lParam)
@@ -241,6 +242,11 @@ public static class TrayIcon
             HotkeyPressed?.Invoke();
             return 0;
         }
+        else if (_taskbarCreatedMessage != 0 && msg == _taskbarCreatedMessage)
+        {
+            _created = AddTrayIcon();
+            return 0;
+        }
         return DefWindowProcW(hwnd, msg, wParam, lParam);
     }
 
@@ -257,8 +263,6 @@ public static class TrayIcon
         var sLimit = CoreService.GetString(15) ?? "Clean when above";
         var sInterval = CoreService.GetString(16) ?? "Clean every";
         var sDisable = CoreService.GetString(13) ?? "Disable";
-        var allowStandby = IniConfig.ReadBool("IsAllowStandbyListCleanup", false);
-
         AppendMenuW(hMenu, 0, CMD_SHOW, _textShow);
         AppendMenuW(hMenu, 0x800, 0, "");
         AppendMenuW(hMenu, 0, CMD_CLEAN, _textClean);
@@ -270,8 +274,7 @@ public static class TrayIcon
         {
             var id = CMD_REGION_BASE + i;
             var rname = CoreService.GetString(_regionIds[i]) ?? _regionNames[i];
-            var flag = (!allowStandby && (i == 3 || i == 4)) ? 1u : 0u; // MF_GRAYED
-            AppendMenuW(hRegion, flag, (nuint)id, rname);
+            AppendMenuW(hRegion, 0, (nuint)id, rname);
             if ((mask & _regionMasks[i]) != 0)
                 CheckMenuItem(hRegion, (nuint)id, 8);
         }
@@ -309,6 +312,7 @@ public static class TrayIcon
         SetForegroundWindow(hwnd);
         GetCursorPos(out var pt);
         var cmd = TrackPopupMenu(hMenu, 0x2 | 0x100 | 0x80, pt.X, pt.Y, 0, hwnd, 0);
+        DestroyMenu(hMenu);
 
         if (cmd == 0) return;
 
@@ -342,6 +346,8 @@ public static class TrayIcon
         if (_created) return true;
 
         _wndProcDelegate = WndProc;
+        _tooltip = tooltip;
+        _taskbarCreatedMessage = RegisterWindowMessageW("TaskbarCreated");
 
         var wc = new WNDCLASSEXW
         {
@@ -359,37 +365,23 @@ public static class TrayIcon
             0, 0, 0, 0, nint.Zero, nint.Zero, GetModuleHandleW(null), nint.Zero);
         if (_hwnd == nint.Zero) return false;
 
-        var icon = nint.Zero;
-        if (_iconPath != null)
-            icon = LoadImageW(nint.Zero, _iconPath, IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
-        if (icon == nint.Zero)
-            icon = LoadIconW(nint.Zero, new nint(32512));
-
-        var nid = new NOTIFYICONDATAW
+        _created = AddTrayIcon();
+        if (!_created)
         {
-            cbSize = (uint)Marshal.SizeOf<NOTIFYICONDATAW>(),
-            hWnd = _hwnd,
-            uID = 0,
-            guidItem = IconGuid,
-            uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP | NIF_GUID,
-            uCallbackMessage = WM_TRAYICON,
-            hIcon = icon,
-        };
-        nid.szTip = tooltip;
-
-        _created = Shell_NotifyIconW(NIM_ADD, ref nid);
-        _currentIcon = icon;
+            DestroyWindow(_hwnd);
+            _hwnd = nint.Zero;
+        }
 
         return _created;
     }
 
-    public static void RefreshHotkey()
+    public static bool RefreshHotkey()
     {
-        if (_hwnd == nint.Zero) return;
+        if (_hwnd == nint.Zero) return false;
         UnregisterHotKey(_hwnd, (int)HOTKEY_ID);
 
         var enabled = IniConfig.ReadBool("HotkeyCleanEnable");
-        if (!enabled) return;
+        if (!enabled) return true;
 
         var hotkey = IniConfig.ReadInt("HotkeyClean", (int)(0x0002 << 8 | VK_F1));
         var vk = (uint)(hotkey & 0xFF);
@@ -401,25 +393,69 @@ public static class TrayIcon
         if ((mod & 4) != 0) winMod |= 0x0001;
         if ((mod & 8) != 0) winMod |= 0x0008;
 
-        RegisterHotKey(_hwnd, (int)HOTKEY_ID, winMod, vk);
+        return RegisterHotKey(_hwnd, (int)HOTKEY_ID, winMod, vk);
     }
 
     public static void Destroy()
     {
-        if (!_created) return;
         if (_hwnd != nint.Zero) UnregisterHotKey(_hwnd, (int)HOTKEY_ID);
+        if (_created)
+        {
+            var nid = new NOTIFYICONDATAW
+            {
+                cbSize = (uint)Marshal.SizeOf<NOTIFYICONDATAW>(),
+                hWnd = _hwnd,
+                uID = 0,
+                guidItem = IconGuid,
+                uFlags = NIF_GUID,
+            };
+            Shell_NotifyIconW(NIM_DELETE, ref nid);
+        }
+        if (_hwnd != nint.Zero) DestroyWindow(_hwnd);
+        if (_ownsCurrentIcon && _currentIcon != nint.Zero) DestroyIcon(_currentIcon);
+        _hwnd = nint.Zero;
+        _currentIcon = nint.Zero;
+        _ownsCurrentIcon = false;
+        _created = false;
+    }
+
+    private static bool AddTrayIcon()
+    {
+        var icon = LoadTrayIcon(out var ownsIcon);
         var nid = new NOTIFYICONDATAW
         {
             cbSize = (uint)Marshal.SizeOf<NOTIFYICONDATAW>(),
             hWnd = _hwnd,
             uID = 0,
             guidItem = IconGuid,
-            uFlags = NIF_GUID,
+            uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP | NIF_GUID,
+            uCallbackMessage = WM_TRAYICON,
+            hIcon = icon,
+            szTip = _tooltip,
         };
-        Shell_NotifyIconW(NIM_DELETE, ref nid);
-        if (_hwnd != nint.Zero) DestroyWindow(_hwnd);
-        if (_currentIcon != nint.Zero) DestroyIcon(_currentIcon);
-        _created = false;
+
+        if (!Shell_NotifyIconW(NIM_ADD, ref nid))
+        {
+            if (ownsIcon && icon != nint.Zero)
+                DestroyIcon(icon);
+            return false;
+        }
+
+        if (_ownsCurrentIcon && _currentIcon != nint.Zero)
+            DestroyIcon(_currentIcon);
+        _currentIcon = icon;
+        _ownsCurrentIcon = ownsIcon;
+        return true;
+    }
+
+    private static nint LoadTrayIcon(out bool ownsIcon)
+    {
+        var icon = nint.Zero;
+        if (_iconPath != null)
+            icon = LoadImageW(nint.Zero, _iconPath, IMAGE_ICON, 32, 32, LR_LOADFROMFILE);
+
+        ownsIcon = icon != nint.Zero;
+        return ownsIcon ? icon : LoadIconW(nint.Zero, new nint(32512));
     }
 
     public static void ShowBalloon(string title, string text, bool noSound)

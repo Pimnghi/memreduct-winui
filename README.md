@@ -30,15 +30,27 @@
 ### 步骤
 
 ```powershell
-# 编译 native C DLL
-msbuild CoreLib\CoreLib.vcxproj -p:Configuration=Release -p:Platform=x64
+# 构建并发布 x64、ARM64 便携版
+.\build_winui.ps1
 
-# 编译 WinUI 应用
-dotnet build memreduct-winui.csproj -c Release
-dotnet build memreduct-winui.csproj -c Release -p:Platform=ARM64
+# 仅构建一个平台
+.\build_winui.ps1 -Platform x64
 ```
 
-输出目录：`bin\Release\net9.0-windows10.0.26100.0\win-x64\memreduct-winui.exe`
+输出目录：`artifacts\win-x64\`、`artifacts\win-arm64\`。
+
+脚本会执行干净 native 构建、版本一致性检查，并验证发布目录中的
+`CoreLib.dll` 与目标平台匹配。
+
+## 命令行
+
+```powershell
+memreduct-winui.exe -clean
+memreduct-winui.exe -clean:full
+```
+
+`-clean` 使用已保存的清理区域，`-clean:full` 使用全部区域。退出码 `0`
+表示全部成功，`1` 表示清理失败或部分失败，`2` 表示参数或提权失败。
 
 ## 项目结构
 
@@ -72,6 +84,7 @@ memreduct-winui/
 ## 配置
 
 所有设置保存在 `data\memreduct-winui.ini`（exe 同级目录下的便携模式）。
+启用清理日志后，结果写入 `data\memreduct-winui.log`。
 
 ## 开源许可
 

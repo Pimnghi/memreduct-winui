@@ -10,12 +10,7 @@ namespace memreduct_winui;
 
 public partial class App : Application
 {
-    [DllImport("shell32", CharSet = CharSet.Unicode)]
-    private static extern void SetCurrentProcessExplicitAppUserModelID(string AppID);
     public static Window? MainWindow { get; private set; }
-
-    [DllImport("kernel32")]
-    private static extern bool AllocConsole();
 
     [DllImport("kernel32")]
     private static extern bool AttachConsole(uint dwProcessId);
@@ -29,37 +24,59 @@ public partial class App : Application
 
     protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
-        var cmdline = string.Join(" ", Environment.GetCommandLineArgs().Skip(1));
-        var isAutostart = cmdline.Contains("-autostart");
+        var commandArgs = Environment.GetCommandLineArgs().Skip(1).ToArray();
+        var isClean = commandArgs.Any(IsCleanArgument);
+        var isFullClean = commandArgs.Any(IsFullCleanArgument);
+        var isAutostart = commandArgs.Any(IsAutostartArgument);
+        var hasInvalidArguments = commandArgs.Any(arg =>
+            !IsCleanArgument(arg) && !IsFullCleanArgument(arg) && !IsAutostartArgument(arg));
 
-        if (cmdline.Contains("-clean") || cmdline.Contains("/clean"))
+        if (hasInvalidArguments || (isClean && isAutostart))
         {
-            var fullMask = cmdline.Contains("full") ? MemReduct.Core.MemoryMask.All : MemReduct.Core.MemoryMask.Default;
+            AttachConsole(ATTACH_PARENT_PROCESS);
+            Console.Error.WriteLine("Usage: memreduct-winui.exe [-clean|-clean:full|-autostart]");
+            Environment.Exit(2);
+            return;
+        }
 
+        if (isClean)
+        {
 #if !DEBUG
             if (!MemReduct.Core.CoreService.IsElevated())
             {
-                RunAsAdmin(cmdline);
+                Environment.Exit(RunAsAdmin(commandArgs, waitForExit: true));
                 return;
             }
 #endif
 
-            if (!AttachConsole(ATTACH_PARENT_PROCESS)) AllocConsole();
-            var result = MemReduct.Core.CoreService.CleanMemory(fullMask);
-            if (result.Success)
+            AttachConsole(ATTACH_PARENT_PROCESS);
+            var mask = isFullClean
+                ? MemReduct.Core.MemoryMask.All
+                : MemReduct.Core.IniConfig.ReadUInt("ReductMask2", MemReduct.Core.MemoryMask.Default);
+            var result = MemReduct.Core.CleanupCoordinator
+                .CleanAsync(MemReduct.Core.CleanupSource.CommandLine, mask)
+                .GetAwaiter()
+                .GetResult();
+
+            if (result?.Status == MemReduct.Core.CleanupStatus.Success)
+            {
                 Console.WriteLine($"Memory released: {result.FreedFormatted}");
+                Environment.Exit(0);
+            }
             else
-                Console.WriteLine("Clean failed.");
-            Console.WriteLine("Press any key to exit...");
-            Console.ReadKey();
-            Environment.Exit(result.Success ? 0 : 1);
+            {
+                Console.Error.WriteLine(result?.Status == MemReduct.Core.CleanupStatus.PartialSuccess
+                    ? $"Memory cleaning partially failed (failed mask: 0x{result.FailedMask:X2})."
+                    : $"Memory cleaning failed (failed mask: 0x{result?.FailedMask ?? mask:X2}).");
+                Environment.Exit(1);
+            }
             return;
         }
 
 #if !DEBUG
         if (!MemReduct.Core.CoreService.IsElevated())
         {
-            RunAsAdmin(cmdline);
+            Environment.Exit(RunAsAdmin(commandArgs, waitForExit: false));
             return;
         }
 #endif
@@ -84,7 +101,7 @@ public partial class App : Application
             MainWindow.AppWindow.Hide();
 
         MemReduct.Core.AutoCleanService.Refresh();
-        SyncAutoStart();
+        MemReduct.Core.AutoStartService.EnsureConfigured();
 
         appInstance.Activated += (s, e) =>
         {
@@ -111,46 +128,51 @@ public partial class App : Application
         ApplyTheme(null);
     }
 
-    private static void RunAsAdmin(string arguments)
+    private static bool IsCleanArgument(string value) =>
+        value.Equals("-clean", StringComparison.OrdinalIgnoreCase)
+        || value.Equals("/clean", StringComparison.OrdinalIgnoreCase)
+        || IsFullCleanArgument(value);
+
+    private static bool IsFullCleanArgument(string value) =>
+        value.Equals("-clean:full", StringComparison.OrdinalIgnoreCase)
+        || value.Equals("/clean:full", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsAutostartArgument(string value) =>
+        value.Equals("-autostart", StringComparison.OrdinalIgnoreCase)
+        || value.Equals("/autostart", StringComparison.OrdinalIgnoreCase);
+
+    private static int RunAsAdmin(string[] arguments, bool waitForExit)
     {
         var exePath = Process.GetCurrentProcess().MainModule?.FileName ?? Environment.ProcessPath ?? "";
-        if (!string.IsNullOrEmpty(exePath) && File.Exists(exePath))
+        if (string.IsNullOrEmpty(exePath) || !File.Exists(exePath))
+            return 2;
+
+        try
         {
-            try
+            var startInfo = new ProcessStartInfo(exePath)
             {
-                Process.Start(new ProcessStartInfo(exePath, arguments)
-                {
-                    UseShellExecute = true,
-                    Verb = "runas",
-                    WorkingDirectory = Path.GetDirectoryName(exePath),
-                });
+                UseShellExecute = true,
+                Verb = "runas",
+                WorkingDirectory = Path.GetDirectoryName(exePath) ?? AppContext.BaseDirectory,
+            };
+            foreach (var argument in arguments)
+                startInfo.ArgumentList.Add(argument);
+
+            using var process = Process.Start(startInfo);
+            if (process == null)
+                return 2;
+
+            if (waitForExit)
+            {
+                process.WaitForExit();
+                return process.ExitCode;
             }
-            catch { }
-        }
-        Environment.Exit(0);
-    }
 
-    private static void SyncAutoStart()
-    {
-        var enable = MemReduct.Core.IniConfig.ReadBool("LoadOnStartup");
-        var exePath = Process.GetCurrentProcess().MainModule?.FileName ?? "";
-        if (string.IsNullOrEmpty(exePath)) return;
-
-        if (enable)
-        {
-            Process.Start(new ProcessStartInfo("schtasks.exe", $"/create /tn \"MemReductWinUI\" /tr \"\\\"{exePath}\\\" -autostart\" /sc onlogon /rl highest /f")
-            {
-                UseShellExecute = false,
-                CreateNoWindow = true,
-            })?.WaitForExit();
+            return 0;
         }
-        else
+        catch
         {
-            Process.Start(new ProcessStartInfo("schtasks.exe", "/delete /tn \"MemReductWinUI\" /f")
-            {
-                UseShellExecute = false,
-                CreateNoWindow = true,
-            })?.WaitForExit();
+            return 2;
         }
     }
 }

@@ -2742,7 +2742,6 @@ VOID _r_update_navigate (
 			tdc.pszVerificationText = _r_locale_getstring (IDS_UPDATE_AUTOINSTALL);
 #else
 			tdc.pszVerificationText = L"Automatically install non-executable updates";
-#pragma PR_PRINT_WARNING_UNDEFINED(IDS_UPDATE_AUTOINSTALL)
 #endif // IDS_UPDATE_AUTOINSTALL
 		}
 	}

@@ -5,17 +5,25 @@
         <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
         <RootNamespace>memreduct_winui</RootNamespace>
         <ApplicationManifest>app.manifest</ApplicationManifest>
-        <Platforms>x86;x64;ARM64</Platforms>
-        <RuntimeIdentifier Condition="'$(RuntimeIdentifier)' == ''">win-$([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture.ToString().ToLowerInvariant())</RuntimeIdentifier>
-        <PublishProfile Condition="Exists('Properties\PublishProfiles\win-$(Platform).pubxml')">win-$(Platform).pubxml</PublishProfile>
+        <Platforms>x64;ARM64</Platforms>
+        <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+        <RuntimeIdentifier Condition="'$(Platform)' == 'x64'">win-x64</RuntimeIdentifier>
+        <RuntimeIdentifier Condition="'$(Platform)' == 'ARM64'">win-arm64</RuntimeIdentifier>
         <UseWinUI>true</UseWinUI>
+        <WindowsPackageType>None</WindowsPackageType>
         <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+        <SelfContained>true</SelfContained>
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
         <ApplicationIcon>Assets\AppIcon.ico</ApplicationIcon>
         <WinUISDKReferences>false</WinUISDKReferences>
-        <EnableMsixTooling>true</EnableMsixTooling>
+        <EnableMsixTooling>false</EnableMsixTooling>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <Version>3.5.3</Version>
+        <AssemblyVersion>3.5.3.0</AssemblyVersion>
+        <FileVersion>3.5.3.0</FileVersion>
+        <NativeCorePath>$(MSBuildProjectDirectory)\CoreLib\bin\$(Platform)\CoreLib.dll</NativeCorePath>
     </PropertyGroup>
 
     <ItemGroup>
@@ -31,45 +39,18 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Content Include="CoreLib\bin\x64\CoreLib.dll" Link="CoreLib.dll" CopyToOutputDirectory="PreserveNewest" />
-        <Content Include="language\memreduct-winui.lng" Link="language\memreduct-winui.lng" CopyToOutputDirectory="PreserveNewest" />
+        <Content Include="$(NativeCorePath)" Link="CoreLib.dll" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+        <Content Include="language\memreduct-winui.lng" Link="language\memreduct-winui.lng" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
     </ItemGroup>
 
     <ItemGroup>
         <Manifest Include="$(ApplicationManifest)"/>
     </ItemGroup>
 
-    <!--
-      Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
-      Tools extension to be activated for this project even if the Windows App SDK Nuget
-      package has not yet been restored.
-    -->
-    <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
-        <ProjectCapability Include="Msix"/>
-    </ItemGroup>
-
-    <!--
-      Microsoft.Windows.SDK.BuildTools.WinApp adds first-class support for
-      `dotnet run` on packaged WinUI apps: it hooks the .NET CLI Run target to
-      register a debug identity via the winapp CLI and launch the app with
-      package identity (AUMID).
-      Set <EnableWinAppRunSupport>false</EnableWinAppRunSupport> in a
-      <PropertyGroup> above to opt out.
-    -->
     <ItemGroup>
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.7705"/>
         <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260317003"/>
-        <PackageReference Include="Microsoft.Windows.SDK.BuildTools.WinApp" Version="0.3.1"/>
     </ItemGroup>
-
-    <!--
-      Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution
-      Explorer "Package and Publish" context menu entry to be enabled for this project even if
-      the Windows App SDK Nuget package has not yet been restored.
-    -->
-    <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
-        <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
-    </PropertyGroup>
 
     <!-- Publish Properties -->
     <PropertyGroup>
@@ -77,4 +58,11 @@
         <PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
         <PublishTrimmed>False</PublishTrimmed>
     </PropertyGroup>
+
+    <Target Name="ValidateNativeCore" BeforeTargets="PrepareForBuild">
+        <Error Condition="'$(Platform)' != 'x64' and '$(Platform)' != 'ARM64'"
+               Text="Unsupported platform '$(Platform)'. Use x64 or ARM64." />
+        <Error Condition="!Exists('$(NativeCorePath)')"
+               Text="CoreLib.dll is missing for $(Platform). Run build_winui.ps1 or build CoreLib first." />
+    </Target>
 </Project>
