@@ -131,10 +131,21 @@ foreach ($architecture in $Platform) {
         throw "Managed $architecture publish failed with exit code $LASTEXITCODE."
     }
 
-    $publishedExe = Join-Path $publishDirectory "memreduct-winui.exe"
     $publishedCore = Join-Path $publishDirectory "CoreLib.dll"
-    if (-not (Test-Path -LiteralPath $publishedExe)) {
-        throw "Published executable is missing: $publishedExe"
+    $requiredPublishFiles = @(
+        "memreduct-winui.exe",
+        "memreduct-winui.pri",
+        "App.xbf",
+        "MainWindow.xbf",
+        "MainPage.xbf",
+        "SettingsPage.xbf",
+        "AboutPage.xbf"
+    )
+    foreach ($fileName in $requiredPublishFiles) {
+        $publishedFile = Join-Path $publishDirectory $fileName
+        if (-not (Test-Path -LiteralPath $publishedFile -PathType Leaf)) {
+            throw "Published file is missing: $publishedFile"
+        }
     }
     Assert-PeMachine -Path $publishedCore -Architecture $architecture
 }

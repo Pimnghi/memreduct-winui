@@ -65,4 +65,20 @@
         <Error Condition="!Exists('$(NativeCorePath)')"
                Text="CoreLib.dll is missing for $(Platform). Run build_winui.ps1 or build CoreLib first." />
     </Target>
+
+    <Target Name="CopyWinUiResourcesToPublishDirectory" AfterTargets="Publish">
+        <ItemGroup>
+            <_WinUiXbfResource Include="$(TargetDir)*.xbf" />
+            <_WinUiPriResource Include="$(TargetDir)$(AssemblyName).pri"
+                               Condition="Exists('$(TargetDir)$(AssemblyName).pri')" />
+        </ItemGroup>
+
+        <Error Condition="'@(_WinUiXbfResource)' == ''"
+               Text="WinUI XBF resources are missing from '$(TargetDir)'." />
+        <Error Condition="'@(_WinUiPriResource)' == ''"
+               Text="WinUI PRI resource is missing from '$(TargetDir)'." />
+        <Copy SourceFiles="@(_WinUiXbfResource);@(_WinUiPriResource)"
+              DestinationFolder="$(PublishDir)"
+              SkipUnchangedFiles="true" />
+    </Target>
 </Project>
