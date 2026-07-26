@@ -2,6 +2,7 @@ using MemReduct.Core;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -47,16 +48,10 @@ public sealed partial class MainPage : Page
 
     public void SetCleaningState(bool cleaning)
     {
-        if (cleaning)
-        {
-            CleanBtn.IsEnabled = false;
-            CleanBtn.Content = (CoreService.GetString(StrId.CleanMemory) ?? "Cleaning") + "…";
-        }
-        else
-        {
-            CleanBtn.IsEnabled = true;
-            CleanBtn.Content = CoreService.GetString(StrId.CleanMemory) ?? "Clean memory";
-        }
+        CleanBtn.IsEnabled = !cleaning;
+        CleanButtonIdleContent.Visibility = cleaning ? Visibility.Collapsed : Visibility.Visible;
+        CleanButtonBusyContent.Visibility = cleaning ? Visibility.Visible : Visibility.Collapsed;
+        CleanProgressRing.IsActive = cleaning;
     }
 
     private void OnTimerTick(DispatcherQueueTimer sender, object args) => UpdateDisplay();
@@ -73,20 +68,39 @@ public sealed partial class MainPage : Page
         if (v != null) CacheTitle.Text = v;
 
         var usage = s(StrId.ItemUsage);
-        var avail = s(StrId.ItemAvailable);
+        var available = s(StrId.ItemAvailable);
         var total = s(StrId.ItemTotal);
 
-        if (usage != null) { PhysicalPctLabel.Text = usage + ":"; PageFilePctLabel.Text = usage + ":"; CachePctLabel.Text = usage + ":"; }
-        if (avail != null) { PhysicalFreeLabel.Text = avail + ":"; PageFileFreeLabel.Text = avail + ":"; CacheFreeLabel.Text = avail + ":"; }
-        if (total != null) { PhysicalTotalLabel.Text = total + ":"; PageFileTotalLabel.Text = total + ":"; CacheTotalLabel.Text = total + ":"; }
+        if (usage != null)
+        {
+            PhysicalPctLabel.Text = usage + ":";
+            PageFilePctLabel.Text = usage + ":";
+            CachePctLabel.Text = usage + ":";
+        }
 
-        v = s(StrId.CleanMemory);
-        if (v != null) CleanBtn.Content = v;
+        if (available != null)
+        {
+            PhysicalFreeLabel.Text = available + ":";
+            PageFileFreeLabel.Text = available + ":";
+            CacheFreeLabel.Text = available + ":";
+        }
+
+        if (total != null)
+        {
+            PhysicalTotalLabel.Text = total + ":";
+            PageFileTotalLabel.Text = total + ":";
+            CacheTotalLabel.Text = total + ":";
+        }
+
+        var cleanText = s(StrId.CleanMemory) ?? "Clean memory";
+        CleanButtonText.Text = cleanText;
+        CleaningButtonText.Text = cleanText + "…";
     }
 
     private void UpdateDisplay()
     {
         var stats = CoreService.GetMemoryStats();
+
         PhysicalBar.Value = stats.PhysicalPercent;
         PhysicalPctText.Text = $"{stats.PhysicalPercent:F1}%";
         PhysicalFreeText.Text = FormatBytes(stats.PhysicalFree);
@@ -102,31 +116,45 @@ public sealed partial class MainPage : Page
         CacheFreeText.Text = FormatBytes(stats.SystemCacheFree);
         CacheTotalText.Text = FormatBytes(stats.SystemCacheTotal);
 
-        UpdateBarColors(stats);
+        UpdateUsageColors(stats);
     }
 
-    private void UpdateBarColors(MemoryStats stats)
+    private void UpdateUsageColors(MemoryStats stats)
     {
         var danger = IniConfig.ReadUInt("TrayLevelDanger", 90);
         var warning = IniConfig.ReadUInt("TrayLevelWarning", 70);
+        var dangerBrush = (Brush)Application.Current.Resources["SystemFillColorCriticalBrush"];
+        var warningBrush = (Brush)Application.Current.Resources["SystemFillColorCautionBrush"];
 
-        var dangerBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(Windows.UI.Color.FromArgb(0xFF, 0xEC, 0x1C, 0x24));
-        var warningBrush = new Microsoft.UI.Xaml.Media.SolidColorBrush(Windows.UI.Color.FromArgb(0xFF, 0xFF, 0x80, 0x40));
-
-        SetBarColor(PhysicalBar, stats.PhysicalPercent, danger, warning, dangerBrush, warningBrush);
-        SetBarColor(PageFileBar, stats.PageFilePercent, danger, warning, dangerBrush, warningBrush);
-        SetBarColor(CacheBar, stats.SystemCachePercent, danger, warning, dangerBrush, warningBrush);
+        SetUsageColor(PhysicalBar, PhysicalPctText, stats.PhysicalPercent, danger, warning, dangerBrush, warningBrush);
+        SetUsageColor(PageFileBar, PageFilePctText, stats.PageFilePercent, danger, warning, dangerBrush, warningBrush);
+        SetUsageColor(CacheBar, CachePctText, stats.SystemCachePercent, danger, warning, dangerBrush, warningBrush);
     }
 
-    private static void SetBarColor(ProgressBar bar, double pct, uint danger, uint warning,
-        Microsoft.UI.Xaml.Media.SolidColorBrush dangerBrush, Microsoft.UI.Xaml.Media.SolidColorBrush warningBrush)
+    private static void SetUsageColor(
+        ProgressBar bar,
+        TextBlock percentageText,
+        double percentage,
+        uint danger,
+        uint warning,
+        Brush dangerBrush,
+        Brush warningBrush)
     {
-        if (pct >= danger)
+        if (percentage >= danger)
+        {
             bar.Foreground = dangerBrush;
-        else if (pct >= warning)
+            percentageText.Foreground = dangerBrush;
+        }
+        else if (percentage >= warning)
+        {
             bar.Foreground = warningBrush;
+            percentageText.Foreground = warningBrush;
+        }
         else
+        {
             bar.ClearValue(ProgressBar.ForegroundProperty);
+            percentageText.ClearValue(TextBlock.ForegroundProperty);
+        }
     }
 
     private static string FormatBytes(ulong bytes) => bytes switch
@@ -155,19 +183,21 @@ public sealed partial class MainPage : Page
             restart.Click += (s2, e2) =>
             {
                 var exePath = Process.GetCurrentProcess().MainModule?.FileName ?? "";
-                if (!string.IsNullOrEmpty(exePath))
+                if (string.IsNullOrEmpty(exePath)) return;
+
+                try
                 {
-                    try
+                    Process.Start(new ProcessStartInfo(exePath)
                     {
-                        Process.Start(new ProcessStartInfo(exePath)
-                        {
-                            UseShellExecute = true,
-                            Verb = "runas",
-                            WorkingDirectory = Path.GetDirectoryName(exePath),
-                        });
-                        Application.Current.Exit();
-                    }
-                    catch { }
+                        UseShellExecute = true,
+                        Verb = "runas",
+                        WorkingDirectory = Path.GetDirectoryName(exePath),
+                    });
+                    Application.Current.Exit();
+                }
+                catch
+                {
+                    // The user can dismiss the InfoBar if elevation is cancelled.
                 }
             };
             ResultBar.ActionButton = restart;
@@ -188,20 +218,45 @@ public sealed partial class MainPage : Page
                 return;
         }
 
-        if (CleanBtn == null) return;
+        ResultBar.IsOpen = false;
+        ResultBar.ActionButton = null;
+        SetCleaningState(true);
 
-        CleanBtn.IsEnabled = false;
-        CleanBtn.Content = (CoreService.GetString(StrId.CleanMemory) ?? "Cleaning") + "…";
+        CleanupResult? result;
+        try
+        {
+            result = await CleanupCoordinator.CleanAsync(CleanupSource.Manual);
+        }
+        catch (Exception ex)
+        {
+            ResultBar.Title = "Memory cleaning failed";
+            ResultBar.Message = ex.Message;
+            ResultBar.Severity = InfoBarSeverity.Error;
+            ResultBar.IsOpen = true;
+            return;
+        }
+        finally
+        {
+            SetCleaningState(false);
+            ApplyLocalization();
+        }
 
-        var result = await CleanupCoordinator.CleanAsync(CleanupSource.Manual);
-        CleanBtn.IsEnabled = true;
-
-        ApplyLocalization();
+        if (result is null)
+        {
+            ResultBar.Title = CoreService.GetString(StrId.CleanMemory) ?? "Memory cleaning";
+            ResultBar.Message = "The cleanup request could not be started.";
+            ResultBar.Severity = InfoBarSeverity.Warning;
+            ResultBar.IsOpen = true;
+            return;
+        }
 
         if (result is { Success: true, BytesFreed: > 0 })
         {
-            var msg = CoreService.GetString(StrId.StatusCleaned);
-            ResultBar.Message = msg != null ? msg.Replace("%s", result.FreedFormatted) : $"Released: {result.FreedFormatted}";
+            var message = CoreService.GetString(StrId.StatusCleaned);
+            ResultBar.Title = string.Empty;
+            ResultBar.Message = message != null
+                ? message.Replace("%s", result.FreedFormatted)
+                : $"Released: {result.FreedFormatted}";
             ResultBar.Severity = result.Status == CleanupStatus.PartialSuccess
                 ? InfoBarSeverity.Warning
                 : InfoBarSeverity.Success;
@@ -209,7 +264,7 @@ public sealed partial class MainPage : Page
             if (IniConfig.ReadBool("BalloonCleanResults", true))
                 ToastService.ShowCleanResult(result.BytesFreed, result.FreedFormatted);
         }
-        else if (result is { Status: CleanupStatus.Failed })
+        else if (result.Status == CleanupStatus.Failed)
         {
             ResultBar.Title = "Memory cleaning failed";
             ResultBar.Message = result.ErrorMessage ?? $"Failed areas: 0x{result.FailedMask:X2}";
@@ -217,10 +272,11 @@ public sealed partial class MainPage : Page
         }
         else
         {
-            ResultBar.Title = "Memory cleaned";
+            ResultBar.Title = string.Empty;
             ResultBar.Message = "No significant memory was released.";
             ResultBar.Severity = InfoBarSeverity.Informational;
         }
+
         ResultBar.IsOpen = true;
     }
 }
