@@ -8,6 +8,13 @@ namespace memreduct_winui;
 public sealed partial class SettingsPage : Page
 {
     private bool _loading;
+    private ContentDialog? _hotkeyDialog;
+    private StackPanel? _hotkeyDialogKeycaps;
+    private TextBlock? _hotkeyDialogStatus;
+    private TextBox? _hotkeyCaptureBox;
+    private uint _pressedHotkeyModifiers;
+    private uint _editingHotkeyModifiers;
+    private uint _editingHotkeyKey;
 
     public SettingsPage()
     {
@@ -46,19 +53,21 @@ public sealed partial class SettingsPage : Page
         ChkCombineMemoryLists.IsChecked = (mask & MemoryMask.CombineMemoryLists) != 0;
         ChkRegistryCache.IsChecked = (mask & MemoryMask.RegistryCache) != 0;
         ChkModifiedFileCache.IsChecked = (mask & MemoryMask.ModifiedFileCache) != 0;
+        UpdateDangerousRegionAvailability(ToggleAllowStandby.IsOn, true);
 
         SliderWarning.Value = IniConfig.ReadUInt("TrayLevelWarning", 70);
-        WarningValueText.Text = ((int)SliderWarning.Value).ToString();
+        WarningValueText.Text = $"{(int)SliderWarning.Value}%";
         SliderDanger.Value = IniConfig.ReadUInt("TrayLevelDanger", 90);
-        DangerValueText.Text = ((int)SliderDanger.Value).ToString();
+        DangerValueText.Text = $"{(int)SliderDanger.Value}%";
 
         ToggleAutoClean.IsOn = IniConfig.ReadBool("AutoreductEnable");
-        NbAutoClean.Value = IniConfig.ReadUInt("AutoreductValue", 90);
-        NbAutoClean.IsEnabled = ToggleAutoClean.IsOn;
+        SliderAutoClean.Value = IniConfig.ReadUInt("AutoreductValue", 90);
+        AutoCleanValueText.Text = $"{(int)SliderAutoClean.Value}%";
+        AutoCleanThresholdCard.IsEnabled = ToggleAutoClean.IsOn;
 
         ToggleIntervalClean.IsOn = IniConfig.ReadBool("AutoreductIntervalEnable");
         NbInterval.Value = IniConfig.ReadUInt("AutoreductIntervalValue", 30);
-        NbInterval.IsEnabled = ToggleIntervalClean.IsOn;
+        IntervalValueCard.IsEnabled = ToggleIntervalClean.IsOn;
 
         ToggleHotkey.IsOn = IniConfig.ReadBool("HotkeyCleanEnable");
         LoadHotkeyDisplay();
@@ -68,43 +77,44 @@ public sealed partial class SettingsPage : Page
     {
         var s = (uint id) => CoreService.GetString(id);
 
-        var v = s(StrId.SettingsGeneral);      if (v != null) GeneralHeader.Text = v;
-        v = s(StrId.LanguageHint);              if (v != null) LanguageLabel.Text = v;
-        v = s(StrId.AlwaysOnTop);               if (v != null) AlwaysOnTopLabel.Text = v;
-        v = s(StrId.LoadOnStartup);             if (v != null) LoadOnStartupLabel.Text = v;
-        v = s(StrId.StartMinimized);            if (v != null) StartMinimizedLabel.Text = v;
-        v = s(StrId.ConfirmCleaning);           if (v != null) ConfirmCleanLabel.Text = v;
+        var v = s(StrId.Settings);             if (v != null) SettingsPageTitle.Text = v;
+        v = s(StrId.SettingsGeneral);            if (v != null) GeneralHeader.Text = v;
+        v = s(StrId.LanguageHint);               if (v != null) LanguageCard.Header = v;
+        v = s(StrId.AlwaysOnTop);                if (v != null) AlwaysOnTopCard.Header = v;
+        v = s(StrId.LoadOnStartup);              if (v != null) LoadOnStartupCard.Header = v;
+        v = s(StrId.StartMinimized);             if (v != null) StartMinimizedCard.Header = v;
+        v = s(StrId.ConfirmCleaning);            if (v != null) ConfirmCleanCard.Header = v;
 
         v = s(StrId.SettingsAppearance);        if (v != null) AppearanceHeader.Text = v;
-        v = s(StrId.Theme);                     if (v != null) ThemeLabel.Text = v;
-        v = s(StrId.WarningLevel);              if (v != null) WarningLabel.Text = v;
-        v = s(StrId.DangerLevel);               if (v != null) DangerLabel.Text = v;
+        v = s(StrId.Theme);                     if (v != null) ThemeCard.Header = v;
+        v = s(StrId.WarningLevel);              if (v != null) WarningCard.Header = v;
+        v = s(StrId.DangerLevel);               if (v != null) DangerCard.Header = v;
 
         v = s(StrId.SettingsMemory);            if (v != null) MemoryHeader.Text = v;
         v = s(StrId.TitleMemoryRegions);        if (v != null) RegionsExpander.Header = v;
-        v = s(StrId.WorkingSet);                if (v != null) ChkWorkingSet.Content = v;
-        v = s(StrId.SystemFileCache);           if (v != null) ChkSystemFileCache.Content = v;
-        v = s(StrId.StandbyPriority0);          if (v != null) ChkStandbyPriority0.Content = v;
-        v = s(StrId.StandbyList);               if (v != null) ChkStandbyList.Content = v;
-        v = s(StrId.ModifiedList);              if (v != null) ChkModifiedList.Content = v;
-        v = s(StrId.CombineMemoryLists);        if (v != null) ChkCombineMemoryLists.Content = v;
-        v = s(StrId.RegistryCache);             if (v != null) ChkRegistryCache.Content = v;
-        v = s(StrId.ModifiedFileCache);         if (v != null) ChkModifiedFileCache.Content = v;
-        v = s(StrId.AutoCleanEnable);           if (v != null) AutoCleanLabel.Text = v;
-        v = s(StrId.AutoCleanInterval);         if (v != null) IntervalCleanLabel.Text = v;
-        v = s(StrId.TitleHotkeys);              if (v != null) HotkeyLabel.Text = v;
+        v = s(StrId.WorkingSet);                if (v != null) WorkingSetCard.Header = v;
+        v = s(StrId.SystemFileCache);           if (v != null) SystemFileCacheCard.Header = v;
+        v = s(StrId.StandbyPriority0);          if (v != null) StandbyPriority0Card.Header = v;
+        v = s(StrId.StandbyList);               if (v != null) StandbyListCard.Header = v;
+        v = s(StrId.ModifiedList);              if (v != null) ModifiedListCard.Header = v;
+        v = s(StrId.CombineMemoryLists);        if (v != null) CombineMemoryListsCard.Header = v;
+        v = s(StrId.RegistryCache);             if (v != null) RegistryCacheCard.Header = v;
+        v = s(StrId.ModifiedFileCache);         if (v != null) ModifiedFileCacheCard.Header = v;
+        v = s(StrId.AutoCleanEnable);           if (v != null) AutoCleanExpander.Header = v;
+        v = s(StrId.AutoCleanInterval);         if (v != null) IntervalCleanExpander.Header = v;
+        v = s(StrId.TitleHotkeys);              if (v != null) HotkeyExpander.Header = v;
 
-        v = s(StrId.ShowCleanResult);           if (v != null) ShowResultsLabel.Text = v;
-        v = s(StrId.NotificationSound);         if (v != null) NotificationSoundLabel.Text = v;
+        v = s(StrId.ShowCleanResult);           if (v != null) ShowResultsCard.Header = v;
+        v = s(StrId.NotificationSound);         if (v != null) NotificationSoundCard.Header = v;
         v = s(StrId.BalloonTips);               if (v != null) NotificationHeader.Text = v;
 
-        v = s(StrId.AllowStandbyCleanup);       if (v != null) AllowStandbyLabel.Text = v;
-        v = s(StrId.LogCleanResults);           if (v != null) LogResultsLabel.Text = v;
+        v = s(StrId.AllowStandbyCleanup);       if (v != null) AllowStandbyCard.Header = v;
+        v = s(StrId.LogCleanResults);           if (v != null) LogResultsCard.Header = v;
         v = s(StrId.TitleAdvanced);             if (v != null) AdvancedHeader.Text = v;
 
         v = s(StrId.SettingsTray);              if (v != null) TrayHeader.Text = v;
-        v = s(StrId.TrayActionScHint);          if (v != null) TrayLeftLabel.Text = v;
-        v = s(StrId.TrayActionMcHint);          if (v != null) TrayMidLabel.Text = v;
+        v = s(StrId.TrayActionScHint);          if (v != null) TrayLeftCard.Header = v;
+        v = s(StrId.TrayActionMcHint);          if (v != null) TrayMidCard.Header = v;
     }
 
     private void LoadLocales()
@@ -188,18 +198,19 @@ public sealed partial class SettingsPage : Page
         else if (ReferenceEquals(sender, ToggleAutoClean))
         {
             IniConfig.WriteBool("AutoreductEnable", ToggleAutoClean.IsOn);
-            NbAutoClean.IsEnabled = ToggleAutoClean.IsOn;
+            AutoCleanThresholdCard.IsEnabled = ToggleAutoClean.IsOn;
             AutoCleanService.Refresh();
         }
         else if (ReferenceEquals(sender, ToggleIntervalClean))
         {
             IniConfig.WriteBool("AutoreductIntervalEnable", ToggleIntervalClean.IsOn);
-            NbInterval.IsEnabled = ToggleIntervalClean.IsOn;
+            IntervalValueCard.IsEnabled = ToggleIntervalClean.IsOn;
             AutoCleanService.Refresh();
         }
         else if (ReferenceEquals(sender, ToggleAllowStandby))
         {
             IniConfig.WriteBool("IsAllowStandbyListCleanup", ToggleAllowStandby.IsOn);
+            UpdateDangerousRegionAvailability(ToggleAllowStandby.IsOn, true);
         }
         else if (ReferenceEquals(sender, ToggleLogResults))
         {
@@ -211,12 +222,35 @@ public sealed partial class SettingsPage : Page
     {
         if (_loading) return;
 
+        WriteRegionMask();
+    }
+
+    private void UpdateDangerousRegionAvailability(bool isAllowed, bool persistMask)
+    {
+        if (isAllowed)
+        {
+            StandbyListCard.IsEnabled = true;
+            ModifiedListCard.IsEnabled = true;
+            return;
+        }
+
+        var selectionChanged = ChkStandbyList.IsChecked == true || ChkModifiedList.IsChecked == true;
+        ChkStandbyList.IsChecked = false;
+        ChkModifiedList.IsChecked = false;
+        StandbyListCard.IsEnabled = false;
+        ModifiedListCard.IsEnabled = false;
+        if (persistMask && selectionChanged)
+            WriteRegionMask();
+    }
+
+    private void WriteRegionMask()
+    {
         uint mask = 0;
         if (ChkWorkingSet.IsChecked == true) mask |= MemoryMask.WorkingSet;
         if (ChkSystemFileCache.IsChecked == true) mask |= MemoryMask.SystemFileCache;
         if (ChkStandbyPriority0.IsChecked == true) mask |= MemoryMask.StandbyPriority0List;
-        if (ChkStandbyList.IsChecked == true) mask |= MemoryMask.StandbyList;
-        if (ChkModifiedList.IsChecked == true) mask |= MemoryMask.ModifiedList;
+        if (ToggleAllowStandby.IsOn && ChkStandbyList.IsChecked == true) mask |= MemoryMask.StandbyList;
+        if (ToggleAllowStandby.IsOn && ChkModifiedList.IsChecked == true) mask |= MemoryMask.ModifiedList;
         if (ChkCombineMemoryLists.IsChecked == true) mask |= MemoryMask.CombineMemoryLists;
         if (ChkRegistryCache.IsChecked == true) mask |= MemoryMask.RegistryCache;
         if (ChkModifiedFileCache.IsChecked == true) mask |= MemoryMask.ModifiedFileCache;
@@ -274,17 +308,16 @@ public sealed partial class SettingsPage : Page
             IniConfig.WriteInt("TrayActionMc", (int)(mid.Tag ?? 1));
     }
 
-    private void OnWarningValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs args) { if (_loading || WarningValueText == null) return; var v = (uint)args.NewValue; IniConfig.WriteUInt("TrayLevelWarning", v); WarningValueText.Text = v.ToString(); }
-    private void OnDangerValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs args) { if (_loading || DangerValueText == null) return; var v = (uint)args.NewValue; IniConfig.WriteUInt("TrayLevelDanger", v); DangerValueText.Text = v.ToString(); }
-    private void OnAutoCleanValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args) { if (_loading || double.IsNaN(args.NewValue)) return; IniConfig.WriteUInt("AutoreductValue", (uint)args.NewValue); }
+    private void OnWarningValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs args) { if (_loading || WarningValueText == null) return; var v = (uint)args.NewValue; IniConfig.WriteUInt("TrayLevelWarning", v); WarningValueText.Text = $"{v}%"; }
+    private void OnDangerValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs args) { if (_loading || DangerValueText == null) return; var v = (uint)args.NewValue; IniConfig.WriteUInt("TrayLevelDanger", v); DangerValueText.Text = $"{v}%"; }
+    private void OnAutoCleanValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs args) { if (_loading || AutoCleanValueText == null) return; var v = (uint)args.NewValue; IniConfig.WriteUInt("AutoreductValue", v); AutoCleanValueText.Text = $"{v}%"; }
     private void OnIntervalValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args) { if (_loading || double.IsNaN(args.NewValue)) return; IniConfig.WriteUInt("AutoreductIntervalValue", (uint)args.NewValue); }
 
     private void LoadHotkeyDisplay()
     {
         var hotkey = IniConfig.ReadInt("HotkeyClean", (0x02 << 8 | 0x70));
-        var vk = hotkey & 0xFF;
-        var mods = (hotkey >> 8) & 0xFF;
-        HotkeyBox.Text = HotkeyToString((uint)mods, (uint)vk);
+        RenderHotkeyKeycaps(HotkeyKeycapsPanel, (uint)((hotkey >> 8) & 0xFF), (uint)(hotkey & 0xFF), false);
+        HotkeyStatusText.Visibility = Visibility.Collapsed;
     }
 
     private void OnHotkeyChanged(object sender, RoutedEventArgs e)
@@ -297,50 +330,269 @@ public sealed partial class SettingsPage : Page
         _loading = true;
         ToggleHotkey.IsOn = false;
         _loading = false;
-        HotkeyBox.PlaceholderText = "This hotkey is already in use.";
+        HotkeyStatusText.Text = GetHotkeyEditorStrings().Conflict;
+        HotkeyStatusText.Visibility = Visibility.Visible;
     }
-    private void OnHotkeyTapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e) { HotkeyBox.PlaceholderText = "Press a key combination..."; HotkeyBox.Focus(FocusState.Keyboard); }
 
-    private void OnHotkeyKeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+    private async void OnEditHotkeyClick(object sender, RoutedEventArgs e)
     {
-        var vk = (uint)e.Key;
-        if (vk is 0xA0 or 0xA1 or 0xA2 or 0xA3 or 0xA4 or 0xA5) { e.Handled = false; return; }
-        uint mods = 0;
-        if (Microsoft.UI.Input.InputKeyboardSource.GetKeyStateForCurrentThread(Windows.System.VirtualKey.Control).HasFlag(Windows.UI.Core.CoreVirtualKeyStates.Down)) mods |= 2;
-        if (Microsoft.UI.Input.InputKeyboardSource.GetKeyStateForCurrentThread(Windows.System.VirtualKey.Menu).HasFlag(Windows.UI.Core.CoreVirtualKeyStates.Down)) mods |= 4;
-        if (Microsoft.UI.Input.InputKeyboardSource.GetKeyStateForCurrentThread(Windows.System.VirtualKey.Shift).HasFlag(Windows.UI.Core.CoreVirtualKeyStates.Down)) mods |= 1;
-        var hotkey = ((int)mods << 8) | (int)vk;
-        IniConfig.WriteInt("HotkeyClean", hotkey);
-        HotkeyBox.Text = HotkeyToString(mods, vk);
-        if (ToggleHotkey.IsOn && !TrayIcon.RefreshHotkey())
+        if (_hotkeyDialog != null) return;
+
+        var strings = GetHotkeyEditorStrings();
+        var currentHotkey = IniConfig.ReadInt("HotkeyClean", (0x02 << 8 | 0x70));
+        _editingHotkeyModifiers = (uint)((currentHotkey >> 8) & 0xFF);
+        _editingHotkeyKey = (uint)(currentHotkey & 0xFF);
+        _pressedHotkeyModifiers = 0;
+
+        _hotkeyDialogKeycaps = new StackPanel
         {
-            IniConfig.WriteBool("HotkeyCleanEnable", false);
-            _loading = true;
-            ToggleHotkey.IsOn = false;
-            _loading = false;
-            HotkeyBox.PlaceholderText = "This hotkey is already in use.";
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Orientation = Orientation.Horizontal,
+            Spacing = 10
+        };
+
+        _hotkeyDialogStatus = new TextBlock
+        {
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Text = strings.Hint,
+            TextAlignment = TextAlignment.Center,
+            TextWrapping = TextWrapping.Wrap
+        };
+
+        var captureBox = new TextBox
+        {
+            Width = 1,
+            Height = 1,
+            Padding = new Thickness(0),
+            BorderThickness = new Thickness(0),
+            IsReadOnly = true,
+            IsTabStop = true,
+            Opacity = 0
+        };
+        _hotkeyCaptureBox = captureBox;
+
+        var keycapHost = new Grid();
+        keycapHost.Children.Add(_hotkeyDialogKeycaps);
+        keycapHost.Children.Add(captureBox);
+
+        var content = new StackPanel
+        {
+            MinWidth = 420,
+            Padding = new Thickness(0, 8, 0, 4),
+            Spacing = 28
+        };
+        content.Children.Add(new TextBlock
+        {
+            Text = strings.Prompt,
+            FontSize = 18,
+            TextWrapping = TextWrapping.Wrap
+        });
+        content.Children.Add(keycapHost);
+        content.Children.Add(_hotkeyDialogStatus);
+
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            Title = HotkeyExpander.Header?.ToString() ?? "Hotkey",
+            Content = content,
+            PrimaryButtonText = strings.Save,
+            CloseButtonText = strings.Cancel,
+            DefaultButton = ContentDialogButton.Primary,
+            IsPrimaryButtonEnabled = IsValidHotkey(_editingHotkeyModifiers, _editingHotkeyKey)
+        };
+        _hotkeyDialog = dialog;
+        dialog.PreviewKeyDown += OnHotkeyDialogPreviewKeyDown;
+        dialog.PreviewKeyUp += OnHotkeyDialogPreviewKeyUp;
+        dialog.Opened += (_, _) => captureBox.Focus(FocusState.Programmatic);
+        dialog.PrimaryButtonClick += (_, args) =>
+        {
+            if (!IsValidHotkey(_editingHotkeyModifiers, _editingHotkeyKey))
+            {
+                args.Cancel = true;
+                SetHotkeyDialogStatus(strings.Hint, true);
+                return;
+            }
+
+            var oldHotkey = IniConfig.ReadInt("HotkeyClean", currentHotkey);
+            var newHotkey = ((int)_editingHotkeyModifiers << 8) | (int)_editingHotkeyKey;
+            IniConfig.WriteInt("HotkeyClean", newHotkey);
+            if (ToggleHotkey.IsOn && !TrayIcon.RefreshHotkey())
+            {
+                IniConfig.WriteInt("HotkeyClean", oldHotkey);
+                TrayIcon.RefreshHotkey();
+                args.Cancel = true;
+                SetHotkeyDialogStatus(strings.Conflict, true);
+            }
+        };
+
+        RenderHotkeyKeycaps(_hotkeyDialogKeycaps, _editingHotkeyModifiers, _editingHotkeyKey, true);
+
+        try
+        {
+            var result = await dialog.ShowAsync();
+            if (result == ContentDialogResult.Primary)
+                LoadHotkeyDisplay();
         }
+        finally
+        {
+            dialog.PreviewKeyDown -= OnHotkeyDialogPreviewKeyDown;
+            dialog.PreviewKeyUp -= OnHotkeyDialogPreviewKeyUp;
+            _hotkeyDialog = null;
+            _hotkeyDialogKeycaps = null;
+            _hotkeyDialogStatus = null;
+            _hotkeyCaptureBox = null;
+            _pressedHotkeyModifiers = 0;
+            EditHotkeyButton.Focus(FocusState.Programmatic);
+        }
+    }
+
+    private void OnHotkeyDialogPreviewKeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+    {
+        var key = (uint)e.Key;
+        var modifier = GetHotkeyModifierFlag(key);
+
+        if (modifier != 0)
+        {
+            _pressedHotkeyModifiers |= modifier;
+            _editingHotkeyModifiers = _pressedHotkeyModifiers;
+            _editingHotkeyKey = 0;
+        }
+        else if (key <= byte.MaxValue)
+        {
+            _editingHotkeyModifiers = _pressedHotkeyModifiers;
+            _editingHotkeyKey = key;
+        }
+
+        if (_hotkeyDialogKeycaps != null)
+            RenderHotkeyKeycaps(_hotkeyDialogKeycaps, _editingHotkeyModifiers, _editingHotkeyKey, true);
+
+        var isValid = IsValidHotkey(_editingHotkeyModifiers, _editingHotkeyKey);
+        if (_hotkeyDialog != null)
+            _hotkeyDialog.IsPrimaryButtonEnabled = isValid;
+        SetHotkeyDialogStatus(GetHotkeyEditorStrings().Hint, !isValid);
+        _hotkeyCaptureBox?.Focus(FocusState.Keyboard);
         e.Handled = true;
     }
 
-    private static string HotkeyToString(uint mods, uint vk)
+    private void OnHotkeyDialogPreviewKeyUp(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+    {
+        var modifier = GetHotkeyModifierFlag((uint)e.Key);
+        if (modifier == 0) return;
+
+        _pressedHotkeyModifiers &= ~modifier;
+        if (_editingHotkeyKey == 0)
+        {
+            _editingHotkeyModifiers = _pressedHotkeyModifiers;
+            if (_hotkeyDialogKeycaps != null)
+                RenderHotkeyKeycaps(_hotkeyDialogKeycaps, _editingHotkeyModifiers, 0, true);
+        }
+
+        e.Handled = true;
+    }
+
+    private void RenderHotkeyKeycaps(StackPanel panel, uint modifiers, uint key, bool large)
+    {
+        panel.Children.Clear();
+        var parts = GetHotkeyParts(modifiers, key);
+        if (parts.Count == 0)
+        {
+            panel.Children.Add(new TextBlock
+            {
+                VerticalAlignment = VerticalAlignment.Center,
+                FontSize = large ? 22 : 16,
+                Text = "—"
+            });
+            return;
+        }
+
+        var style = (Style)Resources[large ? "HotkeyDialogKeycapStyle" : "HotkeyKeycapStyle"];
+        foreach (var part in parts)
+            panel.Children.Add(new Button { Content = part, Style = style });
+    }
+
+    private void SetHotkeyDialogStatus(string text, bool isError)
+    {
+        if (_hotkeyDialogStatus == null) return;
+        _hotkeyDialogStatus.Text = text;
+        _hotkeyDialogStatus.Foreground = isError
+            ? (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["SystemFillColorCriticalBrush"]
+            : (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["TextFillColorSecondaryBrush"];
+    }
+
+    private static bool IsModifierKey(uint key)
+    {
+        return GetHotkeyModifierFlag(key) != 0;
+    }
+
+    private static uint GetHotkeyModifierFlag(uint key)
+    {
+        return key switch
+        {
+            0x10 or 0xA0 or 0xA1 => 1,
+            0x11 or 0xA2 or 0xA3 => 2,
+            0x12 or 0xA4 or 0xA5 => 4,
+            0x5B or 0x5C => 8,
+            _ => 0
+        };
+    }
+
+    private static bool IsValidHotkey(uint modifiers, uint key)
+    {
+        return modifiers != 0 && key is > 0 and <= byte.MaxValue && !IsModifierKey(key);
+    }
+
+    private static System.Collections.Generic.List<string> GetHotkeyParts(uint modifiers, uint key)
     {
         var parts = new System.Collections.Generic.List<string>();
-        if ((mods & 2) != 0) parts.Add("Ctrl");
-        if ((mods & 4) != 0) parts.Add("Alt");
-        if ((mods & 1) != 0) parts.Add("Shift");
-        if ((mods & 8) != 0) parts.Add("Win");
-        var keyName = vk switch
+        if ((modifiers & 8) != 0) parts.Add("Win");
+        if ((modifiers & 2) != 0) parts.Add("Ctrl");
+        if ((modifiers & 4) != 0) parts.Add("Alt");
+        if ((modifiers & 1) != 0) parts.Add("Shift");
+        if (key != 0) parts.Add(GetHotkeyKeyName(key));
+        return parts;
+    }
+
+    private static string GetHotkeyKeyName(uint key)
+    {
+        return key switch
         {
-            >= 0x70 and <= 0x87 => "F" + (vk - 0x70 + 1),
-            0x2E => "Del", 0x08 => "Back", 0x09 => "Tab", 0x0D => "Enter",
-            0x20 => "Space", 0x21 => "PgUp", 0x22 => "PgDn",
-            0x23 => "End", 0x24 => "Home", 0x25 => "Left", 0x26 => "Up",
-            0x27 => "Right", 0x28 => "Down", 0x2D => "Ins",
-            _ => ((char)vk).ToString()
+            >= 0x30 and <= 0x39 => ((char)key).ToString(),
+            >= 0x41 and <= 0x5A => ((char)key).ToString(),
+            >= 0x70 and <= 0x87 => "F" + (key - 0x70 + 1),
+            0x08 => "Back",
+            0x09 => "Tab",
+            0x0D => "Enter",
+            0x1B => "Esc",
+            0x20 => "Space",
+            0x21 => "PgUp",
+            0x22 => "PgDn",
+            0x23 => "End",
+            0x24 => "Home",
+            0x25 => "Left",
+            0x26 => "Up",
+            0x27 => "Right",
+            0x28 => "Down",
+            0x2D => "Ins",
+            0x2E => "Del",
+            _ => ((Windows.System.VirtualKey)key).ToString()
         };
-        parts.Add(keyName);
-        return string.Join(" + ", parts);
+    }
+
+    private static (string Prompt, string Hint, string Save, string Cancel, string Conflict) GetHotkeyEditorStrings()
+    {
+        var configuredLanguage = IniConfig.ReadString("Language", "") ?? "";
+        var cultureName = System.Globalization.CultureInfo.CurrentUICulture.Name;
+        var isTraditional = configuredLanguage.Contains("Traditional", StringComparison.OrdinalIgnoreCase)
+            || (configuredLanguage.Length == 0 && (cultureName.StartsWith("zh-TW", StringComparison.OrdinalIgnoreCase)
+                || cultureName.StartsWith("zh-HK", StringComparison.OrdinalIgnoreCase)));
+        var isChinese = configuredLanguage.Contains("Chinese", StringComparison.OrdinalIgnoreCase)
+            || (configuredLanguage.Length == 0 && cultureName.StartsWith("zh", StringComparison.OrdinalIgnoreCase));
+
+        if (isTraditional)
+            return ("按下新的組合鍵", "快捷鍵必須包含 Win、Ctrl、Alt 或 Shift。", "儲存", "取消", "此快捷鍵已被其他程式使用。");
+        if (isChinese)
+            return ("按下新的组合键", "快捷键必须包含 Win、Ctrl、Alt 或 Shift。", "保存", "取消", "该快捷键已被其他程序占用。");
+        return ("Press a new key combination", "The shortcut must include Win, Ctrl, Alt, or Shift.", "Save", "Cancel", "This shortcut is already in use.");
     }
 
 }
