@@ -1,8 +1,10 @@
 using MemReduct.Core;
 using Microsoft.UI;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace memreduct_winui;
@@ -16,6 +18,7 @@ public sealed partial class MainWindow : Window
     private const uint SWP_NOSIZE = 0x0001;
     private const uint SWP_NOMOVE = 0x0002;
     private const uint SWP_NOACTIVATE = 0x0010;
+    private const double CaptionButtonBottomInset = 1.0;
 
     [DllImport("user32")]
     private static extern bool SetWindowPos(nint hWnd, nint hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
@@ -38,12 +41,17 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        AppWindow.SetIcon("Assets/AppIcon.ico");
+
+        var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "AppIcon.ico");
+        if (File.Exists(iconPath))
+            AppWindow.SetIcon(iconPath);
 
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
+        AppTitleBar.Loaded += OnAppTitleBarLoaded;
 
         UpdateTitleBarColors();
+        Activated += OnWindowActivated;
 
         if (Content is FrameworkElement fe)
             fe.ActualThemeChanged += (s, e) => UpdateTitleBarColors();
@@ -81,24 +89,66 @@ public sealed partial class MainWindow : Window
 
     private void UpdateTitleBarColors()
     {
+        if (!AppWindowTitleBar.IsCustomizationSupported())
+            return;
+
         var theme = Content is FrameworkElement fe ? fe.ActualTheme : ElementTheme.Default;
         var tb = AppWindow.TitleBar;
         tb.ButtonBackgroundColor = Windows.UI.Color.FromArgb(0, 0, 0, 0);
         tb.ButtonInactiveBackgroundColor = Windows.UI.Color.FromArgb(0, 0, 0, 0);
-        tb.ButtonHoverBackgroundColor = Windows.UI.Color.FromArgb(20, 0, 0, 0);
 
         if (theme == ElementTheme.Dark)
         {
             tb.ButtonForegroundColor = Windows.UI.Color.FromArgb(255, 220, 220, 220);
-            tb.ButtonInactiveForegroundColor = Windows.UI.Color.FromArgb(140, 220, 220, 220);
             tb.ButtonHoverForegroundColor = Windows.UI.Color.FromArgb(255, 240, 240, 240);
+            tb.ButtonPressedForegroundColor = Windows.UI.Color.FromArgb(255, 240, 240, 240);
+            tb.ButtonInactiveForegroundColor = Windows.UI.Color.FromArgb(255, 128, 128, 128);
+            tb.ButtonHoverBackgroundColor = Windows.UI.Color.FromArgb(24, 255, 255, 255);
+            tb.ButtonPressedBackgroundColor = Windows.UI.Color.FromArgb(14, 255, 255, 255);
         }
         else
         {
             tb.ButtonForegroundColor = Windows.UI.Color.FromArgb(255, 40, 40, 40);
-            tb.ButtonInactiveForegroundColor = Windows.UI.Color.FromArgb(120, 40, 40, 40);
             tb.ButtonHoverForegroundColor = Windows.UI.Color.FromArgb(255, 20, 20, 20);
+            tb.ButtonPressedForegroundColor = Windows.UI.Color.FromArgb(255, 20, 20, 20);
+            tb.ButtonInactiveForegroundColor = Windows.UI.Color.FromArgb(255, 128, 128, 128);
+            tb.ButtonHoverBackgroundColor = Windows.UI.Color.FromArgb(16, 0, 0, 0);
+            tb.ButtonPressedBackgroundColor = Windows.UI.Color.FromArgb(10, 0, 0, 0);
         }
+    }
+
+    private void OnWindowActivated(object sender, WindowActivatedEventArgs args)
+    {
+        var opacity = args.WindowActivationState == WindowActivationState.Deactivated ? 0.55 : 1.0;
+        TitleBarIcon.Opacity = opacity;
+        TitleLabel.Opacity = opacity;
+    }
+
+    private void OnAppTitleBarLoaded(object sender, RoutedEventArgs args)
+    {
+        SyncTitleBarHeight();
+        if (AppTitleBar.XamlRoot != null)
+            AppTitleBar.XamlRoot.Changed += OnTitleBarXamlRootChanged;
+    }
+
+    private void OnTitleBarXamlRootChanged(XamlRoot sender, XamlRootChangedEventArgs args)
+    {
+        DispatcherQueue.TryEnqueue(SyncTitleBarHeight);
+    }
+
+    private void SyncTitleBarHeight()
+    {
+        if (!AppWindowTitleBar.IsCustomizationSupported() || AppTitleBar.XamlRoot == null)
+            return;
+
+        var scale = AppTitleBar.XamlRoot.RasterizationScale;
+        var systemHeight = AppWindow.TitleBar.Height;
+        if (scale <= 0 || systemHeight <= 0)
+            return;
+
+        var height = Math.Max(0, systemHeight / scale - CaptionButtonBottomInset);
+        if (Math.Abs(TitleBarRow.Height.Value - height) > 0.01)
+            TitleBarRow.Height = new GridLength(height);
     }
 
     public void ApplyTopmost()
@@ -155,6 +205,12 @@ public sealed partial class MainWindow : Window
 
     private void SaveWindowBounds()
     {
+        if (AppWindow.Presenter is OverlappedPresenter presenter
+            && presenter.State != OverlappedPresenterState.Restored)
+        {
+            return;
+        }
+
         var pos = AppWindow.Position;
         var size = AppWindow.Size;
         IniConfig.WriteInt("WindowLeft", pos.X);
