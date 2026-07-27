@@ -10,6 +10,7 @@ public static class TrayIcon
     private static bool _created;
     private static WndProcDelegate? _wndProcDelegate;
     private static uint _taskbarCreatedMessage;
+    private static bool _useDarkMenu;
 
     private const uint WM_TRAYICON = 0x8001;
     private const uint NIF_MESSAGE = 0x00000001;
@@ -32,34 +33,12 @@ public static class TrayIcon
     public const int CMD_CLEAN = 2;
     public const int CMD_SETTINGS = 3;
     public const int CMD_EXIT = 4;
-    private const int CMD_REGION_BASE = 100;
-    private const int CMD_LIMIT_BASE = 200;
-    private const int CMD_INTERVAL_BASE = 300;
-
     public const int ACTION_SHOW = 0;
     public const int ACTION_CLEAN = 1;
     public const int ACTION_TASKMGR = 2;
 
     [DllImport("shell32", CharSet = CharSet.Unicode)]
     private static extern bool Shell_NotifyIconW(uint dwMessage, ref NOTIFYICONDATAW lpData);
-
-    [DllImport("user32")]
-    private static extern nint CreatePopupMenu();
-
-    [DllImport("user32")]
-    private static extern bool DestroyMenu(nint hMenu);
-
-    [DllImport("user32", CharSet = CharSet.Unicode)]
-    private static extern bool AppendMenuW(nint hMenu, uint uFlags, nuint uIDNewItem, string lpNewItem);
-
-    [DllImport("user32")]
-    private static extern bool CheckMenuItem(nint hMenu, nuint uIDCheckItem, uint uCheck);
-
-    [DllImport("user32")]
-    private static extern bool SetForegroundWindow(nint hWnd);
-
-    [DllImport("user32")]
-    private static extern int TrackPopupMenu(nint hMenu, uint uFlags, int x, int y, int nReserved, nint hWnd, nint prcRect);
 
     [DllImport("user32")]
     private static extern bool RegisterHotKey(nint hWnd, int id, uint fsModifiers, uint vk);
@@ -152,16 +131,12 @@ public static class TrayIcon
     public static event Action<int>? TrayCommand;
     public static event Action? HotkeyPressed;
     public static event Action<int>? TrayClickAction;
+    public static event Action<int, int>? ContextMenuRequested;
 
     private static string _textShow = "Show / Hide";
     private static string _textClean = "Clean memory";
     private static string _textSettings = "Settings";
     private static string _textExit = "Exit";
-
-    private static readonly string[] _regionNames = { "Working set", "System file cache", "Modified file cache",
-        "Modified page list", "Standby list", "Standby list (low)", "Registry cache", "Combine memory lists" };
-    private static readonly uint[] _regionMasks = { 0x01, 0x02, 0x80, 0x10, 0x08, 0x04, 0x40, 0x20 };
-    private static readonly uint[] _regionIds = { 45, 46, 95, 49, 48, 47, 96, 50 };
 
     private static nint _currentIcon;
     private static bool _ownsCurrentIcon;
@@ -174,6 +149,23 @@ public static class TrayIcon
         _textClean = clean;
         _textSettings = settings;
         _textExit = exit;
+    }
+
+    public static void SetMenuTheme(bool useDarkTheme)
+    {
+        _useDarkMenu = useDarkTheme;
+    }
+
+    internal static bool UseDarkMenu => _useDarkMenu;
+
+    internal static string ShowMenuText => _textShow;
+    internal static string CleanMenuText => _textClean;
+    internal static string SettingsMenuText => _textSettings;
+    internal static string ExitMenuText => _textExit;
+
+    internal static void DispatchMenuCommand(int command)
+    {
+        TrayCommand?.Invoke(command);
     }
 
     public static void SetIcon(string path)
@@ -233,7 +225,8 @@ public static class TrayIcon
             }
             if (evt == 0x0205) // WM_RBUTTONUP
             {
-                ShowContextMenu(hwnd);
+                GetCursorPos(out var cursor);
+                ContextMenuRequested?.Invoke(cursor.X, cursor.Y);
                 return 0;
             }
         }
@@ -248,97 +241,6 @@ public static class TrayIcon
             return 0;
         }
         return DefWindowProcW(hwnd, msg, wParam, lParam);
-    }
-
-    private static void ShowContextMenu(nint hwnd)
-    {
-        var hMenu = CreatePopupMenu();
-        var mask = IniConfig.ReadUInt("ReductMask2", 0xE7);
-        var limitEnabled = IniConfig.ReadBool("AutoreductEnable");
-        var intervalEnabled = IniConfig.ReadBool("AutoreductIntervalEnable");
-        var limitVal = IniConfig.ReadUInt("AutoreductValue", 90);
-        var intervalVal = IniConfig.ReadUInt("AutoreductIntervalValue", 30);
-
-        var sRegions = CoreService.GetString(14) ?? "Clean areas";
-        var sLimit = CoreService.GetString(15) ?? "Clean when above";
-        var sInterval = CoreService.GetString(16) ?? "Clean every";
-        var sDisable = CoreService.GetString(13) ?? "Disable";
-        AppendMenuW(hMenu, 0, CMD_SHOW, _textShow);
-        AppendMenuW(hMenu, 0x800, 0, "");
-        AppendMenuW(hMenu, 0, CMD_CLEAN, _textClean);
-        AppendMenuW(hMenu, 0x800, 0, "");
-
-        // Regions submenu
-        var hRegion = CreatePopupMenu();
-        for (int i = 0; i < _regionNames.Length; i++)
-        {
-            var id = CMD_REGION_BASE + i;
-            var rname = CoreService.GetString(_regionIds[i]) ?? _regionNames[i];
-            AppendMenuW(hRegion, 0, (nuint)id, rname);
-            if ((mask & _regionMasks[i]) != 0)
-                CheckMenuItem(hRegion, (nuint)id, 8);
-        }
-        AppendMenuW(hMenu, 0x10, (nuint)hRegion, sRegions);
-
-        // Clean when above submenu
-        var hLimit = CreatePopupMenu();
-        AppendMenuW(hLimit, 0, CMD_LIMIT_BASE, sDisable);
-        if (!limitEnabled) CheckMenuItem(hLimit, (nuint)CMD_LIMIT_BASE, 8);
-        for (int p = 10; p <= 90; p += 10)
-        {
-            var id = CMD_LIMIT_BASE + p;
-            AppendMenuW(hLimit, 0, (nuint)id, $"{p}%");
-            if (limitEnabled && limitVal == p) CheckMenuItem(hLimit, (nuint)id, 8);
-        }
-        AppendMenuW(hMenu, 0x10, (nuint)hLimit, sLimit);
-
-        // Clean every submenu
-        var hInterval = CreatePopupMenu();
-        AppendMenuW(hInterval, 0, CMD_INTERVAL_BASE, sDisable);
-        if (!intervalEnabled) CheckMenuItem(hInterval, (nuint)CMD_INTERVAL_BASE, 8);
-        for (int m = 10; m <= 90; m += 10)
-        {
-            var id = CMD_INTERVAL_BASE + m;
-            AppendMenuW(hInterval, 0, (nuint)id, $"{m} min.");
-            if (intervalEnabled && intervalVal == m) CheckMenuItem(hInterval, (nuint)id, 8);
-        }
-        AppendMenuW(hMenu, 0x10, (nuint)hInterval, sInterval);
-
-        AppendMenuW(hMenu, 0x800, 0, "");
-        AppendMenuW(hMenu, 0, CMD_SETTINGS, _textSettings);
-        AppendMenuW(hMenu, 0x800, 0, "");
-        AppendMenuW(hMenu, 0, CMD_EXIT, _textExit);
-
-        SetForegroundWindow(hwnd);
-        GetCursorPos(out var pt);
-        var cmd = TrackPopupMenu(hMenu, 0x2 | 0x100 | 0x80, pt.X, pt.Y, 0, hwnd, 0);
-        DestroyMenu(hMenu);
-
-        if (cmd == 0) return;
-
-        if (cmd >= CMD_REGION_BASE && cmd < CMD_LIMIT_BASE)
-        {
-            var idx = cmd - CMD_REGION_BASE;
-            IniConfig.WriteUInt("ReductMask2", mask ^ _regionMasks[idx]);
-        }
-        else if (cmd >= CMD_LIMIT_BASE && cmd < CMD_INTERVAL_BASE)
-        {
-            var pct = cmd - CMD_LIMIT_BASE;
-            if (pct == 0) { IniConfig.WriteBool("AutoreductEnable", false); }
-            else { IniConfig.WriteBool("AutoreductEnable", true); IniConfig.WriteUInt("AutoreductValue", (uint)pct); }
-            AutoCleanService.Refresh();
-        }
-        else if (cmd >= CMD_INTERVAL_BASE)
-        {
-            var min = cmd - CMD_INTERVAL_BASE;
-            if (min == 0) { IniConfig.WriteBool("AutoreductIntervalEnable", false); }
-            else { IniConfig.WriteBool("AutoreductIntervalEnable", true); IniConfig.WriteUInt("AutoreductIntervalValue", (uint)min); }
-            AutoCleanService.Refresh();
-        }
-        else
-        {
-            TrayCommand?.Invoke(cmd);
-        }
     }
 
     public static bool Create(string tooltip)

@@ -12,6 +12,7 @@ namespace memreduct_winui;
 public sealed partial class MainWindow : Window
 {
     private bool _exiting;
+    private TrayMenuWindow? _trayMenuWindow;
 
     private static readonly nint HWND_TOPMOST = -1;
     private static readonly nint HWND_NOTOPMOST = -2;
@@ -69,7 +70,12 @@ public sealed partial class MainWindow : Window
         TrayIcon.TrayCommand += OnTrayCommand;
         TrayIcon.HotkeyPressed += OnHotkeyPressed;
         TrayIcon.TrayClickAction += OnTrayClickAction;
-        Closed += (s, e) => TrayIcon.Destroy();
+        TrayIcon.ContextMenuRequested += OnTrayContextMenuRequested;
+        Closed += (s, e) =>
+        {
+            _trayMenuWindow?.Close();
+            TrayIcon.Destroy();
+        };
         AppWindow.Closing += AppWindow_Closing;
         UpdateTrayMenuTexts();
         if (!TrayIcon.RefreshHotkey())
@@ -89,10 +95,12 @@ public sealed partial class MainWindow : Window
 
     private void UpdateTitleBarColors()
     {
+        var theme = Content is FrameworkElement fe ? fe.ActualTheme : ElementTheme.Default;
+        TrayIcon.SetMenuTheme(theme == ElementTheme.Dark);
+
         if (!AppWindowTitleBar.IsCustomizationSupported())
             return;
 
-        var theme = Content is FrameworkElement fe ? fe.ActualTheme : ElementTheme.Default;
         var tb = AppWindow.TitleBar;
         tb.ButtonBackgroundColor = Windows.UI.Color.FromArgb(0, 0, 0, 0);
         tb.ButtonInactiveBackgroundColor = Windows.UI.Color.FromArgb(0, 0, 0, 0);
@@ -277,6 +285,28 @@ public sealed partial class MainWindow : Window
             mainPage.ApplyLocalization();
         else if (ContentFrame.Content is SettingsPage settingsPage)
             settingsPage.ApplyLocalization();
+    }
+
+    private void OnTrayContextMenuRequested(int cursorX, int cursorY)
+    {
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            _trayMenuWindow?.Close();
+
+            var menu = new TrayMenuWindow(
+                TrayIcon.UseDarkMenu,
+                TrayIcon.ShowMenuText,
+                TrayIcon.CleanMenuText,
+                TrayIcon.SettingsMenuText,
+                TrayIcon.ExitMenuText);
+            _trayMenuWindow = menu;
+            menu.Closed += (_, _) =>
+            {
+                if (ReferenceEquals(_trayMenuWindow, menu))
+                    _trayMenuWindow = null;
+            };
+            menu.ShowAt(cursorX, cursorY);
+        });
     }
 
     public void ApplyNavLocalization()
