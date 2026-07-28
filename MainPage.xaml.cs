@@ -73,23 +73,23 @@ public sealed partial class MainPage : Page
 
         if (usage != null)
         {
-            PhysicalPctLabel.Text = usage + ":";
-            PageFilePctLabel.Text = usage + ":";
-            CachePctLabel.Text = usage + ":";
+            PhysicalPctLabel.Text = usage;
+            PageFilePctLabel.Text = usage;
+            CachePctLabel.Text = usage;
         }
 
         if (available != null)
         {
-            PhysicalFreeLabel.Text = available + ":";
-            PageFileFreeLabel.Text = available + ":";
-            CacheFreeLabel.Text = available + ":";
+            PhysicalFreeLabel.Text = available;
+            PageFileFreeLabel.Text = available;
+            CacheFreeLabel.Text = available;
         }
 
         if (total != null)
         {
-            PhysicalTotalLabel.Text = total + ":";
-            PageFileTotalLabel.Text = total + ":";
-            CacheTotalLabel.Text = total + ":";
+            PhysicalTotalLabel.Text = total;
+            PageFileTotalLabel.Text = total;
+            CacheTotalLabel.Text = total;
         }
 
         var cleanText = s(StrId.CleanMemory) ?? "Clean memory";

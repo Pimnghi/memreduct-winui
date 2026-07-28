@@ -121,7 +121,7 @@
                             SelectionChanged="OnThemeChanged" />
                     </toolkit:SettingsCard>
 
-                    <toolkit:SettingsCard x:Name="WarningCard" Header="Warning level (%)">
+                    <toolkit:SettingsCard x:Name="WarningCard" Header="Warning level threshold">
                         <toolkit:SettingsCard.HeaderIcon>
                             <FontIcon Glyph="&#xE7BA;" />
                         </toolkit:SettingsCard.HeaderIcon>
@@ -144,7 +144,7 @@
                         </Grid>
                     </toolkit:SettingsCard>
 
-                    <toolkit:SettingsCard x:Name="DangerCard" Header="Danger level (%)">
+                    <toolkit:SettingsCard x:Name="DangerCard" Header="Danger level threshold">
                         <toolkit:SettingsCard.HeaderIcon>
                             <FontIcon Glyph="&#xEA39;" />
                         </toolkit:SettingsCard.HeaderIcon>
@@ -258,7 +258,7 @@
 
                     <toolkit:SettingsExpander
                         x:Name="AutoCleanExpander"
-                        Header="Clean when above (%)"
+                        Header="Clean when usage reaches threshold"
                         IsExpanded="False">
                         <toolkit:SettingsExpander.HeaderIcon>
                             <FontIcon Glyph="&#xE895;" />
@@ -295,7 +295,7 @@
 
                     <toolkit:SettingsExpander
                         x:Name="IntervalCleanExpander"
-                        Header="Clean every (min.)"
+                        Header="Clean at specified intervals"
                         IsExpanded="False">
                         <toolkit:SettingsExpander.HeaderIcon>
                             <FontIcon Glyph="&#xE823;" />
@@ -309,20 +309,29 @@
                             <toolkit:SettingsCard
                                 x:Name="IntervalValueCard"
                                 HorizontalContentAlignment="Right">
-                                <NumberBox
-                                    x:Name="NbInterval"
-                                    Width="96"
-                                    Minimum="1"
-                                    Maximum="1440"
-                                    SpinButtonPlacementMode="Compact"
-                                    ValueChanged="OnIntervalValueChanged" />
+                                <StackPanel
+                                    HorizontalAlignment="Right"
+                                    Orientation="Horizontal"
+                                    Spacing="8">
+                                    <NumberBox
+                                        x:Name="NbInterval"
+                                        Width="96"
+                                        Minimum="1"
+                                        Maximum="1440"
+                                        SpinButtonPlacementMode="Compact"
+                                        ValueChanged="OnIntervalValueChanged" />
+                                    <TextBlock
+                                        x:Name="IntervalMinuteText"
+                                        VerticalAlignment="Center"
+                                        Text="minutes" />
+                                </StackPanel>
                             </toolkit:SettingsCard>
                         </toolkit:SettingsExpander.Items>
                     </toolkit:SettingsExpander>
 
                     <toolkit:SettingsExpander
                         x:Name="HotkeyExpander"
-                        Header="Hotkey (global)"
+                        Header="Shortcut"
                         IsExpanded="False">
                         <toolkit:SettingsExpander.HeaderIcon>
                             <FontIcon Glyph="&#xE765;" />

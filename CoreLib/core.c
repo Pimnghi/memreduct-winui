@@ -1,7 +1,5 @@
 #include "core.h"
 
-extern APP_GLOBAL_CONFIG app_global;
-
 #define MOUNTMGR_DEVICE_NAME L"\\Device\\MountPointManager"
 #define MOUNTMGRCONTROLTYPE 0x0000006D
 #define IOCTL_MOUNTMGR_QUERY_POINTS CTL_CODE(MOUNTMGRCONTROLTYPE, 2, METHOD_BUFFERED, FILE_ANY_ACCESS)
@@ -241,6 +239,7 @@ static LPCWSTR core_get_string_en(ULONG uid)
 		case 4:  return L"Settings";
 		case 5:  return L"Exit";
 		case 10: return L"About";
+		case 12: return L"Show / Hide";
 		case 13: return L"Disable";
 		case 14: return L"Clean areas";
 		case 15: return L"Clean when above";
@@ -258,6 +257,7 @@ static LPCWSTR core_get_string_en(ULONG uid)
 		case 27: return L"Tray icon";
 		case 31: return L"Memory regions to be cleaned";
 		case 32: return L"Memory management";
+		case 33: return L"Shortcut";
 		case 38: return L"Always on top";
 		case 39: return L"Load on system startup";
 		case 40: return L"Start minimized";
@@ -268,25 +268,25 @@ static LPCWSTR core_get_string_en(ULONG uid)
 		case 47: return L"Standby list (without priority)";
 		case 48: return L"Standby list*";
 		case 49: return L"Modified page list*";
-		case 50: return L"Combine memory lists(win10+)";
-		case 51: return L"Clean when above: (%)";
-		case 52: return L"Clean every: (min.)";
+		case 50: return L"Combine memory lists (Windows 10+)";
+		case 51: return L"Clean when usage reaches threshold";
+		case 52: return L"Clean at specified intervals";
 		case 84: return L"Enable notifications sound";
 		case 85: return L"Advanced";
-		case 89: return L"Allow Standby lists and Modified page list cleanup on autoreduct";
+		case 89: return L"Allow Standby list and Modified page list cleanup during automatic cleaning";
 		case 90: return L"Log cleaning results into a debug log";
-		case 95: return L"Registry cache (win8.1+)";
+		case 95: return L"Registry cache (Windows 8.1+)";
 		case 96: return L"Modified file cache";
 		case 71: return L"Show memory cleaning results";
 		case 72: return L"Are you sure you want to clean the memory?";
 		case 75: return L"Memory was released.";
 		case 76: return L"Required administrator privileges.";
 		case 35: return L"Color indication";
-		case 37: return L"Balloon tips";
-		case 64: return L"Warning level (%)";
-		case 65: return L"Danger level (%)";
-		case 66: return L"Single click:";
-		case 67: return L"Middle click:";
+		case 37: return L"Notifications";
+		case 64: return L"Warning level threshold";
+		case 65: return L"Danger level threshold";
+		case 66: return L"Single click";
+		case 67: return L"Middle click";
 		case 68: return L"Show / Hide";
 		case 69: return L"Clean memory";
 		case 70: return L"Open task manager";
@@ -294,47 +294,156 @@ static LPCWSTR core_get_string_en(ULONG uid)
 		case 92: return L"System default";
 		case 93: return L"Light";
 		case 94: return L"Dark";
+		case 97: return L"Dashboard";
+		case 98: return L"minutes";
+		case 99: return L"Press a new key combination";
+		case 100: return L"The shortcut must include Win, Ctrl, Alt, or Shift.";
+		case 101: return L"Save";
+		case 102: return L"Cancel";
+		case 103: return L"This shortcut is already in use.";
 		default: return NULL;
 	}
+}
+
+static VOID core_get_locale_path(LPWSTR buffer, ULONG buffer_size)
+{
+	_r_str_printf(
+		buffer,
+		buffer_size,
+		L"%s\\language\\memreduct-winui.lng",
+		_r_app_getdirectory()->buffer);
+}
+
+static VOID core_get_config_path(LPWSTR buffer, ULONG buffer_size)
+{
+	_r_str_printf(
+		buffer,
+		buffer_size,
+		L"%s\\data\\memreduct-winui.ini",
+		_r_app_getdirectory()->buffer);
+}
+
+typedef struct _CORE_LOCALE_MAP
+{
+	LPCWSTR locale_prefix;
+	LPCWSTR section_name;
+} CORE_LOCALE_MAP;
+
+static BOOLEAN core_locale_has_prefix(LPCWSTR locale_name, LPCWSTR prefix)
+{
+	SIZE_T prefix_length = wcslen(prefix);
+
+	return _wcsnicmp(locale_name, prefix, prefix_length) == 0 &&
+		(locale_name[prefix_length] == L'\0' || locale_name[prefix_length] == L'-');
+}
+
+static BOOLEAN core_get_system_locale(LPWSTR buffer, ULONG buffer_size)
+{
+	static const CORE_LOCALE_MAP locale_map[] =
+	{
+		{L"zh-Hant", L"Chinese (Traditional)"},
+		{L"zh-TW", L"Chinese (Traditional)"},
+		{L"zh-HK", L"Chinese (Traditional)"},
+		{L"zh-MO", L"Chinese (Traditional)"},
+		{L"zh", L"Chinese (Simplified)"},
+		{L"pt-BR", L"Portuguese (Brazil)"},
+		{L"pt", L"Portuguese"},
+		{L"sr-Latn", L"Serbian (Latin)"},
+		{L"sr", L"Serbian (Cyrillic)"},
+		{L"ar", L"Arabic"},
+		{L"bg", L"Bulgarian"},
+		{L"ca", L"Catalan"},
+		{L"cs", L"Czech"},
+		{L"nl", L"Dutch"},
+		{L"fr", L"French"},
+		{L"de", L"German"},
+		{L"he", L"Hebrew"},
+		{L"hu", L"Hungarian"},
+		{L"id", L"Indonesian"},
+		{L"it", L"Italian"},
+		{L"ja", L"Japanese"},
+		{L"kk", L"Kazakh"},
+		{L"ko", L"Korean"},
+		{L"fa", L"Persian"},
+		{L"pl", L"Polish"},
+		{L"ro", L"Romanian"},
+		{L"ru", L"Russian"},
+		{L"sk", L"Slovak"},
+		{L"es", L"Spanish"},
+		{L"sv", L"Swedish"},
+		{L"tr", L"Turkish"},
+		{L"uk", L"Ukrainian"},
+		{L"vi", L"Vietnamese"},
+		{L"en", L"English"},
+	};
+	WCHAR locale_name[LOCALE_NAME_MAX_LENGTH];
+
+	if (GetLocaleInfoW(
+		LOCALE_USER_DEFAULT,
+		LOCALE_SNAME,
+		locale_name,
+		RTL_NUMBER_OF(locale_name)) <= 1)
+	{
+		return FALSE;
+	}
+
+	for (ULONG_PTR i = 0; i < RTL_NUMBER_OF(locale_map); i++)
+	{
+		if (core_locale_has_prefix(locale_name, locale_map[i].locale_prefix))
+		{
+			_r_str_copy(buffer, (LONG)buffer_size, locale_map[i].section_name);
+			return TRUE;
+		}
+	}
+
+	return FALSE;
+}
+
+static BOOLEAN core_get_active_locale(LPWSTR buffer, ULONG buffer_size)
+{
+	WCHAR ini_path[MAX_PATH];
+
+	buffer[0] = L'\0';
+	core_get_config_path(ini_path, RTL_NUMBER_OF(ini_path));
+
+	GetPrivateProfileStringW(
+		L"memreduct",
+		L"Language",
+		L"",
+		buffer,
+		buffer_size,
+		ini_path);
+
+	if (buffer[0])
+		return TRUE;
+
+	// An empty configuration value means that the Windows user locale is used.
+	if (core_get_system_locale(buffer, buffer_size))
+		return TRUE;
+
+	buffer[0] = L'\0';
+	return FALSE;
 }
 
 LPCWSTR core_get_string(ULONG uid)
 {
 	static WCHAR buf[256];
-
-	// try routine library first
-	if (app_global.locale.table && _r_obj_gethashtablesize(app_global.locale.table))
-	{
-		LPWSTR str = _r_locale_getstring(uid);
-		if (str)
-		{
-			_r_str_copy(buf, (LONG)RTL_NUMBER_OF(buf), str);
-			return buf;
-		}
-	}
-
-	// read .lng file directly
-	static WCHAR lng_path[MAX_PATH];
-	static R_INITONCE lng_init = PR_INITONCE_INIT;
-	if (_r_initonce_begin(&lng_init))
-	{
-		_r_str_printf(lng_path, RTL_NUMBER_OF(lng_path), L"%s\\language\\memreduct-winui.lng", _r_app_getdirectory()->buffer);
-		_r_initonce_end(&lng_init);
-	}
-
 	WCHAR language[128] = {0};
-	WCHAR section[128];
-	WCHAR ini_path[MAX_PATH];
-	_r_str_printf(ini_path, RTL_NUMBER_OF(ini_path), L"%s\\data\\memreduct-winui.ini", _r_app_getdirectory()->buffer);
-	GetPrivateProfileStringW(L"memreduct", L"Language", L"", language, 127, ini_path);
+	WCHAR lng_path[MAX_PATH];
 
-	if (language[0])
+	if (core_get_active_locale(language, RTL_NUMBER_OF(language)))
 	{
-		wcscpy_s(section, 127, language);
-
 		WCHAR key[16];
+
+		core_get_locale_path(lng_path, RTL_NUMBER_OF(lng_path));
 		_r_str_printf(key, RTL_NUMBER_OF(key), L"%03u", uid);
-		GetPrivateProfileStringW(section, key, L"", buf, 255, lng_path);
+		GetPrivateProfileStringW(
+			language,
+			key,
+			L"",
+			buf,
+			RTL_NUMBER_OF(buf),
+			lng_path);
 
 		if (buf[0])
 			return buf;
@@ -346,27 +455,18 @@ LPCWSTR core_get_string(ULONG uid)
 
 ULONG core_locale_count(void)
 {
-	// try routine library first
-	if (app_global.locale.available_list)
-	{
-		ULONG_PTR count;
-		_r_queuedlock_acquireshared(&app_global.locale.lock);
-		count = _r_obj_getlistsize(app_global.locale.available_list);
-		_r_queuedlock_releaseshared(&app_global.locale.lock);
-		return (ULONG)count;
-	}
-
-	// fallback: count sections in language\\memreduct-winui.lng
 	WCHAR buf[4096];
 	WCHAR lng_path[MAX_PATH];
-	_r_str_printf(lng_path, RTL_NUMBER_OF(lng_path), L"%s\\language\\memreduct-winui.lng", _r_app_getdirectory()->buffer);
+
+	core_get_locale_path(lng_path, RTL_NUMBER_OF(lng_path));
 	if (GetPrivateProfileSectionNamesW(buf, RTL_NUMBER_OF(buf), lng_path) == 0)
-		return 0;
+		return 1; // Built-in English is always available.
 
 	ULONG_PTR count = 0;
 	for (LPWSTR p = buf; *p; p += wcslen(p) + 1)
 		count++;
-	return (ULONG)count;
+
+	return (ULONG)count + 1; // English resource plus translated sections
 }
 
 BOOLEAN core_locale_get_name(ULONG index, LPWSTR buf, ULONG buf_size)
@@ -374,26 +474,20 @@ BOOLEAN core_locale_get_name(ULONG index, LPWSTR buf, ULONG buf_size)
 	if (!buf || !buf_size) return FALSE;
 	buf[0] = L'\0';
 
-	// try routine library first
-	if (app_global.locale.available_list)
+	if (index == 0)
 	{
-		PR_STRING name = NULL;
-		_r_queuedlock_acquireshared(&app_global.locale.lock);
-		if (index == 0) name = app_global.locale.resource_name;
-		else name = _r_obj_getlistitem(app_global.locale.available_list, index - 1);
-		if (name) _r_str_copy(buf, (LONG)buf_size, name->buffer);
-		_r_queuedlock_releaseshared(&app_global.locale.lock);
-		return name != NULL;
+		_r_str_copy(buf, (LONG)buf_size, L"English");
+		return TRUE;
 	}
 
-	// fallback: read section names from language\\memreduct-winui.lng
 	WCHAR sections[4096];
 	WCHAR lng_path[MAX_PATH];
-	_r_str_printf(lng_path, RTL_NUMBER_OF(lng_path), L"%s\\language\\memreduct-winui.lng", _r_app_getdirectory()->buffer);
+
+	core_get_locale_path(lng_path, RTL_NUMBER_OF(lng_path));
 	if (GetPrivateProfileSectionNamesW(sections, RTL_NUMBER_OF(sections), lng_path) == 0)
 		return FALSE;
 
-	ULONG_PTR i = 0;
+	ULONG_PTR i = 1;
 	for (LPWSTR p = sections; *p; p += wcslen(p) + 1)
 	{
 		if (i == index) { _r_str_copy(buf, (LONG)buf_size, p); return TRUE; }
@@ -404,48 +498,22 @@ BOOLEAN core_locale_get_name(ULONG index, LPWSTR buf, ULONG buf_size)
 
 ULONG_PTR core_locale_get_current(void)
 {
-	PR_STRING current_name;
-	PR_STRING locale_name;
-	ULONG_PTR count, result = SIZE_MAX;
-
-	if (app_global.locale.available_list)
-	{
-		_r_queuedlock_acquireshared(&app_global.locale.lock);
-
-		current_name = app_global.locale.current_name;
-		count = _r_obj_getlistsize(app_global.locale.available_list);
-
-		if (current_name && _r_obj_isstringempty(current_name))
-			result = 0;
-		else if (current_name)
-		{
-			for (ULONG_PTR i = 0; i < count; i++)
-			{
-				locale_name = _r_obj_getlistitem(app_global.locale.available_list, i);
-				if (locale_name && _r_str_isequal(&current_name->sr, &locale_name->sr, TRUE))
-				{
-					result = i + 1;
-					break;
-				}
-			}
-		}
-
-		_r_queuedlock_releaseshared(&app_global.locale.lock);
-		return result;
-	}
-
-	// fallback: read Language from INI, find matching section in .lng
 	WCHAR language[128] = {0};
 	WCHAR ini_path[MAX_PATH];
-	_r_str_printf(ini_path, RTL_NUMBER_OF(ini_path), L"%s\\data\\memreduct-winui.ini", _r_app_getdirectory()->buffer);
+
+	core_get_config_path(ini_path, RTL_NUMBER_OF(ini_path));
 	GetPrivateProfileStringW(L"memreduct", L"Language", L"", language, 127, ini_path);
-	if (!language[0]) return 0; // System default
+	if (!language[0])
+		return SIZE_MAX; // System default
+	if (_wcsicmp(language, L"English") == 0)
+		return 0;
 
 	WCHAR sections[4096];
 	WCHAR lng_path[MAX_PATH];
-	_r_str_printf(lng_path, RTL_NUMBER_OF(lng_path), L"%s\\language\\memreduct-winui.lng", _r_app_getdirectory()->buffer);
+
+	core_get_locale_path(lng_path, RTL_NUMBER_OF(lng_path));
 	if (GetPrivateProfileSectionNamesW(sections, RTL_NUMBER_OF(sections), lng_path) == 0)
-		return 0;
+		return SIZE_MAX;
 
 	ULONG_PTR i = 1;
 	for (LPWSTR p = sections; *p; p += wcslen(p) + 1)
@@ -454,28 +522,32 @@ ULONG_PTR core_locale_get_current(void)
 			return i;
 		i++;
 	}
-	return 0;
+	return SIZE_MAX;
 }
 
 BOOLEAN core_locale_set(ULONG_PTR index)
 {
-	PR_STRING locale_name;
+	WCHAR language[128] = {0};
+	WCHAR ini_path[MAX_PATH];
 
-	_r_queuedlock_acquireexclusive(&app_global.locale.lock);
-
-	if (index == 0)
+	if (index == SIZE_MAX)
 	{
-		_r_obj_swapreference(&app_global.locale.current_name, app_global.locale.resource_name);
+		language[0] = L'\0';
 	}
-	else if (app_global.locale.available_list)
+	else if (index == 0)
 	{
-		locale_name = _r_obj_getlistitem(app_global.locale.available_list, index - 1);
-
-		if (locale_name)
-			_r_obj_swapreference(&app_global.locale.current_name, locale_name);
+		_r_str_copy(language, RTL_NUMBER_OF(language), L"English");
+	}
+	else if (!core_locale_get_name((ULONG)index, language, RTL_NUMBER_OF(language)))
+	{
+		return FALSE;
 	}
 
-	_r_queuedlock_releaseexclusive(&app_global.locale.lock);
+	core_get_config_path(ini_path, RTL_NUMBER_OF(ini_path));
 
-	return TRUE;
+	return WritePrivateProfileStringW(
+		L"memreduct",
+		L"Language",
+		language,
+		ini_path);
 }

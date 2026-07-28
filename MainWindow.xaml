@@ -41,7 +41,7 @@
             <controls:NavigationView.FooterMenuItems>
                 <controls:NavigationViewItem x:Name="NavMemory" Tag="main" Content="Memory">
                     <controls:NavigationViewItem.Icon>
-                        <FontIcon Glyph="&#xE950;" FontSize="16"/>
+                        <SymbolIcon Symbol="ViewAll"/>
                     </controls:NavigationViewItem.Icon>
                 </controls:NavigationViewItem>
                 <controls:NavigationViewItem x:Name="NavSettings" Icon="Setting" Content="Settings" Tag="settings"/>

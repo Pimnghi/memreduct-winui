@@ -313,7 +313,7 @@ public sealed partial class MainWindow : Window
     public void ApplyNavLocalization()
     {
         var s = (uint id) => CoreService.GetString(id);
-        var v = s(StrId.GroupPhysical);       if (v != null) NavMemory.Content = v;
+        var v = s(StrId.Dashboard);           if (v != null) NavMemory.Content = v;
         v = s(StrId.Settings);                if (v != null) NavSettings.Content = v;
         v = s(StrId.About);                   if (v != null) NavAbout.Content = v;
     }

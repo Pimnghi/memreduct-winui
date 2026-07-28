@@ -133,6 +133,8 @@ public static class CoreService
 
     public static bool SetLocale(uint index) => core_locale_set(index);
 
+    public static bool SetSystemLocale() => core_locale_set(nuint.MaxValue);
+
     public static string? GetString(uint uid)
     {
         var ptr = core_get_string(uid);

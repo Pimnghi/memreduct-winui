@@ -61,4 +61,11 @@ public static class StrId
     public const uint TrayAction1 = 68; // Show / Hide
     public const uint TrayAction2 = 69; // Clean memory
     public const uint TrayAction3 = 70; // Open task manager
+    public const uint Dashboard = 97;
+    public const uint MinuteUnit = 98;
+    public const uint HotkeyPrompt = 99;
+    public const uint HotkeyHint = 100;
+    public const uint Save = 101;
+    public const uint Cancel = 102;
+    public const uint HotkeyConflict = 103;
 }

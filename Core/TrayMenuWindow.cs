@@ -484,9 +484,10 @@ internal sealed class TrayMenuWindow : Window
         for (var value = 10; value <= 90; value += 10)
         {
             var selectedValue = value;
+            var minuteUnit = CoreService.GetString(StrId.MinuteUnit) ?? "minutes";
             AddToggleItem(
                 submenu,
-                $"{value} min.",
+                $"{value} {minuteUnit}",
                 enabled && current == value,
                 () =>
                 {

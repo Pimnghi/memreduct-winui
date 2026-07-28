@@ -83,7 +83,7 @@
                                         HorizontalAlignment="Right"
                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                         FontSize="13"
-                                        Text="Usage:" />
+                                        Text="Usage" />
                                     <TextBlock
                                         x:Name="PhysicalPctText"
                                         HorizontalAlignment="Right"
@@ -109,7 +109,7 @@
                                         x:Name="PhysicalFreeLabel"
                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                         FontSize="12"
-                                        Text="Available:" />
+                                        Text="Available" />
                                     <TextBlock
                                         x:Name="PhysicalFreeText"
                                         Margin="0,3,0,0"
@@ -121,7 +121,7 @@
                                         x:Name="PhysicalTotalLabel"
                                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                         FontSize="12"
-                                        Text="Total:" />
+                                        Text="Total" />
                                     <TextBlock
                                         x:Name="PhysicalTotalText"
                                         Margin="0,3,0,0"
@@ -175,7 +175,7 @@
                                             HorizontalAlignment="Right"
                                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                             FontSize="12"
-                                            Text="Usage:" />
+                                            Text="Usage" />
                                         <TextBlock
                                             x:Name="PageFilePctText"
                                             HorizontalAlignment="Right"
@@ -197,7 +197,7 @@
                                             x:Name="PageFileFreeLabel"
                                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                             FontSize="12"
-                                            Text="Available:" />
+                                            Text="Available" />
                                         <TextBlock
                                             x:Name="PageFileFreeText"
                                             Margin="0,3,0,0"
@@ -208,7 +208,7 @@
                                             x:Name="PageFileTotalLabel"
                                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                             FontSize="12"
-                                            Text="Total:" />
+                                            Text="Total" />
                                         <TextBlock
                                             x:Name="PageFileTotalText"
                                             Margin="0,3,0,0"
@@ -247,7 +247,7 @@
                                             HorizontalAlignment="Right"
                                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                             FontSize="12"
-                                            Text="Usage:" />
+                                            Text="Usage" />
                                         <TextBlock
                                             x:Name="CachePctText"
                                             HorizontalAlignment="Right"
@@ -269,7 +269,7 @@
                                             x:Name="CacheFreeLabel"
                                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                             FontSize="12"
-                                            Text="Available:" />
+                                            Text="Available" />
                                         <TextBlock
                                             x:Name="CacheFreeText"
                                             Margin="0,3,0,0"
@@ -280,7 +280,7 @@
                                             x:Name="CacheTotalLabel"
                                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                             FontSize="12"
-                                            Text="Total:" />
+                                            Text="Total" />
                                         <TextBlock
                                             x:Name="CacheTotalText"
                                             Margin="0,3,0,0"

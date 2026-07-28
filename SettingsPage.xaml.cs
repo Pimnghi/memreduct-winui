@@ -75,46 +75,60 @@ public sealed partial class SettingsPage : Page
 
     public void ApplyLocalization()
     {
-        var s = (uint id) => CoreService.GetString(id);
+        var wasLoading = _loading;
+        _loading = true;
+        try
+        {
+            var s = (uint id) => CoreService.GetString(id);
 
-        var v = s(StrId.Settings);             if (v != null) SettingsPageTitle.Text = v;
-        v = s(StrId.SettingsGeneral);            if (v != null) GeneralHeader.Text = v;
-        v = s(StrId.LanguageHint);               if (v != null) LanguageCard.Header = v;
-        v = s(StrId.AlwaysOnTop);                if (v != null) AlwaysOnTopCard.Header = v;
-        v = s(StrId.LoadOnStartup);              if (v != null) LoadOnStartupCard.Header = v;
-        v = s(StrId.StartMinimized);             if (v != null) StartMinimizedCard.Header = v;
-        v = s(StrId.ConfirmCleaning);            if (v != null) ConfirmCleanCard.Header = v;
+            var v = s(StrId.Settings);             if (v != null) SettingsPageTitle.Text = v;
+            v = s(StrId.SettingsGeneral);            if (v != null) GeneralHeader.Text = v;
+            v = s(StrId.LanguageHint);               if (v != null) LanguageCard.Header = v;
+            v = s(StrId.AlwaysOnTop);                if (v != null) AlwaysOnTopCard.Header = v;
+            v = s(StrId.LoadOnStartup);              if (v != null) LoadOnStartupCard.Header = v;
+            v = s(StrId.StartMinimized);             if (v != null) StartMinimizedCard.Header = v;
+            v = s(StrId.ConfirmCleaning);            if (v != null) ConfirmCleanCard.Header = v;
 
-        v = s(StrId.SettingsAppearance);        if (v != null) AppearanceHeader.Text = v;
-        v = s(StrId.Theme);                     if (v != null) ThemeCard.Header = v;
-        v = s(StrId.WarningLevel);              if (v != null) WarningCard.Header = v;
-        v = s(StrId.DangerLevel);               if (v != null) DangerCard.Header = v;
+            v = s(StrId.SettingsAppearance);        if (v != null) AppearanceHeader.Text = v;
+            v = s(StrId.Theme);                     if (v != null) ThemeCard.Header = v;
+            v = s(StrId.WarningLevel);              if (v != null) WarningCard.Header = v;
+            v = s(StrId.DangerLevel);               if (v != null) DangerCard.Header = v;
 
-        v = s(StrId.SettingsMemory);            if (v != null) MemoryHeader.Text = v;
-        v = s(StrId.TitleMemoryRegions);        if (v != null) RegionsExpander.Header = v;
-        v = s(StrId.WorkingSet);                if (v != null) WorkingSetCard.Header = v;
-        v = s(StrId.SystemFileCache);           if (v != null) SystemFileCacheCard.Header = v;
-        v = s(StrId.StandbyPriority0);          if (v != null) StandbyPriority0Card.Header = v;
-        v = s(StrId.StandbyList);               if (v != null) StandbyListCard.Header = v;
-        v = s(StrId.ModifiedList);              if (v != null) ModifiedListCard.Header = v;
-        v = s(StrId.CombineMemoryLists);        if (v != null) CombineMemoryListsCard.Header = v;
-        v = s(StrId.RegistryCache);             if (v != null) RegistryCacheCard.Header = v;
-        v = s(StrId.ModifiedFileCache);         if (v != null) ModifiedFileCacheCard.Header = v;
-        v = s(StrId.AutoCleanEnable);           if (v != null) AutoCleanExpander.Header = v;
-        v = s(StrId.AutoCleanInterval);         if (v != null) IntervalCleanExpander.Header = v;
-        v = s(StrId.TitleHotkeys);              if (v != null) HotkeyExpander.Header = v;
+            v = s(StrId.SettingsMemory);            if (v != null) MemoryHeader.Text = v;
+            v = s(StrId.TitleMemoryRegions);        if (v != null) RegionsExpander.Header = v;
+            v = s(StrId.WorkingSet);                if (v != null) WorkingSetCard.Header = v;
+            v = s(StrId.SystemFileCache);           if (v != null) SystemFileCacheCard.Header = v;
+            v = s(StrId.StandbyPriority0);          if (v != null) StandbyPriority0Card.Header = v;
+            v = s(StrId.StandbyList);               if (v != null) StandbyListCard.Header = v;
+            v = s(StrId.ModifiedList);              if (v != null) ModifiedListCard.Header = v;
+            v = s(StrId.CombineMemoryLists);        if (v != null) CombineMemoryListsCard.Header = v;
+            v = s(StrId.RegistryCache);             if (v != null) RegistryCacheCard.Header = v;
+            v = s(StrId.ModifiedFileCache);         if (v != null) ModifiedFileCacheCard.Header = v;
+            v = s(StrId.AutoCleanEnable);           if (v != null) AutoCleanExpander.Header = v;
+            v = s(StrId.AutoCleanInterval);         if (v != null) IntervalCleanExpander.Header = v;
+            v = s(StrId.MinuteUnit);                if (v != null) IntervalMinuteText.Text = v;
+            v = s(StrId.TitleHotkeys);              if (v != null) HotkeyExpander.Header = v;
 
-        v = s(StrId.ShowCleanResult);           if (v != null) ShowResultsCard.Header = v;
-        v = s(StrId.NotificationSound);         if (v != null) NotificationSoundCard.Header = v;
-        v = s(StrId.BalloonTips);               if (v != null) NotificationHeader.Text = v;
+            v = s(StrId.ShowCleanResult);           if (v != null) ShowResultsCard.Header = v;
+            v = s(StrId.NotificationSound);         if (v != null) NotificationSoundCard.Header = v;
+            v = s(StrId.BalloonTips);               if (v != null) NotificationHeader.Text = v;
 
-        v = s(StrId.AllowStandbyCleanup);       if (v != null) AllowStandbyCard.Header = v;
-        v = s(StrId.LogCleanResults);           if (v != null) LogResultsCard.Header = v;
-        v = s(StrId.TitleAdvanced);             if (v != null) AdvancedHeader.Text = v;
+            v = s(StrId.AllowStandbyCleanup);       if (v != null) AllowStandbyCard.Header = v;
+            v = s(StrId.LogCleanResults);           if (v != null) LogResultsCard.Header = v;
+            v = s(StrId.TitleAdvanced);             if (v != null) AdvancedHeader.Text = v;
 
-        v = s(StrId.SettingsTray);              if (v != null) TrayHeader.Text = v;
-        v = s(StrId.TrayActionScHint);          if (v != null) TrayLeftCard.Header = v;
-        v = s(StrId.TrayActionMcHint);          if (v != null) TrayMidCard.Header = v;
+            v = s(StrId.SettingsTray);              if (v != null) TrayHeader.Text = v;
+            v = s(StrId.TrayActionScHint);          if (v != null) TrayLeftCard.Header = v;
+            v = s(StrId.TrayActionMcHint);          if (v != null) TrayMidCard.Header = v;
+
+            UpdateSystemLocaleLabel();
+            LoadThemes();
+            LoadTrayActions();
+        }
+        finally
+        {
+            _loading = wasLoading;
+        }
     }
 
     private void LoadLocales()
@@ -132,7 +146,7 @@ public sealed partial class SettingsPage : Page
             var name = CoreService.GetLocaleName(i);
             if (name != null)
             {
-                CmbLanguage.Items.Add(new ComboBoxItem { Content = name, Tag = name });
+                CmbLanguage.Items.Add(new ComboBoxItem { Content = GetLocaleDisplayName(name), Tag = name });
                 if (name == currentLocale) selected = idx;
                 idx++;
             }
@@ -142,6 +156,12 @@ public sealed partial class SettingsPage : Page
             CmbLanguage.SelectedIndex = selected;
         else
             CmbLanguage.SelectedIndex = 0;
+    }
+
+    private void UpdateSystemLocaleLabel()
+    {
+        if (CmbLanguage.Items.Count > 0 && CmbLanguage.Items[0] is ComboBoxItem systemItem)
+            systemItem.Content = CoreService.GetString(StrId.ThemeSystem) ?? "System default";
     }
 
     private void LoadThemes()
@@ -265,12 +285,18 @@ public sealed partial class SettingsPage : Page
         {
             var code = item.Tag?.ToString() ?? "";
             IniConfig.WriteString("Language", code);
-            if (CmbLanguage.SelectedIndex > 0)
-                CoreService.SetLocale((uint)(CmbLanguage.SelectedIndex - 1));
-            if (App.MainWindow is MainWindow window)
-                window.ApplyLocalization();
-            else
-                ApplyLocalization();
+
+            // Rebuilding an open ComboBox inside SelectionChanged can re-enter
+            // WinUI's selection logic. Refresh after the current input event.
+            DispatcherQueue.TryEnqueue(
+                Microsoft.UI.Dispatching.DispatcherQueuePriority.Low,
+                () =>
+                {
+                    if (App.MainWindow is MainWindow window)
+                        window.ApplyLocalization();
+                    else if (XamlRoot is not null)
+                        ApplyLocalization();
+                });
         }
     }
 
@@ -293,9 +319,9 @@ public sealed partial class SettingsPage : Page
     private static void SetupTrayCmb(ComboBox cmb, int current)
     {
         cmb.Items.Clear();
-        cmb.Items.Add(new ComboBoxItem { Content = CoreService.GetString(StrId.TrayShow) ?? "显示 / 隐藏", Tag = TrayIcon.ACTION_SHOW });
-        cmb.Items.Add(new ComboBoxItem { Content = CoreService.GetString(StrId.CleanMemory) ?? "清理内存", Tag = TrayIcon.ACTION_CLEAN });
-        cmb.Items.Add(new ComboBoxItem { Content = CoreService.GetString(StrId.TrayAction3) ?? "打开任务管理器", Tag = TrayIcon.ACTION_TASKMGR });
+        cmb.Items.Add(new ComboBoxItem { Content = CoreService.GetString(StrId.TrayShow) ?? "Show / Hide", Tag = TrayIcon.ACTION_SHOW });
+        cmb.Items.Add(new ComboBoxItem { Content = CoreService.GetString(StrId.CleanMemory) ?? "Clean memory", Tag = TrayIcon.ACTION_CLEAN });
+        cmb.Items.Add(new ComboBoxItem { Content = CoreService.GetString(StrId.TrayAction3) ?? "Open task manager", Tag = TrayIcon.ACTION_TASKMGR });
         cmb.SelectedIndex = current switch { TrayIcon.ACTION_CLEAN => 1, TrayIcon.ACTION_TASKMGR => 2, _ => 0 };
     }
 
@@ -580,19 +606,47 @@ public sealed partial class SettingsPage : Page
 
     private static (string Prompt, string Hint, string Save, string Cancel, string Conflict) GetHotkeyEditorStrings()
     {
-        var configuredLanguage = IniConfig.ReadString("Language", "") ?? "";
-        var cultureName = System.Globalization.CultureInfo.CurrentUICulture.Name;
-        var isTraditional = configuredLanguage.Contains("Traditional", StringComparison.OrdinalIgnoreCase)
-            || (configuredLanguage.Length == 0 && (cultureName.StartsWith("zh-TW", StringComparison.OrdinalIgnoreCase)
-                || cultureName.StartsWith("zh-HK", StringComparison.OrdinalIgnoreCase)));
-        var isChinese = configuredLanguage.Contains("Chinese", StringComparison.OrdinalIgnoreCase)
-            || (configuredLanguage.Length == 0 && cultureName.StartsWith("zh", StringComparison.OrdinalIgnoreCase));
-
-        if (isTraditional)
-            return ("按下新的組合鍵", "快捷鍵必須包含 Win、Ctrl、Alt 或 Shift。", "儲存", "取消", "此快捷鍵已被其他程式使用。");
-        if (isChinese)
-            return ("按下新的组合键", "快捷键必须包含 Win、Ctrl、Alt 或 Shift。", "保存", "取消", "该快捷键已被其他程序占用。");
-        return ("Press a new key combination", "The shortcut must include Win, Ctrl, Alt, or Shift.", "Save", "Cancel", "This shortcut is already in use.");
+        return (
+            CoreService.GetString(StrId.HotkeyPrompt) ?? "Press a new key combination",
+            CoreService.GetString(StrId.HotkeyHint) ?? "The shortcut must include Win, Ctrl, Alt, or Shift.",
+            CoreService.GetString(StrId.Save) ?? "Save",
+            CoreService.GetString(StrId.Cancel) ?? "Cancel",
+            CoreService.GetString(StrId.HotkeyConflict) ?? "This shortcut is already in use.");
     }
+
+    private static string GetLocaleDisplayName(string localeName) => localeName switch
+    {
+        "Arabic" => "العربية",
+        "Bulgarian" => "Български",
+        "Catalan" => "Català",
+        "Chinese (Simplified)" => "简体中文",
+        "Chinese (Traditional)" => "繁體中文",
+        "Czech" => "Čeština",
+        "Dutch" => "Nederlands",
+        "French" => "Français",
+        "German" => "Deutsch",
+        "Hebrew" => "עברית",
+        "Hungarian" => "Magyar",
+        "Indonesian" => "Bahasa Indonesia",
+        "Italian" => "Italiano",
+        "Japanese" => "日本語",
+        "Kazakh" => "Қазақша",
+        "Korean" => "한국어",
+        "Persian" => "فارسی",
+        "Polish" => "Polski",
+        "Portuguese (Brazil)" => "Português (Brasil)",
+        "Portuguese" => "Português",
+        "Romanian" => "Română",
+        "Russian" => "Русский",
+        "Serbian (Cyrillic)" => "Српски (ћирилица)",
+        "Serbian (Latin)" => "Srpski (latinica)",
+        "Slovak" => "Slovenčina",
+        "Spanish" => "Español",
+        "Swedish" => "Svenska",
+        "Turkish" => "Türkçe",
+        "Ukrainian" => "Українська",
+        "Vietnamese" => "Tiếng Việt",
+        _ => localeName
+    };
 
 }
