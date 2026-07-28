@@ -19,13 +19,12 @@ public sealed partial class MainWindow : Window
     private const uint SWP_NOSIZE = 0x0001;
     private const uint SWP_NOMOVE = 0x0002;
     private const uint SWP_NOACTIVATE = 0x0010;
+    private const int DefaultWindowWidth = 1600;
+    private const int DefaultWindowHeight = 1200;
     private const double CaptionButtonBottomInset = 1.0;
 
     [DllImport("user32")]
     private static extern bool SetWindowPos(nint hWnd, nint hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
-
-    [DllImport("user32")]
-    private static extern int GetSystemMetrics(int nIndex);
 
     [DllImport("user32")]
     private static extern nint MonitorFromRect(ref RECT lprc, uint dwFlags);
@@ -186,18 +185,23 @@ public sealed partial class MainWindow : Window
         }
         else if (w > 0 && h > 0)
         {
-            AppWindow.Resize(new Windows.Graphics.SizeInt32(w, h));
+            CenterWindow(w, h);
         }
         else
         {
-            var screenW = GetSystemMetrics(0);
-            var screenH = GetSystemMetrics(1);
-            var width = Math.Min(1600, screenW);
-            var height = Math.Min(1000, screenH);
-            var cx = Math.Max(0, (screenW - width) / 2);
-            var cy = Math.Max(0, (screenH - height) / 2);
-            AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(cx, cy, width, height));
+            CenterWindow(DefaultWindowWidth, DefaultWindowHeight);
         }
+    }
+
+    private void CenterWindow(int requestedWidth, int requestedHeight)
+    {
+        var workArea = DisplayArea.Primary.WorkArea;
+        var width = Math.Min(requestedWidth, workArea.Width);
+        var height = Math.Min(requestedHeight, workArea.Height);
+        var x = workArea.X + Math.Max(0, (workArea.Width - width) / 2);
+        var y = workArea.Y + Math.Max(0, (workArea.Height - height) / 2);
+
+        AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(x, y, width, height));
     }
 
     private static bool IsWindowRectVisible(int x, int y, int width, int height)
