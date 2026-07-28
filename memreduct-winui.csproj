@@ -15,6 +15,10 @@
         <SelfContained>true</SelfContained>
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
         <ApplicationIcon>Assets\AppIcon.ico</ApplicationIcon>
+        <AssemblyTitle>Mem Reduct WinUI</AssemblyTitle>
+        <Product>Mem Reduct WinUI</Product>
+        <Description>Lightweight real-time memory management application.</Description>
+        <Authors>Pimnghi</Authors>
         <WinUISDKReferences>false</WinUISDKReferences>
         <EnableMsixTooling>false</EnableMsixTooling>
         <ImplicitUsings>enable</ImplicitUsings>
@@ -35,6 +39,7 @@
         <Content Include="Assets\Square44x44Logo.targetsize-48_altform-lightunplated.png"/>
         <Content Include="Assets\StoreLogo.png"/>
         <Content Include="Assets\AppIcon.ico" CopyToOutputDirectory="PreserveNewest"/>
+        <Content Include="Assets\AppIcon.Notification.png" CopyToOutputDirectory="PreserveNewest"/>
         <Content Include="Assets\Wide310x150Logo.scale-200.png"/>
     </ItemGroup>
 

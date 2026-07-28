@@ -74,6 +74,7 @@ public sealed partial class MainWindow : Window
         Closed += (s, e) =>
         {
             _trayMenuWindow?.Close();
+            ToastService.Shutdown();
             TrayIcon.Destroy();
         };
         AppWindow.Closing += AppWindow_Closing;

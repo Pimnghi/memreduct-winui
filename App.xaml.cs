@@ -89,6 +89,7 @@ public partial class App : Application
             return;
         }
 
+        MemReduct.Core.ToastService.Initialize();
         MemReduct.Core.TrayIcon.SetIcon(System.IO.Path.Combine(AppContext.BaseDirectory, "Assets", "AppIcon.ico"));
         MemReduct.Core.TrayIcon.Create("Mem Reduct WinUI");
 
