@@ -148,6 +148,9 @@ foreach ($architecture in $Platform) {
         }
     }
     Assert-PeMachine -Path $publishedCore -Architecture $architecture
+
+    Copy-Item -LiteralPath (Join-Path $projectRoot "LICENSE") `
+        -Destination (Join-Path $publishDirectory "LICENSE") -Force
 }
 
 Write-Host "Build completed. Portable artifacts are in '$artifactRoot'."

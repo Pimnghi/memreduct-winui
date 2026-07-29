@@ -301,6 +301,24 @@ static LPCWSTR core_get_string_en(ULONG uid)
 		case 101: return L"Save";
 		case 102: return L"Cancel";
 		case 103: return L"This shortcut is already in use.";
+		case 104: return L"Version";
+		case 105: return L"A lightweight real-time memory management application that uses the Windows Native API to clear system caches. Compatible with Windows 10/11 x64 and ARM64.";
+		case 106: return L"Author";
+		case 107: return L"Copyright";
+		case 108: return L"Upstream project";
+		case 109: return L"Open project repository";
+		case 110: return L"Please run as administrator.";
+		case 111: return L"Restart as administrator";
+		case 112: return L"Memory cleaning failed";
+		case 113: return L"The cleanup request could not be started.";
+		case 114: return L"Failed areas: %s";
+		case 115: return L"No significant memory was released.";
+		case 116: return L"Memory released: %s. Failed areas: %m.";
+		case 117: return L"No memory cleanup areas are selected.";
+		case 118: return L"Usage: memreduct-winui.exe [-clean|-clean:full|-autostart]";
+		case 119: return L"Memory cleaning partially failed (failed mask: %s).";
+		case 120: return L"Memory cleaning failed (failed mask: %s).";
+		case 121: return L"Administrator privileges required";
 		default: return NULL;
 	}
 }

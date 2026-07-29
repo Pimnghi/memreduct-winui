@@ -68,4 +68,21 @@ public static class StrId
     public const uint Save = 101;
     public const uint Cancel = 102;
     public const uint HotkeyConflict = 103;
+    public const uint Version = 104;
+    public const uint AboutDescription = 105;
+    public const uint Author = 106;
+    public const uint UpstreamProject = 108;
+    public const uint ProjectRepository = 109;
+    public const uint RunAsAdministratorMessage = 110;
+    public const uint RestartAsAdministrator = 111;
+    public const uint CleaningFailed = 112;
+    public const uint CleanupNotStarted = 113;
+    public const uint FailedAreas = 114;
+    public const uint NoSignificantMemory = 115;
+    public const uint PartialCleanupResult = 116;
+    public const uint NoCleanupAreasSelected = 117;
+    public const uint CommandLineUsage = 118;
+    public const uint CommandLinePartialFailure = 119;
+    public const uint CommandLineFailure = 120;
+    public const uint AdministratorRequired = 121;
 }

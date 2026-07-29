@@ -34,7 +34,9 @@ public partial class App : Application
         if (hasInvalidArguments || (isClean && isAutostart))
         {
             AttachConsole(ATTACH_PARENT_PROCESS);
-            Console.Error.WriteLine("Usage: memreduct-winui.exe [-clean|-clean:full|-autostart]");
+            Console.Error.WriteLine(
+                MemReduct.Core.CoreService.GetString(MemReduct.Core.StrId.CommandLineUsage)
+                ?? "Usage: memreduct-winui.exe [-clean|-clean:full|-autostart]");
             Environment.Exit(2);
             return;
         }
@@ -60,14 +62,25 @@ public partial class App : Application
 
             if (result?.Status == MemReduct.Core.CleanupStatus.Success)
             {
-                Console.WriteLine($"Memory released: {result.FreedFormatted}");
+                Console.WriteLine(
+                    MemReduct.Core.CoreService.FormatCleanedMessage(result.FreedFormatted));
                 Environment.Exit(0);
             }
             else
             {
-                Console.Error.WriteLine(result?.Status == MemReduct.Core.CleanupStatus.PartialSuccess
-                    ? $"Memory cleaning partially failed (failed mask: 0x{result.FailedMask:X2})."
-                    : $"Memory cleaning failed (failed mask: 0x{result?.FailedMask ?? mask:X2}).");
+                if (result?.Status == MemReduct.Core.CleanupStatus.PartialSuccess)
+                {
+                    Console.Error.WriteLine(
+                        MemReduct.Core.CoreService.FormatPartialCleanupMessage(result));
+                }
+                else
+                {
+                    var failedMask = result?.FailedMask ?? mask;
+                    var title = MemReduct.Core.CoreService.GetString(
+                        MemReduct.Core.StrId.CleaningFailed) ?? "Memory cleaning failed";
+                    Console.Error.WriteLine(
+                        $"{title}. {MemReduct.Core.CoreService.FormatFailedAreasMessage(failedMask)}");
+                }
                 Environment.Exit(1);
             }
             return;

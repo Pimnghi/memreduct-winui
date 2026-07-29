@@ -68,6 +68,59 @@ public static class CoreService
 {
     public static bool IsElevated() => core_is_elevated();
 
+    public static string FormatCleanedMessage(string formatted)
+    {
+        var template = GetString(StrId.StatusCleaned) ?? "Memory released: %s";
+        var message = template.Replace("%s", formatted);
+        return message == template ? $"{template} {formatted}" : message;
+    }
+
+    public static string FormatFailedAreaNames(uint failedMask)
+    {
+        var areas = new List<string>();
+        var remainingMask = failedMask;
+        var definitions = new (uint Mask, uint StringId, string Fallback)[]
+        {
+            (MemoryMask.WorkingSet, StrId.WorkingSet, "Working set"),
+            (MemoryMask.SystemFileCache, StrId.SystemFileCache, "System file cache"),
+            (MemoryMask.StandbyPriority0List, StrId.StandbyPriority0, "Standby list (without priority)"),
+            (MemoryMask.StandbyList, StrId.StandbyList, "Standby list"),
+            (MemoryMask.ModifiedList, StrId.ModifiedList, "Modified page list"),
+            (MemoryMask.CombineMemoryLists, StrId.CombineMemoryLists, "Combine memory lists"),
+            (MemoryMask.RegistryCache, StrId.RegistryCache, "Registry cache"),
+            (MemoryMask.ModifiedFileCache, StrId.ModifiedFileCache, "Modified file cache"),
+        };
+
+        foreach (var definition in definitions)
+        {
+            if ((failedMask & definition.Mask) == 0)
+                continue;
+
+            areas.Add(GetString(definition.StringId) ?? definition.Fallback);
+            remainingMask &= ~definition.Mask;
+        }
+
+        if (remainingMask != 0)
+            areas.Add($"0x{remainingMask:X2}");
+
+        return string.Join(", ", areas);
+    }
+
+    public static string FormatFailedAreasMessage(uint failedMask)
+    {
+        var template = GetString(StrId.FailedAreas) ?? "Failed areas: %s";
+        return template.Replace("%s", FormatFailedAreaNames(failedMask));
+    }
+
+    public static string FormatPartialCleanupMessage(CleanupResult result)
+    {
+        var template = GetString(StrId.PartialCleanupResult)
+            ?? "Memory released: %s. Failed areas: %m.";
+        return template
+            .Replace("%s", result.FreedFormatted)
+            .Replace("%m", FormatFailedAreaNames(result.FailedMask));
+    }
+
     public static MemoryStats GetMemoryStats()
     {
         core_get_memory_info(

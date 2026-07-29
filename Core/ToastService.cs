@@ -1,14 +1,23 @@
 using Microsoft.Windows.AppNotifications;
 using Microsoft.Windows.AppNotifications.Builder;
+using Microsoft.Win32;
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace MemReduct.Core;
 
 public static class ToastService
 {
+    private const string AppUserModelId = "Pimnghi.MemReductWinUI";
     private const string AppDisplayName = "Mem Reduct WinUI";
+    private const string IdentityVersionKey = "NotificationIdentityVersion";
+    private const int IdentityVersion = 2;
     private static bool _registered;
+
+    [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
+    private static extern int SetCurrentProcessExplicitAppUserModelID(
+        string appId);
 
     public static void Initialize()
     {
@@ -17,25 +26,48 @@ public static class ToastService
 
         try
         {
+            var iconPath = Path.Combine(
+                AppContext.BaseDirectory,
+                "Assets",
+                "AppIcon.ico");
+            if (!File.Exists(iconPath))
+                return;
+
+            if (!ConfigureNotificationIdentity(iconPath))
+                return;
+
             var manager = AppNotificationManager.Default;
             if (!AppNotificationManager.IsSupported())
                 return;
 
-            var iconPath = Path.Combine(
-                AppContext.BaseDirectory,
-                "Assets",
-                "AppIcon.Notification.png");
-            if (!File.Exists(iconPath))
-                return;
+            if (IniConfig.ReadInt(IdentityVersionKey) < IdentityVersion)
+                manager.UnregisterAll();
 
             manager.NotificationInvoked += OnNotificationInvoked;
             manager.Register(AppDisplayName, new Uri(iconPath, UriKind.Absolute));
+            IniConfig.WriteInt(IdentityVersionKey, IdentityVersion);
             _registered = true;
         }
         catch
         {
             _registered = false;
         }
+    }
+
+    private static bool ConfigureNotificationIdentity(string iconPath)
+    {
+        if (SetCurrentProcessExplicitAppUserModelID(AppUserModelId) < 0)
+            return false;
+
+        using var key = Registry.CurrentUser.CreateSubKey(
+            $@"Software\Classes\AppUserModelId\{AppUserModelId}");
+        if (key == null)
+            return false;
+
+        key.SetValue("DisplayName", AppDisplayName, RegistryValueKind.String);
+        key.SetValue("IconUri", iconPath, RegistryValueKind.String);
+        key.SetValue("IconBackgroundColor", "00000000", RegistryValueKind.String);
+        return true;
     }
 
     public static void Shutdown()
@@ -59,15 +91,19 @@ public static class ToastService
         }
     }
 
-    public static void ShowCleanResult(ulong bytesFreed, string formatted)
+    public static void ShowCleanResult(CleanupResult result)
     {
         var noSound = !IniConfig.ReadBool("IsNotificationsSound", true);
         var title = CoreService.GetString(StrId.CleanMemory) ?? "Memory cleaned";
-        var msg = CoreService.GetString(StrId.StatusCleaned);
-        if (msg != null)
-            msg = msg.Replace("%s", formatted);
+        string msg;
+        if (result.Status == CleanupStatus.PartialSuccess)
+        {
+            msg = CoreService.FormatPartialCleanupMessage(result);
+        }
         else
-            msg = $"Memory released: {formatted}";
+        {
+            msg = CoreService.FormatCleanedMessage(result.FreedFormatted);
+        }
 
         if (_registered)
         {

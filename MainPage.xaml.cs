@@ -169,14 +169,17 @@ public sealed partial class MainPage : Page
     {
         if (!CoreService.IsElevated())
         {
-            ResultBar.Title = "Administrator privileges required";
-            ResultBar.Message = "Please run as administrator.";
+            ResultBar.Title = CoreService.GetString(StrId.AdministratorRequired)
+                ?? "Administrator privileges required";
+            ResultBar.Message = CoreService.GetString(StrId.RunAsAdministratorMessage)
+                ?? "Please run as administrator.";
             ResultBar.Severity = InfoBarSeverity.Error;
             ResultBar.IsOpen = true;
 
             var restart = new Button
             {
-                Content = "Restart as Administrator",
+                Content = CoreService.GetString(StrId.RestartAsAdministrator)
+                    ?? "Restart as administrator",
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 Padding = new Thickness(8),
             };
@@ -208,12 +211,17 @@ public sealed partial class MainPage : Page
         {
             var dialog = new ContentDialog
             {
+                XamlRoot = XamlRoot,
                 Title = CoreService.GetString(StrId.CleanMemory) ?? "Memory cleaning",
                 Content = CoreService.GetString(StrId.Question) ?? "Are you sure?",
-                PrimaryButtonText = "Yes",
-                CloseButtonText = "No",
-                XamlRoot = XamlRoot,
+                PrimaryButtonText = CoreService.GetString(StrId.CleanMemory) ?? "Clean memory",
+                CloseButtonText = CoreService.GetString(StrId.Cancel) ?? "Cancel",
+                DefaultButton = ContentDialogButton.Primary,
+                IsPrimaryButtonEnabled = true,
             };
+            dialog.PrimaryButtonStyle =
+                (Style)Resources["CleanConfirmationPrimaryButtonStyle"];
+
             if (await dialog.ShowAsync() != ContentDialogResult.Primary)
                 return;
         }
@@ -229,7 +237,8 @@ public sealed partial class MainPage : Page
         }
         catch (Exception ex)
         {
-            ResultBar.Title = "Memory cleaning failed";
+            ResultBar.Title = CoreService.GetString(StrId.CleaningFailed)
+                ?? "Memory cleaning failed";
             ResultBar.Message = ex.Message;
             ResultBar.Severity = InfoBarSeverity.Error;
             ResultBar.IsOpen = true;
@@ -244,36 +253,45 @@ public sealed partial class MainPage : Page
         if (result is null)
         {
             ResultBar.Title = CoreService.GetString(StrId.CleanMemory) ?? "Memory cleaning";
-            ResultBar.Message = "The cleanup request could not be started.";
+            ResultBar.Message = CoreService.GetString(StrId.CleanupNotStarted)
+                ?? "The cleanup request could not be started.";
             ResultBar.Severity = InfoBarSeverity.Warning;
             ResultBar.IsOpen = true;
             return;
         }
 
-        if (result is { Success: true, BytesFreed: > 0 })
+        if (result.Status == CleanupStatus.PartialSuccess)
         {
-            var message = CoreService.GetString(StrId.StatusCleaned);
             ResultBar.Title = string.Empty;
-            ResultBar.Message = message != null
-                ? message.Replace("%s", result.FreedFormatted)
-                : $"Released: {result.FreedFormatted}";
-            ResultBar.Severity = result.Status == CleanupStatus.PartialSuccess
-                ? InfoBarSeverity.Warning
-                : InfoBarSeverity.Success;
+            ResultBar.Message = CoreService.FormatPartialCleanupMessage(result);
+            ResultBar.Severity = InfoBarSeverity.Warning;
 
             if (IniConfig.ReadBool("BalloonCleanResults", true))
-                ToastService.ShowCleanResult(result.BytesFreed, result.FreedFormatted);
+                ToastService.ShowCleanResult(result);
+        }
+        else if (result is { Status: CleanupStatus.Success, BytesFreed: > 0 })
+        {
+            ResultBar.Title = string.Empty;
+            ResultBar.Message = CoreService.FormatCleanedMessage(result.FreedFormatted);
+            ResultBar.Severity = InfoBarSeverity.Success;
+
+            if (IniConfig.ReadBool("BalloonCleanResults", true))
+                ToastService.ShowCleanResult(result);
         }
         else if (result.Status == CleanupStatus.Failed)
         {
-            ResultBar.Title = "Memory cleaning failed";
-            ResultBar.Message = result.ErrorMessage ?? $"Failed areas: 0x{result.FailedMask:X2}";
+            ResultBar.Title = CoreService.GetString(StrId.CleaningFailed)
+                ?? "Memory cleaning failed";
+            ResultBar.Message = result.MaskUsed == 0 && result.ErrorMessage != null
+                ? result.ErrorMessage
+                : CoreService.FormatFailedAreasMessage(result.FailedMask);
             ResultBar.Severity = InfoBarSeverity.Error;
         }
         else
         {
             ResultBar.Title = string.Empty;
-            ResultBar.Message = "No significant memory was released.";
+            ResultBar.Message = CoreService.GetString(StrId.NoSignificantMemory)
+                ?? "No significant memory was released.";
             ResultBar.Severity = InfoBarSeverity.Informational;
         }
 

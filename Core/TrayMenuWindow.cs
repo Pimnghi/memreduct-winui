@@ -4,6 +4,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media;
 using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Windows.Graphics;
 
@@ -411,8 +412,28 @@ internal sealed class TrayMenuWindow : Window
 
         var names = new[] { "Working set", "System file cache", "Modified file cache",
             "Modified page list", "Standby list", "Standby list (low)", "Registry cache", "Combine memory lists" };
-        var masks = new uint[] { 0x01, 0x02, 0x80, 0x10, 0x08, 0x04, 0x40, 0x20 };
-        var stringIds = new uint[] { 45, 46, 95, 49, 48, 47, 96, 50 };
+        var masks = new[]
+        {
+            MemoryMask.WorkingSet,
+            MemoryMask.SystemFileCache,
+            MemoryMask.ModifiedFileCache,
+            MemoryMask.ModifiedList,
+            MemoryMask.StandbyList,
+            MemoryMask.StandbyPriority0List,
+            MemoryMask.RegistryCache,
+            MemoryMask.CombineMemoryLists,
+        };
+        var stringIds = new[]
+        {
+            StrId.WorkingSet,
+            StrId.SystemFileCache,
+            StrId.ModifiedFileCache,
+            StrId.ModifiedList,
+            StrId.StandbyList,
+            StrId.StandbyPriority0,
+            StrId.RegistryCache,
+            StrId.CombineMemoryLists,
+        };
 
         var submenu = new MenuFlyoutSubItem
         {
@@ -429,7 +450,14 @@ internal sealed class TrayMenuWindow : Window
                 IsChecked = (mask & itemMask) != 0,
                 IsEnabled = allowDangerousRegions || !isDangerousRegion,
             };
-            item.Click += (_, _) => IniConfig.WriteUInt("ReductMask2", mask ^ itemMask);
+            item.Click += (_, _) =>
+            {
+                var currentMask = IniConfig.ReadUInt("ReductMask2", MemoryMask.Default);
+                var updatedMask = item.IsChecked
+                    ? currentMask | itemMask
+                    : currentMask & ~itemMask;
+                IniConfig.WriteUInt("ReductMask2", updatedMask);
+            };
             submenu.Items.Add(item);
         }
         return submenu;
@@ -450,7 +478,17 @@ internal sealed class TrayMenuWindow : Window
             CoreService.GetString(StrId.TrayDisable) ?? "Disable",
             !enabled,
             () => IniConfig.WriteBool("AutoreductEnable", false));
-        for (var value = 10; value <= 90; value += 10)
+        var values = new SortedSet<uint>();
+        for (uint value = 10; value <= 100; value += 10)
+        {
+            values.Add(value);
+        }
+        if (current is >= 1 and <= 100)
+        {
+            values.Add(current);
+        }
+
+        foreach (var value in values)
         {
             var selectedValue = value;
             AddToggleItem(
@@ -460,7 +498,7 @@ internal sealed class TrayMenuWindow : Window
                 () =>
                 {
                     IniConfig.WriteBool("AutoreductEnable", true);
-                    IniConfig.WriteUInt("AutoreductValue", (uint)selectedValue);
+                    IniConfig.WriteUInt("AutoreductValue", selectedValue);
                 });
         }
         return submenu;
@@ -481,7 +519,13 @@ internal sealed class TrayMenuWindow : Window
             CoreService.GetString(StrId.TrayDisable) ?? "Disable",
             !enabled,
             () => IniConfig.WriteBool("AutoreductIntervalEnable", false));
-        for (var value = 10; value <= 90; value += 10)
+        var values = new SortedSet<uint> { 10, 20, 30, 45, 60, 90, 120, 180, 360, 720, 1440 };
+        if (current is >= 1 and <= 1440)
+        {
+            values.Add(current);
+        }
+
+        foreach (var value in values)
         {
             var selectedValue = value;
             var minuteUnit = CoreService.GetString(StrId.MinuteUnit) ?? "minutes";
@@ -492,7 +536,7 @@ internal sealed class TrayMenuWindow : Window
                 () =>
                 {
                     IniConfig.WriteBool("AutoreductIntervalEnable", true);
-                    IniConfig.WriteUInt("AutoreductIntervalValue", (uint)selectedValue);
+                    IniConfig.WriteUInt("AutoreductIntervalValue", selectedValue);
                 });
         }
         return submenu;

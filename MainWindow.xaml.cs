@@ -64,6 +64,7 @@ public sealed partial class MainWindow : Window
         {
             if (e.Content is MainPage mp) mp.ApplyLocalization();
             else if (e.Content is SettingsPage sp) sp.ApplyLocalization();
+            else if (e.Content is AboutPage ap) ap.ApplyLocalization();
         };
 
         TrayIcon.TrayCommand += OnTrayCommand;
@@ -290,6 +291,8 @@ public sealed partial class MainWindow : Window
             mainPage.ApplyLocalization();
         else if (ContentFrame.Content is SettingsPage settingsPage)
             settingsPage.ApplyLocalization();
+        else if (ContentFrame.Content is AboutPage aboutPage)
+            aboutPage.ApplyLocalization();
     }
 
     private void OnTrayContextMenuRequested(int cursorX, int cursorY)
@@ -336,7 +339,7 @@ public sealed partial class MainWindow : Window
             }
             if (result is { Success: true, BytesFreed: > 0 }
                 && IniConfig.ReadBool("BalloonCleanResults", true))
-                ToastService.ShowCleanResult(result.BytesFreed, result.FreedFormatted);
+                ToastService.ShowCleanResult(result);
         });
     }
 

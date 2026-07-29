@@ -36,66 +36,82 @@
 
                 <!-- Application and project information -->
                 <StackPanel Spacing="4">
-                    <toolkit:SettingsCard Header="Version">
-                        <toolkit:SettingsCard.HeaderIcon>
-                            <FontIcon Glyph="&#xE946;" />
-                        </toolkit:SettingsCard.HeaderIcon>
-                        <TextBlock
-                            x:Name="VersionText"
-                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            FontWeight="SemiBold"
-                            Text="3.5.3" />
-                    </toolkit:SettingsCard>
-
-                    <toolkit:SettingsCard Header="About">
+                    <toolkit:SettingsCard
+                        x:Name="AboutCard"
+                        Header="About"
+                        ContentAlignment="Vertical">
                         <toolkit:SettingsCard.HeaderIcon>
                             <FontIcon Glyph="&#xE946;" />
                         </toolkit:SettingsCard.HeaderIcon>
                         <toolkit:SettingsCard.Description>
                             <TextBlock
+                                x:Name="AboutDescriptionText"
                                 LineHeight="22"
-                                TextWrapping="Wrap">
-                                Lightweight real-time memory management application.<LineBreak />
-                                Uses undocumented internal system features (Native API) to clear system cache.<LineBreak />
-                                Compatible with Windows 10/11 64-bit and ARM64.
-                            </TextBlock>
+                                Text="A lightweight real-time memory management application that uses the Windows Native API to clear system caches. Compatible with Windows 10/11 x64 and ARM64."
+                                TextWrapping="Wrap" />
                         </toolkit:SettingsCard.Description>
                     </toolkit:SettingsCard>
 
-                    <toolkit:SettingsCard Header="Author">
+                    <toolkit:SettingsCard
+                        x:Name="VersionCard"
+                        Header="Version">
+                        <toolkit:SettingsCard.HeaderIcon>
+                            <FontIcon Glyph="&#xE8EC;" />
+                        </toolkit:SettingsCard.HeaderIcon>
+                        <TextBlock
+                            x:Name="VersionText"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            FontWeight="SemiBold"
+                            Text="1.0.0" />
+                    </toolkit:SettingsCard>
+
+                    <toolkit:SettingsCard
+                        x:Name="AuthorCard"
+                        Header="Author"
+                        ActionIconToolTip="https://github.com/Pimnghi"
+                        Click="OnAuthorClick"
+                        IsActionIconVisible="True"
+                        IsClickEnabled="True">
                         <toolkit:SettingsCard.HeaderIcon>
                             <FontIcon Glyph="&#xE77B;" />
                         </toolkit:SettingsCard.HeaderIcon>
+                        <toolkit:SettingsCard.ActionIcon>
+                            <FontIcon Glyph="&#xE8A7;" />
+                        </toolkit:SettingsCard.ActionIcon>
                         <TextBlock
                             x:Name="AuthorText"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            FontWeight="SemiBold"
                             Text="Pimnghi"
                             TextWrapping="Wrap" />
                     </toolkit:SettingsCard>
 
-                    <toolkit:SettingsCard Header="Copyright">
-                        <toolkit:SettingsCard.HeaderIcon>
-                            <FontIcon Glyph="&#xE8C8;" />
-                        </toolkit:SettingsCard.HeaderIcon>
-                        <TextBlock
-                            x:Name="CopyrightText"
-                            Text="© 2024-2026 Pimnghi"
-                            TextWrapping="Wrap" />
-                    </toolkit:SettingsCard>
-
-                    <toolkit:SettingsCard Header="Upstream project">
+                    <toolkit:SettingsCard
+                        x:Name="UpstreamCard"
+                        Header="Upstream project"
+                        ActionIconToolTip="https://github.com/henrypp/memreduct"
+                        Click="OnUpstreamClick"
+                        IsActionIconVisible="True"
+                        IsClickEnabled="True">
                         <toolkit:SettingsCard.HeaderIcon>
                             <FontIcon Glyph="&#xE8CE;" />
                         </toolkit:SettingsCard.HeaderIcon>
+                        <toolkit:SettingsCard.ActionIcon>
+                            <FontIcon Glyph="&#xE8A7;" />
+                        </toolkit:SettingsCard.ActionIcon>
                         <TextBlock
                             x:Name="BasedOnText"
-                            Text="Mem Reduct by Henry++"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            FontWeight="SemiBold"
+                            Text="Mem Reduct"
                             TextWrapping="Wrap" />
                     </toolkit:SettingsCard>
 
                     <toolkit:SettingsCard
-                        Header="github.com/pimnghi/memreduct-winui"
-                        ActionIconToolTip="Open project repository"
-                        Click="OnWebsiteClick"
+                        x:Name="ProjectLinkCard"
+                        Header="Project repository"
+                        ActionIconToolTip="https://github.com/Pimnghi/memreduct-winui"
+                        Click="OnProjectRepositoryClick"
                         IsActionIconVisible="True"
                         IsClickEnabled="True">
                         <toolkit:SettingsCard.HeaderIcon>
@@ -104,6 +120,11 @@
                         <toolkit:SettingsCard.ActionIcon>
                             <FontIcon Glyph="&#xE8A7;" />
                         </toolkit:SettingsCard.ActionIcon>
+                        <TextBlock
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            FontWeight="SemiBold"
+                            Text="Mem Reduct WinUI"
+                            TextWrapping="Wrap" />
                     </toolkit:SettingsCard>
                 </StackPanel>
             </StackPanel>

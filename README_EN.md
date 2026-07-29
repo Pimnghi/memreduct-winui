@@ -90,4 +90,6 @@ All settings are stored in `data\memreduct-winui.ini` alongside the executable
 
 ## License
 
-Based on [Mem Reduct](https://github.com/henrypp/memreduct) by Henry++. MIT License.
+This project is a refactoring based on Henry++'s
+[Mem Reduct](https://github.com/henrypp/memreduct) and is distributed under the
+[GNU General Public License v3.0](LICENSE).

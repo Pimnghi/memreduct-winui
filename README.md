@@ -88,4 +88,5 @@ memreduct-winui/
 
 ## 开源许可
 
-基于 [Mem Reduct](https://github.com/henrypp/memreduct)（Henry++），MIT License。
+本项目基于 Henry++ 的 [Mem Reduct](https://github.com/henrypp/memreduct) 重构，
+并按照 [GNU General Public License v3.0](LICENSE) 发布。

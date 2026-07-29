@@ -167,9 +167,9 @@ public sealed partial class SettingsPage : Page
     private void LoadThemes()
     {
         CmbTheme.Items.Clear();
-        CmbTheme.Items.Add(new ComboBoxItem { Content = CoreService.GetString(StrId.ThemeSystem) ?? "跟随系统", Tag = ElementTheme.Default });
-        CmbTheme.Items.Add(new ComboBoxItem { Content = CoreService.GetString(StrId.ThemeLight) ?? "浅色", Tag = ElementTheme.Light });
-        CmbTheme.Items.Add(new ComboBoxItem { Content = CoreService.GetString(StrId.ThemeDark) ?? "深色", Tag = ElementTheme.Dark });
+        CmbTheme.Items.Add(new ComboBoxItem { Content = CoreService.GetString(StrId.ThemeSystem) ?? "System default", Tag = ElementTheme.Default });
+        CmbTheme.Items.Add(new ComboBoxItem { Content = CoreService.GetString(StrId.ThemeLight) ?? "Light", Tag = ElementTheme.Light });
+        CmbTheme.Items.Add(new ComboBoxItem { Content = CoreService.GetString(StrId.ThemeDark) ?? "Dark", Tag = ElementTheme.Dark });
 
         var themeStr = IniConfig.ReadString("Theme", "System");
         CmbTheme.SelectedIndex = themeStr switch

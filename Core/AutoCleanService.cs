@@ -65,6 +65,6 @@ public static class AutoCleanService
 
         if (result is { Success: true, BytesFreed: > 0 }
             && IniConfig.ReadBool("BalloonCleanResults", true))
-            ToastService.ShowCleanResult(result.BytesFreed, result.FreedFormatted);
+            ToastService.ShowCleanResult(result);
     }
 }

@@ -39,7 +39,8 @@ public static class CleanupCoordinator
                 var emptyResult = new CleanupResult
                 {
                     Status = CleanupStatus.Failed,
-                    ErrorMessage = "No memory cleanup areas are selected."
+                    ErrorMessage = CoreService.GetString(StrId.NoCleanupAreasSelected)
+                        ?? "No memory cleanup areas are selected."
                 };
                 if (IniConfig.ReadBool("LogCleanResults"))
                     await AppendLogAsync(source, emptyResult);
