@@ -31,16 +31,28 @@
 
 ```powershell
 # 构建并发布 x64、ARM64 便携版
-.\build_winui.ps1
+.\build-publish.ps1
 
 # 仅构建一个平台
-.\build_winui.ps1 -Platform x64
+.\build-publish.ps1 -Platform x64
+
+# 生成可直接发布的版本化 ZIP、SHA-256 和发布清单
+.\build-portable.ps1
+
+# 生成 x64、ARM64 自包含安装程序
+.\build-installer.ps1
 ```
 
-输出目录：`artifacts\win-x64\`、`artifacts\win-arm64\`。
+输出目录：`artifacts\publish\win-x64\`、`artifacts\publish\win-arm64\`。
+可上传的便携版文件位于 `artifacts\portable\`。
+安装程序及其校验文件位于 `artifacts\installer\`。
 
 脚本会执行干净 native 构建、版本一致性检查，并验证发布目录中的
 `CoreLib.dll`、`mrw-cli.exe` 与目标平台匹配。
+
+安装程序使用 Inno Setup 7.0.2 或更高版本编译，分别生成 x64、ARM64
+全机安装包。默认安装到 `Program Files\Mem Reduct WinUI`，可选择创建
+桌面快捷方式；升级会保留配置，卸载时可选择是否删除设置和日志。
 
 ## 命令行
 
@@ -89,8 +101,10 @@ memreduct-winui/
 
 ## 配置
 
-所有设置保存在 `data\memreduct-winui.ini`（exe 同级目录下的便携模式）。
-启用清理日志后，结果写入 `data\memreduct-winui.log`。
+便携版的设置保存在 exe 同级目录的 `data\memreduct-winui.ini`。
+安装版的设置保存在
+`%ProgramData%\Mem Reduct WinUI\data\memreduct-winui.ini`。
+启用清理日志后，日志写入对应模式的同一 `data` 目录。
 
 ## 开源许可
 

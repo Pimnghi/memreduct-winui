@@ -1,3 +1,7 @@
+<#
+.SYNOPSIS
+Builds and publishes the unpackaged application directories for x64 and ARM64.
+#>
 [CmdletBinding()]
 param(
     [ValidateSet("Debug", "Release")]
@@ -17,6 +21,7 @@ $cliProject = Join-Path $projectRoot "CliHost\mrw-cli.vcxproj"
 $managedProject = Join-Path $projectRoot "memreduct-winui.csproj"
 $versionHeader = Join-Path $repositoryRoot "src\app.h"
 $artifactRoot = Join-Path $projectRoot "artifacts"
+$publishRoot = Join-Path $artifactRoot "publish"
 
 function Get-MsBuildPath {
     $programFilesX86 = [Environment]::GetFolderPath("ProgramFilesX86")
@@ -119,7 +124,7 @@ foreach ($architecture in $Platform) {
     Assert-PeMachine -Path $cliExecutable -Architecture $architecture
 
     $rid = "win-$($architecture.ToLowerInvariant())"
-    $publishDirectory = Join-Path $artifactRoot $rid
+    $publishDirectory = Join-Path $publishRoot $rid
     Remove-ArtifactDirectory -Path $publishDirectory
 
     Write-Host "Publishing WinUI application ($Configuration|$architecture)..."
@@ -170,4 +175,4 @@ foreach ($architecture in $Platform) {
         -Destination (Join-Path $publishDirectory "LICENSE") -Force
 }
 
-Write-Host "Build completed. Portable artifacts are in '$artifactRoot'."
+Write-Host "Build completed. Published application directories are in '$publishRoot'."

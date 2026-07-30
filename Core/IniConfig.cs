@@ -7,9 +7,9 @@ internal static class IniConfig
 {
     private const string Section = "memreduct";
 
+    internal static readonly string DataDirectory = InstallContext.DataDirectory;
     private static readonly string Path = System.IO.Path.Combine(
-        AppContext.BaseDirectory, "data", "memreduct-winui.ini");
-    internal static readonly string DataDirectory = System.IO.Path.GetDirectoryName(Path)!;
+        DataDirectory, "memreduct-winui.ini");
 
     static IniConfig()
     {

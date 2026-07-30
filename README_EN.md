@@ -31,27 +31,56 @@ Real-time memory management application with WinUI 3 native interface. Built on 
 
 ```powershell
 # Build and publish both portable architectures
-.\build_winui.ps1
+.\build-publish.ps1
 
 # Build one architecture only
-.\build_winui.ps1 -Platform x64
+.\build-publish.ps1 -Platform x64
 ```
 
-Outputs: `artifacts\win-x64\` and `artifacts\win-arm64\`.
+Outputs: `artifacts\publish\win-x64\` and
+`artifacts\publish\win-arm64\`.
 
 The script performs a clean native build, verifies version consistency, and
-checks that each published `CoreLib.dll` matches its target architecture.
+checks that each published `CoreLib.dll` and `mrw-cli.exe` matches its target
+architecture.
+
+To build the upload-ready versioned ZIP archives and checksums:
+
+```powershell
+.\build-portable.ps1
+```
+
+Portable release files are written to `artifacts\portable\`.
+
+To build the self-contained per-machine installers for x64 and ARM64:
+
+```powershell
+.\build-installer.ps1
+```
+
+Inno Setup 7.0.2 or later is required. Installers and their checksum files are
+written to `artifacts\installer\`. The application is installed under
+`Program Files\Mem Reduct WinUI`; upgrades preserve settings, and uninstall
+offers to remove settings and logs.
 
 ## Command Line
 
 ```powershell
-memreduct-winui.exe -clean
-memreduct-winui.exe -clean:full
+mrw-cli.exe
+mrw-cli.exe -clean
+mrw-cli.exe -clean:full
 ```
 
+Run `mrw-cli.exe` without arguments to display detailed help in the language
+selected by the application. `-h`, `--help`, and `/?` display the same help
+without requesting elevation.
 `-clean` uses the saved cleanup mask and `-clean:full` selects every region.
 Exit code `0` means full success, `1` means failure or partial failure, and `2`
 means invalid arguments or elevation failure.
+`mrw-cli.exe` waits in the current terminal while the elevated worker runs and
+returns its localized result without opening another Command Prompt window.
+The original command-line parameters on `memreduct-winui.exe` remain available
+for compatibility.
 
 ## Project Structure
 
@@ -75,6 +104,7 @@ memreduct-winui/
 │   ├── CoreLib.def            Exported functions
 │   ├── CoreLib.vcxproj        MSBuild project
 │   └── routine/               Shared C library
+├── CliHost/                   Native console entry point (mrw-cli.exe)
 ├── language/
 │   └── memreduct-winui.lng    Language translations
 ├── Assets/                    App icons and images
@@ -84,9 +114,10 @@ memreduct-winui/
 
 ## Configuration
 
-All settings are stored in `data\memreduct-winui.ini` alongside the executable
-(portable mode). When cleanup logging is enabled, results are written to
-`data\memreduct-winui.log`.
+The portable build stores settings in `data\memreduct-winui.ini` alongside the
+executable. The installed build stores settings in
+`%ProgramData%\Mem Reduct WinUI\data\memreduct-winui.ini`. When cleanup
+logging is enabled, results are written to the corresponding `data` directory.
 
 ## License
 
