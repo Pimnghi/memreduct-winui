@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "memreduct-winui", "memreduc
 EndProject
 Project("{BC8A1FFA-BEE3-4634-8014-F334798102B3}") = "CoreLib", "CoreLib\CoreLib.vcxproj", "{D1E2F3A4-B5C6-7890-ABCD-EF1234567890}"
 EndProject
+Project("{BC8A1FFA-BEE3-4634-8014-F334798102B3}") = "mrw-cli", "CliHost\mrw-cli.vcxproj", "{4D52D723-2682-4BA8-AFC1-AF5F3A8F1C70}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM64 = Debug|ARM64
@@ -35,5 +37,13 @@ Global
 		{D1E2F3A4-B5C6-7890-ABCD-EF1234567890}.Release|ARM64.Build.0 = Release|ARM64
 		{D1E2F3A4-B5C6-7890-ABCD-EF1234567890}.Release|x64.ActiveCfg = Release|x64
 		{D1E2F3A4-B5C6-7890-ABCD-EF1234567890}.Release|x64.Build.0 = Release|x64
+		{4D52D723-2682-4BA8-AFC1-AF5F3A8F1C70}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{4D52D723-2682-4BA8-AFC1-AF5F3A8F1C70}.Debug|ARM64.Build.0 = Debug|ARM64
+		{4D52D723-2682-4BA8-AFC1-AF5F3A8F1C70}.Debug|x64.ActiveCfg = Debug|x64
+		{4D52D723-2682-4BA8-AFC1-AF5F3A8F1C70}.Debug|x64.Build.0 = Debug|x64
+		{4D52D723-2682-4BA8-AFC1-AF5F3A8F1C70}.Release|ARM64.ActiveCfg = Release|ARM64
+		{4D52D723-2682-4BA8-AFC1-AF5F3A8F1C70}.Release|ARM64.Build.0 = Release|ARM64
+		{4D52D723-2682-4BA8-AFC1-AF5F3A8F1C70}.Release|x64.ActiveCfg = Release|x64
+		{4D52D723-2682-4BA8-AFC1-AF5F3A8F1C70}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 EndGlobal

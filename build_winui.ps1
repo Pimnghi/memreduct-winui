@@ -13,6 +13,7 @@ $ErrorActionPreference = "Stop"
 $projectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repositoryRoot = Split-Path -Parent $projectRoot
 $nativeProject = Join-Path $projectRoot "CoreLib\CoreLib.vcxproj"
+$cliProject = Join-Path $projectRoot "CliHost\mrw-cli.vcxproj"
 $managedProject = Join-Path $projectRoot "memreduct-winui.csproj"
 $versionHeader = Join-Path $repositoryRoot "src\app.h"
 $artifactRoot = Join-Path $projectRoot "artifacts"
@@ -107,6 +108,16 @@ foreach ($architecture in $Platform) {
     $nativeDll = Join-Path $projectRoot "CoreLib\bin\$architecture\CoreLib.dll"
     Assert-PeMachine -Path $nativeDll -Architecture $architecture
 
+    Write-Host "Building command-line host ($Configuration|$architecture)..."
+    & $msbuildPath $cliProject /t:Rebuild /m /nologo /v:minimal `
+        "/p:Configuration=$Configuration" "/p:Platform=$architecture"
+    if ($LASTEXITCODE -ne 0) {
+        throw "Command-line host $architecture build failed with exit code $LASTEXITCODE."
+    }
+
+    $cliExecutable = Join-Path $projectRoot "CliHost\bin\$architecture\mrw-cli.exe"
+    Assert-PeMachine -Path $cliExecutable -Architecture $architecture
+
     $rid = "win-$($architecture.ToLowerInvariant())"
     $publishDirectory = Join-Path $artifactRoot $rid
     Remove-ArtifactDirectory -Path $publishDirectory
@@ -131,9 +142,14 @@ foreach ($architecture in $Platform) {
         throw "Managed $architecture publish failed with exit code $LASTEXITCODE."
     }
 
+    Copy-Item -LiteralPath $cliExecutable `
+        -Destination (Join-Path $publishDirectory "mrw-cli.exe") -Force
+
     $publishedCore = Join-Path $publishDirectory "CoreLib.dll"
+    $publishedCli = Join-Path $publishDirectory "mrw-cli.exe"
     $requiredPublishFiles = @(
         "memreduct-winui.exe",
+        "mrw-cli.exe",
         "memreduct-winui.pri",
         "App.xbf",
         "MainWindow.xbf",
@@ -148,6 +164,7 @@ foreach ($architecture in $Platform) {
         }
     }
     Assert-PeMachine -Path $publishedCore -Architecture $architecture
+    Assert-PeMachine -Path $publishedCli -Architecture $architecture
 
     Copy-Item -LiteralPath (Join-Path $projectRoot "LICENSE") `
         -Destination (Join-Path $publishDirectory "LICENSE") -Force

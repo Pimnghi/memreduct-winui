@@ -319,6 +319,10 @@ static LPCWSTR core_get_string_en(ULONG uid)
 		case 119: return L"Memory cleaning partially failed (failed mask: %s).";
 		case 120: return L"Memory cleaning failed (failed mask: %s).";
 		case 121: return L"Administrator privileges required";
+		case 122: return L"Mem Reduct WinUI command-line tool";
+		case 123: return L"Show this help information.";
+		case 124: return L"Clean memory using the areas selected in the current configuration.";
+		case 125: return L"Clean all memory areas.";
 		default: return NULL;
 	}
 }

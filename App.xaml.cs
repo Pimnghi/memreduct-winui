@@ -3,8 +3,10 @@ using Microsoft.Windows.AppLifecycle;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Pipes;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace memreduct_winui;
 
@@ -16,6 +18,7 @@ public partial class App : Application
     private static extern bool AttachConsole(uint dwProcessId);
 
     private const uint ATTACH_PARENT_PROCESS = 0xFFFFFFFF;
+    private const string CliPipePrefix = "--cli-pipe=";
 
     public App()
     {
@@ -25,19 +28,44 @@ public partial class App : Application
     protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
         var commandArgs = Environment.GetCommandLineArgs().Skip(1).ToArray();
-        var isClean = commandArgs.Any(IsCleanArgument);
-        var isFullClean = commandArgs.Any(IsFullCleanArgument);
-        var isAutostart = commandArgs.Any(IsAutostartArgument);
-        var hasInvalidArguments = commandArgs.Any(arg =>
+        var pipeArguments = commandArgs.Where(IsCliPipeArgument).ToArray();
+        var helpArguments = commandArgs.Where(IsCliHelpArgument).ToArray();
+        var pipeName = pipeArguments.Length == 1
+            ? GetCliPipeName(pipeArguments[0])
+            : null;
+        var publicArguments = commandArgs
+            .Where(arg => !IsCliPipeArgument(arg) && !IsCliHelpArgument(arg))
+            .ToArray();
+        var isCliHelp = helpArguments.Length == 1;
+        var isClean = publicArguments.Any(IsCleanArgument);
+        var isFullClean = publicArguments.Any(IsFullCleanArgument);
+        var isAutostart = publicArguments.Any(IsAutostartArgument);
+        var hasInvalidArguments = publicArguments.Any(arg =>
             !IsCleanArgument(arg) && !IsFullCleanArgument(arg) && !IsAutostartArgument(arg));
+        var hasInvalidPipeArgument = pipeArguments.Length > 1
+            || (pipeArguments.Length == 1 && pipeName == null)
+            || (pipeName != null && !isClean && !isCliHelp);
 
-        if (hasInvalidArguments || (isClean && isAutostart))
+        if (isCliHelp
+            && helpArguments.Length == 1
+            && publicArguments.Length == 0
+            && !hasInvalidPipeArgument)
         {
-            AttachConsole(ATTACH_PARENT_PROCESS);
-            Console.Error.WriteLine(
+            ExitCommandLine(pipeName, FormatCommandLineHelp(), 0, isError: false);
+            return;
+        }
+
+        if (hasInvalidArguments
+            || hasInvalidPipeArgument
+            || helpArguments.Length > 0
+            || (isClean && isAutostart))
+        {
+            ExitCommandLine(
+                pipeName,
                 MemReduct.Core.CoreService.GetString(MemReduct.Core.StrId.CommandLineUsage)
-                ?? "Usage: memreduct-winui.exe [-clean|-clean:full|-autostart]");
-            Environment.Exit(2);
+                    ?? "Usage: memreduct-winui.exe [-clean|-clean:full|-autostart]",
+                2,
+                isError: true);
             return;
         }
 
@@ -46,42 +74,54 @@ public partial class App : Application
 #if !DEBUG
             if (!MemReduct.Core.CoreService.IsElevated())
             {
+                if (pipeName == null)
+                    AttachConsole(ATTACH_PARENT_PROCESS);
                 Environment.Exit(RunAsAdmin(commandArgs, waitForExit: true));
                 return;
             }
 #endif
 
-            AttachConsole(ATTACH_PARENT_PROCESS);
             var mask = isFullClean
                 ? MemReduct.Core.MemoryMask.All
                 : MemReduct.Core.IniConfig.ReadUInt("ReductMask2", MemReduct.Core.MemoryMask.Default);
-            var result = MemReduct.Core.CleanupCoordinator
-                .CleanAsync(MemReduct.Core.CleanupSource.CommandLine, mask)
+            var result = System.Threading.Tasks.Task
+                .Run(() => MemReduct.Core.CleanupCoordinator.CleanAsync(
+                    MemReduct.Core.CleanupSource.CommandLine,
+                    mask))
                 .GetAwaiter()
                 .GetResult();
 
             if (result?.Status == MemReduct.Core.CleanupStatus.Success)
             {
-                Console.WriteLine(
-                    MemReduct.Core.CoreService.FormatCleanedMessage(result.FreedFormatted));
-                Environment.Exit(0);
+                ExitCommandLine(
+                    pipeName,
+                    MemReduct.Core.CoreService.FormatCleanedMessage(result.FreedFormatted),
+                    0,
+                    isError: false);
             }
             else
             {
+                string message;
                 if (result?.Status == MemReduct.Core.CleanupStatus.PartialSuccess)
                 {
-                    Console.Error.WriteLine(
-                        MemReduct.Core.CoreService.FormatPartialCleanupMessage(result));
+                    message = MemReduct.Core.CoreService.FormatPartialCleanupMessage(result);
                 }
                 else
                 {
-                    var failedMask = result?.FailedMask ?? mask;
-                    var title = MemReduct.Core.CoreService.GetString(
-                        MemReduct.Core.StrId.CleaningFailed) ?? "Memory cleaning failed";
-                    Console.Error.WriteLine(
-                        $"{title}. {MemReduct.Core.CoreService.FormatFailedAreasMessage(failedMask)}");
+                    if (!string.IsNullOrWhiteSpace(result?.ErrorMessage))
+                    {
+                        message = result.ErrorMessage;
+                    }
+                    else
+                    {
+                        var failedMask = result?.FailedMask ?? mask;
+                        var title = MemReduct.Core.CoreService.GetString(
+                            MemReduct.Core.StrId.CleaningFailed) ?? "Memory cleaning failed";
+                        message =
+                            $"{title}. {MemReduct.Core.CoreService.FormatFailedAreasMessage(failedMask)}";
+                    }
                 }
-                Environment.Exit(1);
+                ExitCommandLine(pipeName, message, 1, isError: true);
             }
             return;
         }
@@ -154,6 +194,109 @@ public partial class App : Application
     private static bool IsAutostartArgument(string value) =>
         value.Equals("-autostart", StringComparison.OrdinalIgnoreCase)
         || value.Equals("/autostart", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsCliPipeArgument(string value) =>
+        value.StartsWith(CliPipePrefix, StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsCliHelpArgument(string value) =>
+        value.Equals("--cli-help", StringComparison.OrdinalIgnoreCase);
+
+    private static string FormatCommandLineHelp()
+    {
+        var title = MemReduct.Core.CoreService.GetString(
+            MemReduct.Core.StrId.CommandLineHelpTitle)
+            ?? "Mem Reduct WinUI command-line tool";
+        var showHelp = MemReduct.Core.CoreService.GetString(
+            MemReduct.Core.StrId.CommandLineHelpShow)
+            ?? "Show this help information.";
+        var clean = MemReduct.Core.CoreService.GetString(
+            MemReduct.Core.StrId.CommandLineHelpClean)
+            ?? "Clean memory using the areas selected in the current configuration.";
+        var cleanFull = MemReduct.Core.CoreService.GetString(
+            MemReduct.Core.StrId.CommandLineHelpFull)
+            ?? "Clean all memory areas.";
+
+        return $"""
+            {title}
+
+              mrw-cli
+                  {showHelp}
+
+              mrw-cli -clean
+                  {clean}
+
+              mrw-cli -clean:full
+                  {cleanFull}
+            """;
+    }
+
+    private static string? GetCliPipeName(string value)
+    {
+        var pipeName = value[CliPipePrefix.Length..];
+        if (pipeName.Length is 0 or > 128)
+            return null;
+
+        foreach (var character in pipeName)
+        {
+            var isAsciiLetterOrDigit =
+                character is >= 'a' and <= 'z'
+                or >= 'A' and <= 'Z'
+                or >= '0' and <= '9';
+            if (!isAsciiLetterOrDigit && character is not '.' and not '-' and not '_')
+                return null;
+        }
+        return pipeName;
+    }
+
+    private static void ExitCommandLine(
+        string? pipeName,
+        string message,
+        int exitCode,
+        bool isError)
+    {
+        if (!WriteCommandLineResult(pipeName, message, isError))
+            exitCode = 2;
+
+        Environment.Exit(exitCode);
+    }
+
+    private static bool WriteCommandLineResult(
+        string? pipeName,
+        string message,
+        bool isError)
+    {
+        if (pipeName == null)
+        {
+            AttachConsole(ATTACH_PARENT_PROCESS);
+            if (isError)
+                Console.Error.WriteLine(message);
+            else
+                Console.WriteLine(message);
+            return true;
+        }
+
+        try
+        {
+            using var pipe = new NamedPipeClientStream(
+                ".",
+                pipeName,
+                PipeDirection.Out,
+                PipeOptions.None);
+            pipe.Connect(15000);
+            using var writer = new StreamWriter(
+                pipe,
+                new UTF8Encoding(encoderShouldEmitUTF8Identifier: false),
+                bufferSize: 1024,
+                leaveOpen: false);
+            writer.WriteLine(message);
+            writer.Flush();
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
 
     private static int RunAsAdmin(string[] arguments, bool waitForExit)
     {

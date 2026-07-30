@@ -85,4 +85,8 @@ public static class StrId
     public const uint CommandLinePartialFailure = 119;
     public const uint CommandLineFailure = 120;
     public const uint AdministratorRequired = 121;
+    public const uint CommandLineHelpTitle = 122;
+    public const uint CommandLineHelpShow = 123;
+    public const uint CommandLineHelpClean = 124;
+    public const uint CommandLineHelpFull = 125;
 }

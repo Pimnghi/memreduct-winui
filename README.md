@@ -40,17 +40,22 @@
 输出目录：`artifacts\win-x64\`、`artifacts\win-arm64\`。
 
 脚本会执行干净 native 构建、版本一致性检查，并验证发布目录中的
-`CoreLib.dll` 与目标平台匹配。
+`CoreLib.dll`、`mrw-cli.exe` 与目标平台匹配。
 
 ## 命令行
 
 ```powershell
-memreduct-winui.exe -clean
-memreduct-winui.exe -clean:full
+mrw-cli.exe
+mrw-cli.exe -clean
+mrw-cli.exe -clean:full
 ```
 
+不带参数运行 `mrw-cli.exe` 会显示跟随软件语言的详细帮助；也可以使用
+`-h`、`--help` 或 `/?` 显示帮助。
 `-clean` 使用已保存的清理区域，`-clean:full` 使用全部区域。退出码 `0`
 表示全部成功，`1` 表示清理失败或部分失败，`2` 表示参数或提权失败。
+`mrw-cli.exe` 会在当前终端中等待 UAC 提权后的清理结果，无需打开额外的
+命令提示符窗口，也无需按键退出。主程序原有的命令行参数继续保留用于兼容。
 
 ## 项目结构
 
@@ -74,6 +79,7 @@ memreduct-winui/
 │   ├── CoreLib.def             导出函数列表
 │   ├── CoreLib.vcxproj         MSBuild 项目
 │   └── routine/                共享 C 库
+├── CliHost/                   Native 控制台入口（mrw-cli.exe）
 ├── language/
 │   └── memreduct-winui.lng     多语言翻译文件
 ├── Assets/                     应用图标和图片
