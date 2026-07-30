@@ -24,13 +24,67 @@ Real-time memory management application with WinUI 3 native interface. Built on 
 
 ### Prerequisites
 
+- Windows 10 version 1809 or later
 - .NET 9.0 SDK
-- Visual Studio 2022 with C++ desktop development workload
+- Visual Studio 2022 Build Tools
+- Inno Setup 7.0.2 or later (only required for installer packages)
+
+The complete Visual Studio IDE is not required. The C# WinUI 3 application is
+built by the .NET SDK, but `CoreLib.dll` and `mrw-cli.exe` are native C/C++
+projects that use the v143 toolset. Rider and the .NET SDK alone therefore
+cannot build the complete solution.
+
+Install the standalone, IDE-free
+[Visual Studio 2022 Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)
+with the **Desktop development with C++** workload, and make sure the following
+components are selected:
+
+- MSBuild
+- MSVC v143 x64/x86 build tools
+- MSVC v143 ARM64/ARM64EC build tools
+- Windows 11 SDK 10.0.26100
+
+The ARM64 tools can be an optional component. Without them, x64 can still
+build, but the complete x64/ARM64 release process will fail. A full Visual
+Studio 2022 installation is also supported, but is not required.
+
+### Rider
+
+Rider can be used as the primary IDE. Open
+`Settings | Build, Execution, Deployment | Toolset and Build`, then:
+
+- Point `.NET CLI executable path` to the installed .NET SDK.
+- Select the MSBuild supplied by Visual Studio Build Tools as
+  `MSBuild version`.
+- If a full solution build skips native projects or custom MSBuild targets,
+  disable `Use ReSharper Build` so Rider delegates the complete build to
+  `MSBuild.exe`.
+
+For release builds, run the PowerShell scripts below from Rider's integrated
+terminal. This ensures that the same clean-build, architecture, and version
+checks are always applied.
+
+### Verify the Environment
+
+```powershell
+dotnet --version
+
+& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" `
+    -latest -products * -requires Microsoft.Component.MSBuild `
+    -property installationPath
+```
+
+The second command should print the installation directory of Visual Studio
+Build Tools or a full Visual Studio installation. The build script uses the
+same `vswhere` discovery mechanism, so no script changes are needed when only
+Build Tools is installed.
 
 ### Build Steps
 
 ```powershell
-# Build and publish both portable architectures
+# Run from the memreduct-winui directory
+
+# Clean-build and publish both self-contained architectures
 .\build-publish.ps1
 
 # Build one architecture only
@@ -40,9 +94,13 @@ Real-time memory management application with WinUI 3 native interface. Built on 
 Outputs: `artifacts\publish\win-x64\` and
 `artifacts\publish\win-arm64\`.
 
-The script performs a clean native build, verifies version consistency, and
-checks that each published `CoreLib.dll` and `mrw-cli.exe` matches its target
-architecture.
+`build-publish.ps1` first uses MSBuild to compile `CoreLib.dll` and
+`mrw-cli.exe` for each requested architecture, then uses `dotnet publish` for
+the C# WinUI application. It verifies version consistency and checks that
+`memreduct-winui.exe`, `CoreLib.dll`, and `mrw-cli.exe` all match the target
+architecture. Do not replace the complete publish script with a standalone
+`dotnet build`; that would not produce the validated native binaries and final
+application directory.
 
 To build the upload-ready versioned ZIP archives and checksums:
 

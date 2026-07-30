@@ -22,15 +22,61 @@
 
 ## 构建
 
-### 环境
+### 构建环境
 
+- Windows 10 1809 或更高版本
 - .NET 9.0 SDK
-- Visual Studio 2022，勾选"使用 C++ 的桌面开发"工作负载
+- Visual Studio 2022 Build Tools
+- Inno Setup 7.0.2 或更高版本（仅生成安装版时需要）
 
-### 步骤
+不需要安装或使用完整的 Visual Studio IDE。项目中的 C# WinUI 3 主程序由
+`.NET SDK` 构建，但 `CoreLib.dll` 和 `mrw-cli.exe` 是使用 v143 工具集的
+Native C/C++ 项目，因此仅安装 Rider 和 .NET SDK 并不足以完成全项目构建。
+
+可以单独安装无 IDE 界面的
+[Visual Studio 2022 Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/)，
+并在安装器中选择“使用 C++ 的桌面开发”工作负载，确认包含：
+
+- MSBuild
+- MSVC v143 x64/x86 生成工具
+- MSVC v143 ARM64/ARM64EC 生成工具
+- Windows 11 SDK 10.0.26100
+
+ARM64 生成工具可能是可选组件。如果没有安装，x64 可以构建，但完整的
+x64/ARM64 发布流程会失败。完整 Visual Studio 2022 仍然可用，但不是必需项。
+
+### Rider
+
+本项目可以使用 Rider 进行日常开发。在 Rider 的
+`设置 → Build, Execution, Deployment → Toolset and Build` 中：
+
+- 将 `.NET CLI executable path` 指向已安装的 .NET SDK。
+- 将 `MSBuild version` 设为 Visual Studio Build Tools 提供的 MSBuild。
+- 如果 Rider 在完整解决方案构建中跳过 Native 或自定义 MSBuild Target，
+  关闭 `Use ReSharper Build`，让 Rider 将构建完整委托给 `MSBuild.exe`。
+
+正式发布建议从 Rider 内置终端运行下方 PowerShell 脚本，以确保使用相同的
+干净构建、架构和版本检查流程。
+
+### 环境检查
 
 ```powershell
-# 构建并发布 x64、ARM64 便携版
+dotnet --version
+
+& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" `
+    -latest -products * -requires Microsoft.Component.MSBuild `
+    -property installationPath
+```
+
+第二条命令应返回 Visual Studio Build Tools 或完整 Visual Studio 的安装目录。
+构建脚本使用同样的 `vswhere` 检测方式，因此安装 Build Tools 后无需修改脚本。
+
+### 构建步骤
+
+```powershell
+# 在 memreduct-winui 目录中执行
+
+# 干净构建并发布 x64、ARM64 自包含应用目录
 .\build-publish.ps1
 
 # 仅构建一个平台
@@ -47,8 +93,11 @@
 可上传的便携版文件位于 `artifacts\portable\`。
 安装程序及其校验文件位于 `artifacts\installer\`。
 
-脚本会执行干净 native 构建、版本一致性检查，并验证发布目录中的
-`CoreLib.dll`、`mrw-cli.exe` 与目标平台匹配。
+`build-publish.ps1` 会依次使用 MSBuild 构建对应架构的 `CoreLib.dll` 和
+`mrw-cli.exe`，再使用 `dotnet publish` 发布 C# WinUI 主程序。脚本还会执行
+版本一致性检查，并验证 `memreduct-winui.exe`、`CoreLib.dll` 和
+`mrw-cli.exe` 均与目标平台匹配。不要使用单独的 `dotnet build` 代替完整发布
+脚本，否则不会得到经过验证的 Native 二进制和最终应用目录。
 
 安装程序使用 Inno Setup 7.0.2 或更高版本编译，分别生成 x64、ARM64
 全机安装包。默认安装到 `Program Files\Mem Reduct WinUI`，可选择创建
