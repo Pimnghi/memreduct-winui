@@ -19,13 +19,15 @@ concurrency:
 jobs:
   build:
     name: Release ${{ matrix.platform }}
-    runs-on: windows-2025
+    runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
       matrix:
-        platform:
-          - x64
-          - ARM64
+        include:
+          - platform: x64
+            runner: windows-2025
+          - platform: ARM64
+            runner: windows-2022
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
