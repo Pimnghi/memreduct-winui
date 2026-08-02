@@ -1,4 +1,22 @@
-# Mem Reduct WinUI
+<p align="center">
+  <img src="Assets/AppIcon.Notification.png" width="128" alt="Mem Reduct WinUI icon">
+</p>
+
+<h1 align="center">Mem Reduct WinUI</h1>
+
+<p align="center">
+  <a href="README.md">简体中文</a> ·
+  <strong>English</strong> ·
+  <a href="CHANGELOG.md">Changelog</a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/Pimnghi/memreduct-winui/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/Pimnghi/memreduct-winui?style=flat-square"></a>
+  <a href="https://github.com/Pimnghi/memreduct-winui/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/Pimnghi/memreduct-winui/total?style=flat-square"></a>
+  <img alt="Platforms" src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D4?style=flat-square&logo=windows11&logoColor=white">
+  <img alt="Architectures" src="https://img.shields.io/badge/arch-x64%20%7C%20ARM64-0078D4?style=flat-square">
+  <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/Pimnghi/memreduct-winui?style=flat-square"></a>
+</p>
 
 Real-time memory management application with WinUI 3 native interface. Built on the original [Mem Reduct](https://github.com/henrypp/memreduct) core engine.
 

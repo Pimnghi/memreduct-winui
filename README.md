@@ -1,4 +1,22 @@
-# Mem Reduct WinUI
+<p align="center">
+  <img src="Assets/AppIcon.Notification.png" width="128" alt="Mem Reduct WinUI 图标">
+</p>
+
+<h1 align="center">Mem Reduct WinUI</h1>
+
+<p align="center">
+  <strong>简体中文</strong> ·
+  <a href="README_EN.md">English</a> ·
+  <a href="CHANGELOG.md">更新日志</a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/Pimnghi/memreduct-winui/releases/latest"><img alt="最新版本" src="https://img.shields.io/github/v/release/Pimnghi/memreduct-winui?style=flat-square"></a>
+  <a href="https://github.com/Pimnghi/memreduct-winui/releases"><img alt="下载量" src="https://img.shields.io/github/downloads/Pimnghi/memreduct-winui/total?style=flat-square"></a>
+  <img alt="支持平台" src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D4?style=flat-square&logo=windows11&logoColor=white">
+  <img alt="支持架构" src="https://img.shields.io/badge/arch-x64%20%7C%20ARM64-0078D4?style=flat-square">
+  <a href="LICENSE"><img alt="许可证" src="https://img.shields.io/github/license/Pimnghi/memreduct-winui?style=flat-square"></a>
+</p>
 
 基于 [Mem Reduct](https://github.com/henrypp/memreduct) 核心引擎，使用 WinUI 3 原生界面重构的实时内存管理工具。
 
