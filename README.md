@@ -13,12 +13,31 @@
 <p align="center">
   <a href="https://github.com/Pimnghi/memreduct-winui/releases/latest"><img alt="最新版本" src="https://img.shields.io/github/v/release/Pimnghi/memreduct-winui?style=flat-square"></a>
   <a href="https://github.com/Pimnghi/memreduct-winui/releases"><img alt="下载量" src="https://img.shields.io/github/downloads/Pimnghi/memreduct-winui/total?style=flat-square"></a>
+  <a href="https://github.com/Pimnghi/memreduct-winui/actions/workflows/build.yml"><img alt="构建状态" src="https://img.shields.io/github/actions/workflow/status/Pimnghi/memreduct-winui/build.yml?branch=main&style=flat-square"></a>
   <img alt="支持平台" src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D4?style=flat-square&logo=windows11&logoColor=white">
   <img alt="支持架构" src="https://img.shields.io/badge/arch-x64%20%7C%20ARM64-0078D4?style=flat-square">
   <a href="LICENSE"><img alt="许可证" src="https://img.shields.io/github/license/Pimnghi/memreduct-winui?style=flat-square"></a>
 </p>
 
 基于 [Mem Reduct](https://github.com/henrypp/memreduct) 核心引擎，使用 WinUI 3 原生界面重构的实时内存管理工具。
+
+## 下载
+
+普通用户推荐使用 **Installer 安装版**；需要免安装运行时可选择 Portable 便携版。
+请根据设备架构下载对应文件：大多数 Intel/AMD 电脑使用 x64，Windows ARM
+设备使用 ARM64。
+
+| 架构 | Installer（推荐） | Portable |
+| --- | --- | --- |
+| x64 | [下载安装程序](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.0.0/MemReductWinUI-1.0.0-win-x64-setup.exe) | [下载便携版](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.0.0/MemReductWinUI-1.0.0-win-x64.zip) |
+| ARM64 | [下载安装程序](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.0.0/MemReductWinUI-1.0.0-win-arm64-setup.exe) | [下载便携版](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.0.0/MemReductWinUI-1.0.0-win-arm64.zip) |
+
+[查看全部版本](https://github.com/Pimnghi/memreduct-winui/releases) ·
+[SHA-256 校验文件](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.0.0/MemReductWinUI-1.0.0-SHA256SUMS.txt)
+
+> [!IMPORTANT]
+> 程序执行内存清理需要管理员权限。当前发布文件尚未进行 Authenticode
+> 代码签名，因此 Windows UAC 会显示“未知发布者”；请只从本仓库 Release 下载。
 
 ## 功能特性
 
@@ -116,6 +135,8 @@ dotnet --version
 版本一致性检查，并验证 `memreduct-winui.exe`、`CoreLib.dll` 和
 `mrw-cli.exe` 均与目标平台匹配。不要使用单独的 `dotnet build` 代替完整发布
 脚本，否则不会得到经过验证的 Native 二进制和最终应用目录。
+仓库内 `src\app.h` 是 WinUI 版本的规范版本源，构建过程不依赖父目录中的原版
+Mem Reduct 源码，因此全新克隆可以独立完成构建。
 
 安装程序使用 Inno Setup 7.0.2 或更高版本编译，分别生成 x64、ARM64
 全机安装包。默认安装到 `Program Files\Mem Reduct WinUI`，可选择创建
@@ -140,6 +161,10 @@ mrw-cli.exe -clean:full
 
 ```
 memreduct-winui/
+├── .github/                   CI、Issue Form 和依赖更新配置
+├── src/                       Native 版本与资源契约
+│   ├── app.h                   规范版本源
+│   └── resource.h              稳定资源 ID
 ├── App.xaml(.cs)              应用入口
 ├── MainWindow.xaml(.cs)       主窗口、导航、托盘、热键
 ├── MainPage.xaml(.cs)         内存统计 + 清理
@@ -162,6 +187,7 @@ memreduct-winui/
 ├── language/
 │   └── memreduct-winui.lng     多语言翻译文件
 ├── Assets/                     应用图标和图片
+├── global.json                 .NET 9 SDK feature band
 ├── app.manifest                Win32 应用清单
 └── memreduct-winui.csproj      项目文件
 ```

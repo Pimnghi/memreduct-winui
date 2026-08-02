@@ -16,11 +16,10 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $projectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$repositoryRoot = Split-Path -Parent $projectRoot
 $buildScript = Join-Path $projectRoot "build-publish.ps1"
 $installerScript = Join-Path $projectRoot "installer\memreduct-winui.iss"
 $installedMarker = Join-Path $projectRoot "installer\installed.marker"
-$versionHeader = Join-Path $repositoryRoot "src\app.h"
+$versionHeader = Join-Path $projectRoot "src\app.h"
 $artifactRoot = Join-Path $projectRoot "artifacts"
 $publishRoot = Join-Path $artifactRoot "publish"
 $outputRoot = Join-Path $artifactRoot "installer"

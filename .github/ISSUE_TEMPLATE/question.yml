@@ -1,0 +1,37 @@
+name: Usage question / 使用问题
+description: Ask for help using or building the project / 咨询使用或构建问题
+title: "[Question]: "
+labels:
+  - question
+body:
+  - type: dropdown
+    id: topic
+    attributes:
+      label: Topic / 问题类型
+      options:
+        - Installation or startup / 安装或启动
+        - Memory cleanup / 内存清理
+        - Settings or localization / 设置或本地化
+        - CLI / 命令行
+        - Build or development / 构建或开发
+        - Other / 其他
+    validations:
+      required: true
+  - type: textarea
+    id: question
+    attributes:
+      label: Question / 问题
+      description: Include the version, architecture, and relevant context. / 请提供版本、架构和相关背景。
+    validations:
+      required: true
+  - type: textarea
+    id: attempts
+    attributes:
+      label: What have you tried? / 已尝试的方法
+  - type: checkboxes
+    id: security
+    attributes:
+      label: Security / 安全确认
+      options:
+        - label: This question does not disclose a security vulnerability or sensitive data. / 此问题不包含安全漏洞或敏感信息。
+          required: true

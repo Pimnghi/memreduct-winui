@@ -1,6 +1,6 @@
 #include <windows.h>
 #include "resource.h"
-#include "../../src/app.h"
+#include "../src/app.h"
 
 #define CLI_NAME L"mrw-cli"
 #define CLI_DESCRIPTION L"Mem Reduct WinUI Command Line"

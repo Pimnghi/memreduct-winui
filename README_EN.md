@@ -13,12 +13,32 @@
 <p align="center">
   <a href="https://github.com/Pimnghi/memreduct-winui/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/Pimnghi/memreduct-winui?style=flat-square"></a>
   <a href="https://github.com/Pimnghi/memreduct-winui/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/Pimnghi/memreduct-winui/total?style=flat-square"></a>
+  <a href="https://github.com/Pimnghi/memreduct-winui/actions/workflows/build.yml"><img alt="Build status" src="https://img.shields.io/github/actions/workflow/status/Pimnghi/memreduct-winui/build.yml?branch=main&style=flat-square"></a>
   <img alt="Platforms" src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D4?style=flat-square&logo=windows11&logoColor=white">
   <img alt="Architectures" src="https://img.shields.io/badge/arch-x64%20%7C%20ARM64-0078D4?style=flat-square">
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/Pimnghi/memreduct-winui?style=flat-square"></a>
 </p>
 
 Real-time memory management application with WinUI 3 native interface. Built on the original [Mem Reduct](https://github.com/henrypp/memreduct) core engine.
+
+## Download
+
+The **Installer is recommended** for most users. Choose the Portable archive
+when you need a no-install deployment. Most Intel/AMD PCs use x64; Windows on
+Arm devices use ARM64.
+
+| Architecture | Installer (recommended) | Portable |
+| --- | --- | --- |
+| x64 | [Download installer](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.0.0/MemReductWinUI-1.0.0-win-x64-setup.exe) | [Download portable](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.0.0/MemReductWinUI-1.0.0-win-x64.zip) |
+| ARM64 | [Download installer](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.0.0/MemReductWinUI-1.0.0-win-arm64-setup.exe) | [Download portable](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.0.0/MemReductWinUI-1.0.0-win-arm64.zip) |
+
+[All releases](https://github.com/Pimnghi/memreduct-winui/releases) ·
+[SHA-256 checksums](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.0.0/MemReductWinUI-1.0.0-SHA256SUMS.txt)
+
+> [!IMPORTANT]
+> Memory cleanup requires administrator privileges. The current binaries are
+> not Authenticode-signed, so Windows UAC displays “Unknown publisher”. Only
+> download release files from this repository.
 
 ## Features
 
@@ -119,6 +139,9 @@ the C# WinUI application. It verifies version consistency and checks that
 architecture. Do not replace the complete publish script with a standalone
 `dotnet build`; that would not produce the validated native binaries and final
 application directory.
+The repository-local `src\app.h` is the canonical version source for the
+WinUI application. No source file from a parent checkout of the original Mem
+Reduct project is required, so a fresh clone builds independently.
 
 To build the upload-ready versioned ZIP archives and checksums:
 
@@ -162,6 +185,10 @@ for compatibility.
 
 ```
 memreduct-winui/
+├── .github/                   CI, Issue Forms, dependency updates
+├── src/                       Native version and resource contracts
+│   ├── app.h                  Canonical version source
+│   └── resource.h             Stable resource IDs
 ├── App.xaml(.cs)              Application entry
 ├── MainWindow.xaml(.cs)       Main window, navigation, tray, hotkey
 ├── MainPage.xaml(.cs)         Memory statistics + clean
@@ -184,6 +211,7 @@ memreduct-winui/
 ├── language/
 │   └── memreduct-winui.lng    Language translations
 ├── Assets/                    App icons and images
+├── global.json                .NET 9 SDK feature band
 ├── app.manifest               Win32 app manifest
 └── memreduct-winui.csproj     Project file
 ```

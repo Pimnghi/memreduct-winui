@@ -1,0 +1,83 @@
+name: Bug report / 错误报告
+description: Report a reproducible problem / 报告可复现的问题
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a problem. Please remove sensitive information from logs and screenshots.
+        感谢反馈问题。提交日志和截图前，请先移除隐私与敏感信息。
+  - type: input
+    id: version
+    attributes:
+      label: Version / 版本
+      placeholder: 1.0.0
+    validations:
+      required: true
+  - type: dropdown
+    id: architecture
+    attributes:
+      label: Architecture / 架构
+      options:
+        - x64
+        - ARM64
+    validations:
+      required: true
+  - type: dropdown
+    id: distribution
+    attributes:
+      label: Distribution / 分发方式
+      options:
+        - Installer
+        - Portable
+        - Locally built / 本地构建
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version / Windows 版本
+      placeholder: Windows 11 24H2 (26100.x)
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Problem / 问题描述
+      description: What happened, and how often does it happen? / 发生了什么，出现频率如何？
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce / 复现步骤
+      placeholder: |
+        1. Open...
+        2. Select...
+        3. Observe...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior / 预期行为
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Logs and screenshots / 日志与截图
+      description: Drag files here. Do not include private data. / 可将文件拖到此处，请勿包含隐私数据。
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist / 检查项
+      options:
+        - label: I tested the latest stable release. / 我已使用最新稳定版测试。
+          required: true
+        - label: I ran the application with administrator privileges. / 我已使用管理员权限运行程序。
+          required: true
+        - label: I removed passwords, tokens, usernames, and other sensitive data. / 我已移除密码、令牌、用户名等敏感信息。
+          required: true

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability / 安全漏洞
+    url: https://github.com/Pimnghi/memreduct-winui/security/advisories/new
+    about: Report vulnerabilities privately; do not open a public Issue. / 请私密报告漏洞，不要创建公开 Issue。
+  - name: Latest release / 最新版本
+    url: https://github.com/Pimnghi/memreduct-winui/releases/latest
+    about: Download the latest Installer or Portable package. / 下载最新安装版或便携版。

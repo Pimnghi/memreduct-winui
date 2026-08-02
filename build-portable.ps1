@@ -13,9 +13,8 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $projectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$repositoryRoot = Split-Path -Parent $projectRoot
 $buildScript = Join-Path $projectRoot "build-publish.ps1"
-$versionHeader = Join-Path $repositoryRoot "src\app.h"
+$versionHeader = Join-Path $projectRoot "src\app.h"
 $artifactRoot = Join-Path $projectRoot "artifacts"
 $publishRoot = Join-Path $artifactRoot "publish"
 $portableRoot = Join-Path $artifactRoot "portable"

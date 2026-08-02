@@ -15,11 +15,10 @@ param(
 
 $ErrorActionPreference = "Stop"
 $projectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$repositoryRoot = Split-Path -Parent $projectRoot
 $nativeProject = Join-Path $projectRoot "CoreLib\CoreLib.vcxproj"
 $cliProject = Join-Path $projectRoot "CliHost\mrw-cli.vcxproj"
 $managedProject = Join-Path $projectRoot "memreduct-winui.csproj"
-$versionHeader = Join-Path $repositoryRoot "src\app.h"
+$versionHeader = Join-Path $projectRoot "src\app.h"
 $artifactRoot = Join-Path $projectRoot "artifacts"
 $publishRoot = Join-Path $artifactRoot "publish"
 

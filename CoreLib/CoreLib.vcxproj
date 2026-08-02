@@ -56,7 +56,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <IncludePath>$(ProjectDir)..\..\src\;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)routine\;$(ProjectDir)</IncludePath>
+    <IncludePath>$(ProjectDir)..\src\;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)routine\;$(ProjectDir)</IncludePath>
     <OutDir>$(ProjectDir)bin\$(Platform)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>

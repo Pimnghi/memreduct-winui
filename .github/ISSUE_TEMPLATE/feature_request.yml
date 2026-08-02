@@ -1,0 +1,32 @@
+name: Feature request / 功能建议
+description: Suggest an improvement / 建议新功能或改进
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case / 问题或使用场景
+      description: What need would this address? / 这个建议希望解决什么需求？
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution / 建议方案
+      description: Describe the behavior and UI you expect. / 请描述期望的行为和界面。
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives / 其他方案
+      description: What alternatives have you considered? / 你考虑过哪些替代方案？
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope / 范围确认
+      options:
+        - label: This request is related to Mem Reduct WinUI rather than the upstream Win32 project. / 此建议针对 Mem Reduct WinUI，而不是上游 Win32 项目。
+          required: true
