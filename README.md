@@ -21,6 +21,10 @@
 
 基于 [Mem Reduct](https://github.com/henrypp/memreduct) 核心引擎，使用 WinUI 3 原生界面重构的实时内存管理工具。
 
+## 界面预览
+
+![Mem Reduct WinUI 仪表盘](Assets/dashboard_screenshot.png)
+
 ## 下载
 
 普通用户推荐使用 **Installer 安装版**；需要免安装运行时可选择 Portable 便携版。

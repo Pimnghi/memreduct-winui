@@ -7,7 +7,7 @@
 <p align="center">
   <a href="README.md">简体中文</a> ·
   <strong>English</strong> ·
-  <a href="CHANGELOG.md">Changelog</a>
+  <a href="CHANGELOG_EN.md">Changelog</a>
 </p>
 
 <p align="center">
@@ -20,6 +20,10 @@
 </p>
 
 Real-time memory management application with WinUI 3 native interface. Built on the original [Mem Reduct](https://github.com/henrypp/memreduct) core engine.
+
+## Preview
+
+![Mem Reduct WinUI dashboard](Assets/dashboard_screenshot_en.png)
 
 ## Download
 
