@@ -410,7 +410,7 @@
                         x:Name="TrayMemoryUsageCard"
                         Header="Show memory usage in tray icon">
                         <toolkit:SettingsCard.HeaderIcon>
-                            <FontIcon Glyph="&#xE950;" />
+                            <FontIcon Glyph="&#xE9E4;" />
                         </toolkit:SettingsCard.HeaderIcon>
                         <ToggleSwitch
                             x:Name="ToggleTrayMemoryUsage"

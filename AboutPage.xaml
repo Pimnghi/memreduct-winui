@@ -62,7 +62,7 @@
                             x:Name="VersionText"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                             FontWeight="SemiBold"
-                            Text="1.0.0" />
+                            Text="1.1.0" />
                     </toolkit:SettingsCard>
 
                     <toolkit:SettingsCard

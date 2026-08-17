@@ -154,8 +154,10 @@ internal static class TrayMemoryIcon
             oldColorBitmap = SelectObject(colorDc, colorBitmap);
             oldMaskBitmap = SelectObject(maskDc, maskBitmap);
 
-            clearBrush = CreateSolidBrush(Rgb(0, 0, 0));
-            clearPen = CreatePen(0, 1, Rgb(0, 0, 0));
+            // Match the color bitmap outside the rounded mask to the badge color.
+            // This prevents one-pixel black fringes when Shell scales the icon.
+            clearBrush = CreateSolidBrush(background);
+            clearPen = CreatePen(0, 1, background);
             oldColorBrush = SelectObject(colorDc, clearBrush);
             oldColorPen = SelectObject(colorDc, clearPen);
             Rectangle(colorDc, 0, 0, IconSize, IconSize);

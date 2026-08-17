@@ -19,7 +19,7 @@ $artifactRoot = Join-Path $projectRoot "artifacts"
 $publishRoot = Join-Path $artifactRoot "publish"
 $portableRoot = Join-Path $artifactRoot "portable"
 $stagingRoot = Join-Path $portableRoot "staging"
-$expectedVersion = "1.0.0"
+$expectedVersion = "1.1.0"
 $architectures = @(
     [pscustomobject]@{
         Name = "x64"

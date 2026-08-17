@@ -197,11 +197,19 @@ public static class TrayIcon
         try
         {
             var stats = CoreService.GetMemoryStats();
-            var precisePercent = Math.Clamp(stats.PhysicalPercent, 0, 100);
+            var physicalPercent = Math.Clamp(stats.PhysicalPercent, 0, 100);
+            var pageFilePercent = Math.Clamp(stats.PageFilePercent, 0, 100);
+            var systemCachePercent = Math.Clamp(stats.SystemCachePercent, 0, 100);
             var physicalLabel = CoreService.GetString(StrId.GroupPhysical) ?? "Physical memory";
-            var tooltip = $"{physicalLabel}: {precisePercent.ToString("F1", CultureInfo.CurrentCulture)}%";
+            var pageFileLabel = CoreService.GetString(StrId.GroupPagefile) ?? "Pagefile";
+            var systemCacheLabel = CoreService.GetString(StrId.GroupSystemCache) ?? "System working set";
+            var tooltip = string.Join(
+                "\r\n",
+                $"{physicalLabel}: {physicalPercent.ToString("F1", CultureInfo.CurrentCulture)}%",
+                $"{pageFileLabel}: {pageFilePercent.ToString("F1", CultureInfo.CurrentCulture)}%",
+                $"{systemCacheLabel}: {systemCachePercent.ToString("F1", CultureInfo.CurrentCulture)}%");
             var showMemoryUsage = IniConfig.ReadBool("TrayShowMemoryUsage", false);
-            var roundedPercent = (int)Math.Round(precisePercent, MidpointRounding.AwayFromZero);
+            var roundedPercent = (int)Math.Round(physicalPercent, MidpointRounding.AwayFromZero);
             var danger = IniConfig.ReadUInt("TrayLevelDanger", 90);
             var warning = IniConfig.ReadUInt("TrayLevelWarning", 70);
             var severity = roundedPercent >= danger ? 2 : roundedPercent >= warning ? 1 : 0;
