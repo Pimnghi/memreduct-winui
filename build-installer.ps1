@@ -22,8 +22,8 @@ $installedMarker = Join-Path $projectRoot "installer\installed.marker"
 $versionHeader = Join-Path $projectRoot "src\app.h"
 $artifactRoot = Join-Path $projectRoot "artifacts"
 $publishRoot = Join-Path $artifactRoot "publish"
-$outputRoot = Join-Path $artifactRoot "installer"
-$stagingRoot = Join-Path $artifactRoot "installer-staging"
+$installerBaseRoot = Join-Path $artifactRoot "installer"
+$stagingBaseRoot = Join-Path $artifactRoot "installer-staging"
 
 function Remove-SafeDirectory {
     param(
@@ -132,6 +132,12 @@ if (-not $versionMatch.Success) {
     throw "Could not read APP_VERSION from '$versionHeader'."
 }
 $version = $versionMatch.Groups[1].Value
+if ($version -notmatch '^\d+\.\d+\.\d+$') {
+    throw "APP_VERSION must use the major.minor.patch format: '$version'."
+}
+
+$outputRoot = Join-Path $installerBaseRoot $version
+$stagingRoot = Join-Path $stagingBaseRoot $version
 
 $innoCompiler = Get-InnoCompiler
 if (-not $SkipBuild) {
@@ -141,8 +147,8 @@ if (-not $SkipBuild) {
         -NoRestore:$NoRestore
 }
 
-Remove-SafeDirectory -Path $outputRoot -AllowedRoot $artifactRoot
-Remove-SafeDirectory -Path $stagingRoot -AllowedRoot $artifactRoot
+Remove-SafeDirectory -Path $outputRoot -AllowedRoot $installerBaseRoot
+Remove-SafeDirectory -Path $stagingRoot -AllowedRoot $stagingBaseRoot
 New-Item -ItemType Directory -Path $outputRoot -Force | Out-Null
 New-Item -ItemType Directory -Path $stagingRoot -Force | Out-Null
 

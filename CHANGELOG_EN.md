@@ -10,10 +10,30 @@ WinUI.
 
 ## Unreleased
 
+## [1.1.0] - 2026-08-18
+
+[GitHub Release](https://github.com/Pimnghi/memreduct-winui/releases/tag/v1.1.0)
+
+This release improves tray-based memory monitoring and the standalone build and
+release workflow.
+
 ### Added
 
-- Added an optional numeric tray icon for physical-memory usage while retaining
-  the precise percentage in the hover tooltip.
+- Added an optional numeric tray icon that shows physical-memory usage as an
+  integer and follows the configured warning and danger colors.
+- The tray tooltip now shows precise usage for physical memory, pagefile, and
+  the system working set.
+
+### Improved
+
+- Refined numeric tray-icon rendering to remove dark edge artifacts after Shell
+  scaling.
+- Replaced the tray-usage setting icon with a Windows 10/11-compatible usage
+  gauge.
+- Improved standalone repository builds and x64/ARM64 GitHub Actions validation.
+- Preserved older local packages by storing portable and installer artifacts in
+  version-specific directories.
+- Improved the bilingual project documentation and dashboard screenshot.
 
 ## [1.0.0] - 2026-07-31
 

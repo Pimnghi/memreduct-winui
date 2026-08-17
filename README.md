@@ -33,11 +33,11 @@
 
 | 架构 | Installer（推荐） | Portable |
 | --- | --- | --- |
-| x64 | [下载安装程序](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.0.0/MemReductWinUI-1.0.0-win-x64-setup.exe) | [下载便携版](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.0.0/MemReductWinUI-1.0.0-win-x64.zip) |
-| ARM64 | [下载安装程序](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.0.0/MemReductWinUI-1.0.0-win-arm64-setup.exe) | [下载便携版](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.0.0/MemReductWinUI-1.0.0-win-arm64.zip) |
+| x64 | [下载安装程序](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.1.0/MemReductWinUI-1.1.0-win-x64-setup.exe) | [下载便携版](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.1.0/MemReductWinUI-1.1.0-win-x64.zip) |
+| ARM64 | [下载安装程序](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.1.0/MemReductWinUI-1.1.0-win-arm64-setup.exe) | [下载便携版](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.1.0/MemReductWinUI-1.1.0-win-arm64.zip) |
 
 [查看全部版本](https://github.com/Pimnghi/memreduct-winui/releases) ·
-[SHA-256 校验文件](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.0.0/MemReductWinUI-1.0.0-SHA256SUMS.txt)
+[SHA-256 校验文件](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.1.0/MemReductWinUI-1.1.0-SHA256SUMS.txt)
 
 > [!IMPORTANT]
 > 程序执行内存清理需要管理员权限。当前发布文件尚未进行 Authenticode
@@ -131,8 +131,9 @@ dotnet --version
 ```
 
 输出目录：`artifacts\publish\win-x64\`、`artifacts\publish\win-arm64\`。
-可上传的便携版文件位于 `artifacts\portable\`。
-安装程序及其校验文件位于 `artifacts\installer\`。
+可上传的便携版文件位于 `artifacts\portable\<版本>\`。
+安装程序及其校验文件位于 `artifacts\installer\<版本>\`。打包脚本只会重建
+当前版本目录，不会删除本地保留的旧版本产物。
 
 `build-publish.ps1` 会依次使用 MSBuild 构建对应架构的 `CoreLib.dll` 和
 `mrw-cli.exe`，再使用 `dotnet publish` 发布 C# WinUI 主程序。脚本还会执行

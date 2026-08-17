@@ -17,8 +17,7 @@ $buildScript = Join-Path $projectRoot "build-publish.ps1"
 $versionHeader = Join-Path $projectRoot "src\app.h"
 $artifactRoot = Join-Path $projectRoot "artifacts"
 $publishRoot = Join-Path $artifactRoot "publish"
-$portableRoot = Join-Path $artifactRoot "portable"
-$stagingRoot = Join-Path $portableRoot "staging"
+$portableBaseRoot = Join-Path $artifactRoot "portable"
 $expectedVersion = "1.1.0"
 $architectures = @(
     [pscustomobject]@{
@@ -190,6 +189,12 @@ $version = $versionMatch.Groups[1].Value
 if ($version -ne $expectedVersion) {
     throw "This release script packages version '$expectedVersion', but APP_VERSION is '$version'."
 }
+if ($version -notmatch '^\d+\.\d+\.\d+$') {
+    throw "APP_VERSION must use the major.minor.patch format: '$version'."
+}
+
+$portableRoot = Join-Path $portableBaseRoot $version
+$stagingRoot = Join-Path $portableRoot "staging"
 
 if (-not $SkipBuild) {
     Write-Host "Building Mem Reduct WinUI $version for x64 and ARM64..."
@@ -199,7 +204,7 @@ if (-not $SkipBuild) {
         -NoRestore:$NoRestore
 }
 
-Remove-SafeDirectory -Path $portableRoot -AllowedRoot $artifactRoot
+Remove-SafeDirectory -Path $portableRoot -AllowedRoot $portableBaseRoot
 New-Item -ItemType Directory -Path $stagingRoot -Force | Out-Null
 
 $packageRecords = [Collections.Generic.List[object]]::new()
