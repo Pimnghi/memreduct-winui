@@ -1,11 +1,14 @@
 using System;
+using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace MemReduct.Core;
 
 public static class TrayIcon
 {
     private static readonly Guid IconGuid = new("B5F8C3A1-2D4E-4F6A-8C9B-1E3D5F7A9B2C");
+    private static readonly object IconSync = new();
     private static nint _hwnd;
     private static bool _created;
     private static WndProcDelegate? _wndProcDelegate;
@@ -140,8 +143,12 @@ public static class TrayIcon
 
     private static nint _currentIcon;
     private static bool _ownsCurrentIcon;
+    private static bool _usingMemoryIcon;
     private static string? _iconPath;
     private static string _tooltip = "Mem Reduct WinUI";
+    private static Timer? _memoryTimer;
+    private static int _memoryRefreshActive;
+    private static int _lastIconSignature = -1;
 
     public static void SetMenuTexts(string show, string clean, string settings, string exit)
     {
@@ -173,31 +180,102 @@ public static class TrayIcon
         _iconPath = path;
         if (_created)
         {
-            UpdateTrayIcon();
+            RefreshMemoryDisplay(forceIcon: true);
         }
     }
 
-    private static void UpdateTrayIcon()
+    public static void RefreshMemoryDisplay()
     {
-        var newIcon = LoadTrayIcon(out var ownsNewIcon);
+        RefreshMemoryDisplay(forceIcon: false);
+    }
 
-        var nid = new NOTIFYICONDATAW
-        {
-            cbSize = (uint)Marshal.SizeOf<NOTIFYICONDATAW>(),
-            hWnd = _hwnd,
-            uID = 0,
-            guidItem = IconGuid,
-            uFlags = NIF_ICON | NIF_GUID,
-            hIcon = newIcon,
-        };
-        if (!Shell_NotifyIconW(NIM_MODIFY, ref nid))
-        {
-            if (ownsNewIcon && newIcon != nint.Zero)
-                DestroyIcon(newIcon);
+    private static void RefreshMemoryDisplay(bool forceIcon)
+    {
+        if (Interlocked.Exchange(ref _memoryRefreshActive, 1) != 0)
             return;
-        }
 
-        if (_ownsCurrentIcon && _currentIcon != nint.Zero)
+        try
+        {
+            var stats = CoreService.GetMemoryStats();
+            var precisePercent = Math.Clamp(stats.PhysicalPercent, 0, 100);
+            var physicalLabel = CoreService.GetString(StrId.GroupPhysical) ?? "Physical memory";
+            var tooltip = $"{physicalLabel}: {precisePercent.ToString("F1", CultureInfo.CurrentCulture)}%";
+            var showMemoryUsage = IniConfig.ReadBool("TrayShowMemoryUsage", false);
+            var roundedPercent = (int)Math.Round(precisePercent, MidpointRounding.AwayFromZero);
+            var danger = IniConfig.ReadUInt("TrayLevelDanger", 90);
+            var warning = IniConfig.ReadUInt("TrayLevelWarning", 70);
+            var severity = roundedPercent >= danger ? 2 : roundedPercent >= warning ? 1 : 0;
+            var signature = roundedPercent | (severity << 16);
+
+            lock (IconSync)
+            {
+                if (!_created || _hwnd == nint.Zero)
+                    return;
+
+                var replaceIcon = forceIcon || showMemoryUsage != _usingMemoryIcon ||
+                    (showMemoryUsage && signature != _lastIconSignature);
+                if (!replaceIcon && string.Equals(_tooltip, tooltip, StringComparison.Ordinal))
+                    return;
+
+                var newIcon = nint.Zero;
+                var ownsNewIcon = false;
+                if (replaceIcon)
+                {
+                    if (showMemoryUsage)
+                    {
+                        newIcon = TrayMemoryIcon.Create(roundedPercent, severity);
+                        ownsNewIcon = newIcon != nint.Zero;
+                    }
+
+                    if (newIcon == nint.Zero)
+                        newIcon = LoadTrayIcon(out ownsNewIcon);
+                }
+
+                var nid = new NOTIFYICONDATAW
+                {
+                    cbSize = (uint)Marshal.SizeOf<NOTIFYICONDATAW>(),
+                    hWnd = _hwnd,
+                    uID = 0,
+                    guidItem = IconGuid,
+                    uFlags = NIF_TIP | NIF_GUID | (replaceIcon ? NIF_ICON : 0),
+                    hIcon = newIcon,
+                    szTip = tooltip,
+                };
+                if (!Shell_NotifyIconW(NIM_MODIFY, ref nid))
+                {
+                    if (ownsNewIcon && newIcon != nint.Zero)
+                        DestroyIcon(newIcon);
+                    return;
+                }
+
+                _tooltip = tooltip;
+                if (replaceIcon)
+                {
+                    ReplaceCurrentIcon(newIcon, ownsNewIcon);
+                    _usingMemoryIcon = showMemoryUsage;
+                    _lastIconSignature = showMemoryUsage ? signature : -1;
+                }
+            }
+        }
+        catch
+        {
+            // Tray monitoring is optional and must never terminate the application.
+        }
+        finally
+        {
+            Volatile.Write(ref _memoryRefreshActive, 0);
+        }
+    }
+
+    private static void OnMemoryTimer(object? state)
+    {
+        _ = state;
+        RefreshMemoryDisplay(forceIcon: false);
+    }
+
+    private static void ReplaceCurrentIcon(nint newIcon, bool ownsNewIcon)
+    {
+        if (_ownsCurrentIcon && _currentIcon != nint.Zero && _currentIcon != newIcon)
             DestroyIcon(_currentIcon);
         _currentIcon = newIcon;
         _ownsCurrentIcon = ownsNewIcon;
@@ -238,6 +316,8 @@ public static class TrayIcon
         else if (_taskbarCreatedMessage != 0 && msg == _taskbarCreatedMessage)
         {
             _created = AddTrayIcon();
+            if (_created)
+                RefreshMemoryDisplay(forceIcon: true);
             return 0;
         }
         return DefWindowProcW(hwnd, msg, wParam, lParam);
@@ -273,6 +353,14 @@ public static class TrayIcon
             DestroyWindow(_hwnd);
             _hwnd = nint.Zero;
         }
+        else
+        {
+            _memoryTimer = new Timer(
+                OnMemoryTimer,
+                null,
+                TimeSpan.Zero,
+                TimeSpan.FromSeconds(2));
+        }
 
         return _created;
     }
@@ -300,54 +388,67 @@ public static class TrayIcon
 
     public static void Destroy()
     {
-        if (_hwnd != nint.Zero) UnregisterHotKey(_hwnd, (int)HOTKEY_ID);
-        if (_created)
+        var timer = Interlocked.Exchange(ref _memoryTimer, null);
+        timer?.Dispose();
+
+        lock (IconSync)
         {
+            if (_hwnd != nint.Zero) UnregisterHotKey(_hwnd, (int)HOTKEY_ID);
+            if (_created)
+            {
+                var nid = new NOTIFYICONDATAW
+                {
+                    cbSize = (uint)Marshal.SizeOf<NOTIFYICONDATAW>(),
+                    hWnd = _hwnd,
+                    uID = 0,
+                    guidItem = IconGuid,
+                    uFlags = NIF_GUID,
+                };
+                Shell_NotifyIconW(NIM_DELETE, ref nid);
+            }
+            _created = false;
+            if (_hwnd != nint.Zero) DestroyWindow(_hwnd);
+            if (_ownsCurrentIcon && _currentIcon != nint.Zero) DestroyIcon(_currentIcon);
+            _hwnd = nint.Zero;
+            _currentIcon = nint.Zero;
+            _ownsCurrentIcon = false;
+            _usingMemoryIcon = false;
+            _lastIconSignature = -1;
+        }
+    }
+
+    private static bool AddTrayIcon()
+    {
+        lock (IconSync)
+        {
+            var reusingCurrentIcon = _currentIcon != nint.Zero;
+            var ownsIcon = false;
+            var icon = reusingCurrentIcon ? _currentIcon : LoadTrayIcon(out ownsIcon);
+            if (reusingCurrentIcon)
+                ownsIcon = _ownsCurrentIcon;
             var nid = new NOTIFYICONDATAW
             {
                 cbSize = (uint)Marshal.SizeOf<NOTIFYICONDATAW>(),
                 hWnd = _hwnd,
                 uID = 0,
                 guidItem = IconGuid,
-                uFlags = NIF_GUID,
+                uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP | NIF_GUID,
+                uCallbackMessage = WM_TRAYICON,
+                hIcon = icon,
+                szTip = _tooltip,
             };
-            Shell_NotifyIconW(NIM_DELETE, ref nid);
+
+            if (!Shell_NotifyIconW(NIM_ADD, ref nid))
+            {
+                if (!reusingCurrentIcon && ownsIcon && icon != nint.Zero)
+                    DestroyIcon(icon);
+                return false;
+            }
+
+            if (!reusingCurrentIcon)
+                ReplaceCurrentIcon(icon, ownsIcon);
+            return true;
         }
-        if (_hwnd != nint.Zero) DestroyWindow(_hwnd);
-        if (_ownsCurrentIcon && _currentIcon != nint.Zero) DestroyIcon(_currentIcon);
-        _hwnd = nint.Zero;
-        _currentIcon = nint.Zero;
-        _ownsCurrentIcon = false;
-        _created = false;
-    }
-
-    private static bool AddTrayIcon()
-    {
-        var icon = LoadTrayIcon(out var ownsIcon);
-        var nid = new NOTIFYICONDATAW
-        {
-            cbSize = (uint)Marshal.SizeOf<NOTIFYICONDATAW>(),
-            hWnd = _hwnd,
-            uID = 0,
-            guidItem = IconGuid,
-            uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP | NIF_GUID,
-            uCallbackMessage = WM_TRAYICON,
-            hIcon = icon,
-            szTip = _tooltip,
-        };
-
-        if (!Shell_NotifyIconW(NIM_ADD, ref nid))
-        {
-            if (ownsIcon && icon != nint.Zero)
-                DestroyIcon(icon);
-            return false;
-        }
-
-        if (_ownsCurrentIcon && _currentIcon != nint.Zero)
-            DestroyIcon(_currentIcon);
-        _currentIcon = icon;
-        _ownsCurrentIcon = ownsIcon;
-        return true;
     }
 
     private static nint LoadTrayIcon(out bool ownsIcon)

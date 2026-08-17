@@ -278,6 +278,7 @@ public sealed partial class MainWindow : Window
             CoreService.GetString(StrId.CleanMemory) ?? "Clean memory",
             CoreService.GetString(StrId.Settings) ?? "Settings",
             CoreService.GetString(StrId.Exit) ?? "Exit");
+        TrayIcon.RefreshMemoryDisplay();
     }
 
     public void RefreshTrayMenu() => UpdateTrayMenuTexts();

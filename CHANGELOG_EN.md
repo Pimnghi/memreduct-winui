@@ -8,6 +8,13 @@
 This document records the official releases and notable changes of Mem Reduct
 WinUI.
 
+## Unreleased
+
+### Added
+
+- Added an optional numeric tray icon for physical-memory usage while retaining
+  the precise percentage in the hover tooltip.
+
 ## [1.0.0] - 2026-07-31
 
 [GitHub Release](https://github.com/Pimnghi/memreduct-winui/releases/tag/v1.0.0)

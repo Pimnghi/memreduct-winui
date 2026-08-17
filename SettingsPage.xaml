@@ -406,6 +406,19 @@
             <StackPanel Spacing="8">
                 <TextBlock x:Name="TrayHeader" Text="Tray icon" Style="{StaticResource SubtitleTextBlockStyle}" />
                 <StackPanel Spacing="4">
+                    <toolkit:SettingsCard
+                        x:Name="TrayMemoryUsageCard"
+                        Header="Show memory usage in tray icon">
+                        <toolkit:SettingsCard.HeaderIcon>
+                            <FontIcon Glyph="&#xE950;" />
+                        </toolkit:SettingsCard.HeaderIcon>
+                        <ToggleSwitch
+                            x:Name="ToggleTrayMemoryUsage"
+                            OffContent=""
+                            OnContent=""
+                            Toggled="OnToggleChanged" />
+                    </toolkit:SettingsCard>
+
                     <toolkit:SettingsCard x:Name="TrayLeftCard" Header="Single click">
                         <toolkit:SettingsCard.HeaderIcon>
                             <FontIcon Glyph="&#xE962;" />

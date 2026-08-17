@@ -39,6 +39,7 @@ public sealed partial class SettingsPage : Page
         // 2. 通知设置
         ToggleShowResults.IsOn = IniConfig.ReadBool("BalloonCleanResults", true);
         ToggleNotificationSound.IsOn = IniConfig.ReadBool("IsNotificationsSound", true);
+        ToggleTrayMemoryUsage.IsOn = IniConfig.ReadBool("TrayShowMemoryUsage", false);
 
         ToggleAllowStandby.IsOn = IniConfig.ReadBool("IsAllowStandbyListCleanup", false);
         ToggleLogResults.IsOn = IniConfig.ReadBool("LogCleanResults", false);
@@ -118,6 +119,7 @@ public sealed partial class SettingsPage : Page
             v = s(StrId.TitleAdvanced);             if (v != null) AdvancedHeader.Text = v;
 
             v = s(StrId.SettingsTray);              if (v != null) TrayHeader.Text = v;
+            v = s(StrId.TrayShowMemoryUsage);       if (v != null) TrayMemoryUsageCard.Header = v;
             v = s(StrId.TrayActionScHint);          if (v != null) TrayLeftCard.Header = v;
             v = s(StrId.TrayActionMcHint);          if (v != null) TrayMidCard.Header = v;
 
@@ -214,6 +216,11 @@ public sealed partial class SettingsPage : Page
         else if (ReferenceEquals(sender, ToggleNotificationSound))
         {
             IniConfig.WriteBool("IsNotificationsSound", ToggleNotificationSound.IsOn);
+        }
+        else if (ReferenceEquals(sender, ToggleTrayMemoryUsage))
+        {
+            IniConfig.WriteBool("TrayShowMemoryUsage", ToggleTrayMemoryUsage.IsOn);
+            TrayIcon.RefreshMemoryDisplay();
         }
         else if (ReferenceEquals(sender, ToggleAutoClean))
         {
@@ -334,8 +341,8 @@ public sealed partial class SettingsPage : Page
             IniConfig.WriteInt("TrayActionMc", (int)(mid.Tag ?? 1));
     }
 
-    private void OnWarningValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs args) { if (_loading || WarningValueText == null) return; var v = (uint)args.NewValue; IniConfig.WriteUInt("TrayLevelWarning", v); WarningValueText.Text = $"{v}%"; }
-    private void OnDangerValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs args) { if (_loading || DangerValueText == null) return; var v = (uint)args.NewValue; IniConfig.WriteUInt("TrayLevelDanger", v); DangerValueText.Text = $"{v}%"; }
+    private void OnWarningValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs args) { if (_loading || WarningValueText == null) return; var v = (uint)args.NewValue; IniConfig.WriteUInt("TrayLevelWarning", v); WarningValueText.Text = $"{v}%"; TrayIcon.RefreshMemoryDisplay(); }
+    private void OnDangerValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs args) { if (_loading || DangerValueText == null) return; var v = (uint)args.NewValue; IniConfig.WriteUInt("TrayLevelDanger", v); DangerValueText.Text = $"{v}%"; TrayIcon.RefreshMemoryDisplay(); }
     private void OnAutoCleanValueChanged(object sender, Microsoft.UI.Xaml.Controls.Primitives.RangeBaseValueChangedEventArgs args) { if (_loading || AutoCleanValueText == null) return; var v = (uint)args.NewValue; IniConfig.WriteUInt("AutoreductValue", v); AutoCleanValueText.Text = $"{v}%"; }
     private void OnIntervalValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args) { if (_loading || double.IsNaN(args.NewValue)) return; IniConfig.WriteUInt("AutoreductIntervalValue", (uint)args.NewValue); }
 

@@ -7,6 +7,12 @@
 
 本文件记录 Mem Reduct WinUI 的正式版本及主要变化。
 
+## 未发布
+
+### 新增
+
+- 新增可选的托盘数字图标，用整数显示物理内存使用率；悬停提示保留精确百分比。
+
 ## [1.0.0] - 2026-07-31
 
 [GitHub Release](https://github.com/Pimnghi/memreduct-winui/releases/tag/v1.0.0)

@@ -323,6 +323,7 @@ static LPCWSTR core_get_string_en(ULONG uid)
 		case 123: return L"Show this help information.";
 		case 124: return L"Clean memory using the areas selected in the current configuration.";
 		case 125: return L"Clean all memory areas.";
+		case 126: return L"Show memory usage in tray icon";
 		default: return NULL;
 	}
 }
