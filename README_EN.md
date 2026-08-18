@@ -46,6 +46,7 @@ Arm devices use ARM64.
 
 ## Features
 
+- Optional numeric tray icon with precise three-area memory usage in its tooltip
 - Real-time monitoring of physical memory, pagefile, and system working set
 - One-click memory cleanup using Windows Native API
 - System tray with right-click menu and balloon notifications

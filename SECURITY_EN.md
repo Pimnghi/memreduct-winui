@@ -9,7 +9,7 @@
 
 | Version | Supported |
 | --- | --- |
-| Latest stable `1.0.x` | Yes |
+| Latest stable `1.1.x` | Yes |
 | Older or development builds | No |
 
 ## Reporting a vulnerability

@@ -10,12 +10,18 @@ WinUI.
 
 ## Unreleased
 
+There are currently no unreleased changes.
+
 ## [1.1.0] - 2026-08-18
 
 [GitHub Release](https://github.com/Pimnghi/memreduct-winui/releases/tag/v1.1.0)
 
 This release improves tray-based memory monitoring and the standalone build and
 release workflow.
+
+The tray memory usage feature was requested in
+[Issue #1](https://github.com/Pimnghi/memreduct-winui/issues/1). Thanks to
+@kokpk for the suggestion.
 
 ### Added
 

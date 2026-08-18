@@ -9,11 +9,16 @@
 
 ## 未发布
 
+当前没有未发布的变更。
+
 ## [1.1.0] - 2026-08-18
 
 [GitHub Release](https://github.com/Pimnghi/memreduct-winui/releases/tag/v1.1.0)
 
 本版本完善托盘内存监控体验，并改进项目的独立构建与发布流程。
+
+托盘内存使用率功能源自 [Issue #1](https://github.com/Pimnghi/memreduct-winui/issues/1)，
+感谢 @kokpk 提出的建议。
 
 ### 新增
 
