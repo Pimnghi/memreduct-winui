@@ -27,6 +27,11 @@ internal sealed class TrayMenuWindow : Window
     private int _anchorX;
     private int _anchorY;
 
+    // MenuFlyout cannot infer the pointer device when it is opened from a
+    // Shell_NotifyIcon callback. Pin the SDK's narrow (mouse/pen/keyboard)
+    // padding so the menu does not occasionally inherit touch-sized rows.
+    private static readonly Thickness TrayMenuItemPadding = new(11, 4, 11, 5);
+
     private const uint GW_OWNER = 4;
     private const uint GA_ROOT = 2;
     private const uint WM_GETMINMAXINFO = 0x0024;
@@ -82,6 +87,9 @@ internal sealed class TrayMenuWindow : Window
         int cx,
         int cy,
         uint flags);
+
+    [DllImport("user32")]
+    private static extern bool SetForegroundWindow(nint hWnd);
 
     [DllImport("user32")]
     private static extern bool SetWindowDisplayAffinity(nint hWnd, uint dwAffinity);
@@ -282,6 +290,7 @@ internal sealed class TrayMenuWindow : Window
         DispatcherQueue.TryEnqueue(() =>
         {
             ForceHostToAnchor();
+            SetForegroundWindow(_hostHwnd);
             ShowMenuIfReady();
         });
     }
@@ -381,6 +390,12 @@ internal sealed class TrayMenuWindow : Window
             return;
 
         _showRequested = false;
+
+        // Activate the real XAML owner immediately before WinUI creates the
+        // popup HWND. Without this, the Desktop Acrylic backdrop can start in
+        // its inactive fallback state and remain an opaque gray for the whole
+        // menu lifetime.
+        SetForegroundWindow(_hostHwnd);
         _menu.ShowAt(_anchor, new FlyoutShowOptions
         {
             Placement = FlyoutPlacementMode.Auto,
@@ -394,6 +409,7 @@ internal sealed class TrayMenuWindow : Window
         {
             Text = text,
             Icon = CreateIcon(glyph),
+            Padding = TrayMenuItemPadding,
         };
         item.Click += (_, _) => TrayIcon.DispatchMenuCommand(command);
         return item;
@@ -439,6 +455,7 @@ internal sealed class TrayMenuWindow : Window
         {
             Text = CoreService.GetString(StrId.TrayPopUp1) ?? "Clean areas",
             Icon = CreateIcon("\uEA37"),
+            Padding = TrayMenuItemPadding,
         };
         for (var index = 0; index < names.Length; index++)
         {
@@ -449,6 +466,7 @@ internal sealed class TrayMenuWindow : Window
                 Text = CoreService.GetString(stringIds[index]) ?? names[index],
                 IsChecked = (mask & itemMask) != 0,
                 IsEnabled = allowDangerousRegions || !isDangerousRegion,
+                Padding = TrayMenuItemPadding,
             };
             item.Click += (_, _) =>
             {
@@ -471,6 +489,7 @@ internal sealed class TrayMenuWindow : Window
         {
             Text = CoreService.GetString(StrId.TrayPopUp2) ?? "Clean when above",
             Icon = CreateIcon("\uE9D9"),
+            Padding = TrayMenuItemPadding,
         };
 
         AddToggleItem(
@@ -512,6 +531,7 @@ internal sealed class TrayMenuWindow : Window
         {
             Text = CoreService.GetString(StrId.TrayPopUp3) ?? "Clean every",
             Icon = CreateIcon("\uE823"),
+            Padding = TrayMenuItemPadding,
         };
 
         AddToggleItem(
@@ -552,6 +572,7 @@ internal sealed class TrayMenuWindow : Window
         {
             Text = text,
             IsChecked = isChecked,
+            Padding = TrayMenuItemPadding,
         };
         item.Click += (_, _) =>
         {
