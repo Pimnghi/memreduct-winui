@@ -9,11 +9,11 @@
         HorizontalAlignment="Stretch"
         HorizontalContentAlignment="Stretch"
         VerticalScrollBarVisibility="Auto"
-        Padding="24,16,24,0">
+        Padding="24,0,24,0">
         <Grid HorizontalAlignment="Stretch">
             <StackPanel
                 MaxWidth="1000"
-                Margin="0,0,0,32"
+                Margin="0,16,0,32"
                 HorizontalAlignment="Stretch"
                 Spacing="28">
 
