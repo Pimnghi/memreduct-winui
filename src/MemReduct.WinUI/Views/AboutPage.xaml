@@ -61,8 +61,7 @@
                         <TextBlock
                             x:Name="VersionText"
                             Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                            FontWeight="SemiBold"
-                            Text="1.1.0" />
+                            FontWeight="SemiBold" />
                     </toolkit:SettingsCard>
 
                     <toolkit:SettingsCard

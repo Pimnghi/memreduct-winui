@@ -33,11 +33,11 @@ Arm devices use ARM64.
 
 | Architecture | Installer (recommended) | Portable |
 | --- | --- | --- |
-| x64 | [Download installer](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.1.0/MemReductWinUI-1.1.0-win-x64-setup.exe) | [Download portable](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.1.0/MemReductWinUI-1.1.0-win-x64.zip) |
-| ARM64 | [Download installer](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.1.0/MemReductWinUI-1.1.0-win-arm64-setup.exe) | [Download portable](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.1.0/MemReductWinUI-1.1.0-win-arm64.zip) |
+| x64 | [Download installer](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.2.0/MemReductWinUI-1.2.0-win-x64-setup.exe) | [Download portable](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.2.0/MemReductWinUI-1.2.0-win-x64.zip) |
+| ARM64 | [Download installer](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.2.0/MemReductWinUI-1.2.0-win-arm64-setup.exe) | [Download portable](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.2.0/MemReductWinUI-1.2.0-win-arm64.zip) |
 
 [All releases](https://github.com/Pimnghi/memreduct-winui/releases) ·
-[SHA-256 checksums](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.1.0/MemReductWinUI-1.1.0-SHA256SUMS.txt)
+[SHA-256 checksums](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.2.0/MemReductWinUI-1.2.0-SHA256SUMS.txt)
 
 > [!IMPORTANT]
 > Memory cleanup requires administrator privileges. The current binaries are

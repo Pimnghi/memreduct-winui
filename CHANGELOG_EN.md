@@ -12,6 +12,32 @@ WinUI.
 
 There are currently no unreleased changes.
 
+## [1.2.0] - 2026-09-01
+
+[GitHub Release](https://github.com/Pimnghi/memreduct-winui/releases/tag/v1.2.0) ·
+[Full changelog](https://github.com/Pimnghi/memreduct-winui/compare/v1.1.0...v1.2.0)
+
+This release improves native WinUI interaction and visual consistency in Settings,
+and fixes tray-menu and page-layout issues.
+
+### Improved
+
+- Placed native cleanup-region checkboxes to the left of their labels while
+  retaining the safeguards for dangerous cleanup regions.
+- Made the entire hotkey keycap group clickable to open the editor, removed the
+  separate pencil icon, and enlarged the hover and click area.
+- Added localized On/Off labels to the left of settings switches with native spacing.
+- Organized source code, build scripts, and installer resources under a consistent
+  `MemReduct.WinUI` module naming scheme. Public executable names and configuration
+  paths remain unchanged.
+
+### Fixed
+
+- Stabilized the tray context menu's background appearance and item heights.
+- Restored the title-bar and About-page application icons after the directory reorganization.
+- Removed the fixed top gap when scrolling Settings and About while preserving
+  the initial page spacing.
+
 ## [1.1.0] - 2026-08-18
 
 [GitHub Release](https://github.com/Pimnghi/memreduct-winui/releases/tag/v1.1.0)

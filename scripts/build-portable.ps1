@@ -18,7 +18,7 @@ $versionHeader = Join-Path $projectRoot "src\MemReduct.WinUI.Shared\app.h"
 $artifactRoot = Join-Path $projectRoot "artifacts"
 $publishRoot = Join-Path $artifactRoot "publish"
 $portableBaseRoot = Join-Path $artifactRoot "portable"
-$expectedVersion = "1.1.0"
+$expectedVersion = "1.2.0"
 $architectures = @(
     [pscustomobject]@{
         Name = "x64"

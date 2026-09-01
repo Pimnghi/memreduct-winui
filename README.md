@@ -33,11 +33,11 @@
 
 | 架构 | Installer（推荐） | Portable |
 | --- | --- | --- |
-| x64 | [下载安装程序](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.1.0/MemReductWinUI-1.1.0-win-x64-setup.exe) | [下载便携版](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.1.0/MemReductWinUI-1.1.0-win-x64.zip) |
-| ARM64 | [下载安装程序](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.1.0/MemReductWinUI-1.1.0-win-arm64-setup.exe) | [下载便携版](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.1.0/MemReductWinUI-1.1.0-win-arm64.zip) |
+| x64 | [下载安装程序](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.2.0/MemReductWinUI-1.2.0-win-x64-setup.exe) | [下载便携版](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.2.0/MemReductWinUI-1.2.0-win-x64.zip) |
+| ARM64 | [下载安装程序](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.2.0/MemReductWinUI-1.2.0-win-arm64-setup.exe) | [下载便携版](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.2.0/MemReductWinUI-1.2.0-win-arm64.zip) |
 
 [查看全部版本](https://github.com/Pimnghi/memreduct-winui/releases) ·
-[SHA-256 校验文件](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.1.0/MemReductWinUI-1.1.0-SHA256SUMS.txt)
+[SHA-256 校验文件](https://github.com/Pimnghi/memreduct-winui/releases/download/v1.2.0/MemReductWinUI-1.2.0-SHA256SUMS.txt)
 
 > [!IMPORTANT]
 > 程序执行内存清理需要管理员权限。当前发布文件尚未进行 Authenticode
