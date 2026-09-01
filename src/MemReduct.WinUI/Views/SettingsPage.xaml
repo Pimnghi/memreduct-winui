@@ -344,22 +344,21 @@
                         <toolkit:SettingsExpander.Items>
                             <toolkit:SettingsCard HorizontalContentAlignment="Right">
                                 <StackPanel HorizontalAlignment="Right" Spacing="6">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Button
+                                        x:Name="EditHotkeyButton"
+                                        HorizontalAlignment="Right"
+                                        Padding="12,8"
+                                        BorderThickness="0"
+                                        Style="{StaticResource SubtleButtonStyle}"
+                                        Click="OnEditHotkeyClick">
                                         <StackPanel
                                             x:Name="HotkeyKeycapsPanel"
                                             VerticalAlignment="Center"
                                             Orientation="Horizontal"
+                                            IsHitTestVisible="False"
+                                            AutomationProperties.AccessibilityView="Raw"
                                             Spacing="6" />
-                                        <Button
-                                            x:Name="EditHotkeyButton"
-                                            Width="40"
-                                            Height="36"
-                                            Padding="0"
-                                            Style="{StaticResource SubtleButtonStyle}"
-                                            Click="OnEditHotkeyClick">
-                                            <FontIcon Glyph="&#xE70F;" />
-                                        </Button>
-                                    </StackPanel>
+                                    </Button>
                                     <TextBlock
                                         x:Name="HotkeyStatusText"
                                         MaxWidth="320"

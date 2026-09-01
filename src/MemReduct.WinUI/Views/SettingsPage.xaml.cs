@@ -1,6 +1,7 @@
 using MemReduct.WinUI.Core;
 using MemReduct.WinUI.Shell;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
 using System;
 
@@ -125,6 +126,7 @@ public sealed partial class SettingsPage : Page
             v = s(StrId.TrayActionMcHint);          if (v != null) TrayMidCard.Header = v;
 
             UpdateSystemLocaleLabel();
+            UpdateHotkeyButtonAccessibility();
             LoadThemes();
             LoadTrayActions();
         }
@@ -351,7 +353,17 @@ public sealed partial class SettingsPage : Page
     {
         var hotkey = IniConfig.ReadInt("HotkeyClean", (0x02 << 8 | 0x70));
         RenderHotkeyKeycaps(HotkeyKeycapsPanel, (uint)((hotkey >> 8) & 0xFF), (uint)(hotkey & 0xFF), false);
+        UpdateHotkeyButtonAccessibility();
         HotkeyStatusText.Visibility = Visibility.Collapsed;
+    }
+
+    private void UpdateHotkeyButtonAccessibility()
+    {
+        var hotkey = IniConfig.ReadInt("HotkeyClean", (0x02 << 8 | 0x70));
+        var shortcut = string.Join(" + ", GetHotkeyParts((uint)((hotkey >> 8) & 0xFF), (uint)(hotkey & 0xFF)));
+        var title = CoreService.GetString(StrId.TitleHotkeys) ?? "Shortcut";
+        AutomationProperties.SetName(EditHotkeyButton, $"{title}: {shortcut}");
+        AutomationProperties.SetHelpText(EditHotkeyButton, GetHotkeyEditorStrings().Prompt);
     }
 
     private void OnHotkeyChanged(object sender, RoutedEventArgs e)
@@ -541,7 +553,12 @@ public sealed partial class SettingsPage : Page
 
         var style = (Style)Resources[large ? "HotkeyDialogKeycapStyle" : "HotkeyKeycapStyle"];
         foreach (var part in parts)
-            panel.Children.Add(new Button { Content = part, Style = style });
+        {
+            var keycap = new Button { Content = part, Style = style };
+            if (!large)
+                AutomationProperties.SetAccessibilityView(keycap, Microsoft.UI.Xaml.Automation.Peers.AccessibilityView.Raw);
+            panel.Children.Add(keycap);
+        }
     }
 
     private void SetHotkeyDialogStatus(string text, bool isError)
