@@ -67,8 +67,9 @@
                         </toolkit:SettingsCard.HeaderIcon>
                         <ToggleSwitch
                             x:Name="ToggleAlwaysOnTop"
-                            OffContent=""
-                            OnContent=""
+                            AutomationProperties.Name="{Binding Header, ElementName=AlwaysOnTopCard}"
+                            OffContent="{x:Bind ToggleOffText, Mode=OneWay}"
+                            OnContent="{x:Bind ToggleOnText, Mode=OneWay}"
                             Toggled="OnToggleChanged" />
                     </toolkit:SettingsCard>
 
@@ -78,8 +79,9 @@
                         </toolkit:SettingsCard.HeaderIcon>
                         <ToggleSwitch
                             x:Name="ToggleLoadOnStartup"
-                            OffContent=""
-                            OnContent=""
+                            AutomationProperties.Name="{Binding Header, ElementName=LoadOnStartupCard}"
+                            OffContent="{x:Bind ToggleOffText, Mode=OneWay}"
+                            OnContent="{x:Bind ToggleOnText, Mode=OneWay}"
                             Toggled="OnToggleChanged" />
                     </toolkit:SettingsCard>
 
@@ -89,8 +91,9 @@
                         </toolkit:SettingsCard.HeaderIcon>
                         <ToggleSwitch
                             x:Name="ToggleStartMinimized"
-                            OffContent=""
-                            OnContent=""
+                            AutomationProperties.Name="{Binding Header, ElementName=StartMinimizedCard}"
+                            OffContent="{x:Bind ToggleOffText, Mode=OneWay}"
+                            OnContent="{x:Bind ToggleOnText, Mode=OneWay}"
                             Toggled="OnToggleChanged" />
                     </toolkit:SettingsCard>
 
@@ -100,8 +103,9 @@
                         </toolkit:SettingsCard.HeaderIcon>
                         <ToggleSwitch
                             x:Name="ToggleConfirmClean"
-                            OffContent=""
-                            OnContent=""
+                            AutomationProperties.Name="{Binding Header, ElementName=ConfirmCleanCard}"
+                            OffContent="{x:Bind ToggleOffText, Mode=OneWay}"
+                            OnContent="{x:Bind ToggleOnText, Mode=OneWay}"
                             Toggled="OnToggleChanged" />
                     </toolkit:SettingsCard>
                 </StackPanel>
@@ -265,8 +269,9 @@
                         </toolkit:SettingsExpander.HeaderIcon>
                         <ToggleSwitch
                             x:Name="ToggleAutoClean"
-                            OffContent=""
-                            OnContent=""
+                            AutomationProperties.Name="{Binding Header, ElementName=AutoCleanExpander}"
+                            OffContent="{x:Bind ToggleOffText, Mode=OneWay}"
+                            OnContent="{x:Bind ToggleOnText, Mode=OneWay}"
                             Toggled="OnToggleChanged" />
                         <toolkit:SettingsExpander.Items>
                             <toolkit:SettingsCard
@@ -302,8 +307,9 @@
                         </toolkit:SettingsExpander.HeaderIcon>
                         <ToggleSwitch
                             x:Name="ToggleIntervalClean"
-                            OffContent=""
-                            OnContent=""
+                            AutomationProperties.Name="{Binding Header, ElementName=IntervalCleanExpander}"
+                            OffContent="{x:Bind ToggleOffText, Mode=OneWay}"
+                            OnContent="{x:Bind ToggleOnText, Mode=OneWay}"
                             Toggled="OnToggleChanged" />
                         <toolkit:SettingsExpander.Items>
                             <toolkit:SettingsCard
@@ -338,8 +344,9 @@
                         </toolkit:SettingsExpander.HeaderIcon>
                         <ToggleSwitch
                             x:Name="ToggleHotkey"
-                            OffContent=""
-                            OnContent=""
+                            AutomationProperties.Name="{Binding Header, ElementName=HotkeyExpander}"
+                            OffContent="{x:Bind ToggleOffText, Mode=OneWay}"
+                            OnContent="{x:Bind ToggleOnText, Mode=OneWay}"
                             Toggled="OnHotkeyChanged" />
                         <toolkit:SettingsExpander.Items>
                             <toolkit:SettingsCard HorizontalContentAlignment="Right">
@@ -383,8 +390,9 @@
                         </toolkit:SettingsCard.HeaderIcon>
                         <ToggleSwitch
                             x:Name="ToggleShowResults"
-                            OffContent=""
-                            OnContent=""
+                            AutomationProperties.Name="{Binding Header, ElementName=ShowResultsCard}"
+                            OffContent="{x:Bind ToggleOffText, Mode=OneWay}"
+                            OnContent="{x:Bind ToggleOnText, Mode=OneWay}"
                             Toggled="OnToggleChanged" />
                     </toolkit:SettingsCard>
 
@@ -394,8 +402,9 @@
                         </toolkit:SettingsCard.HeaderIcon>
                         <ToggleSwitch
                             x:Name="ToggleNotificationSound"
-                            OffContent=""
-                            OnContent=""
+                            AutomationProperties.Name="{Binding Header, ElementName=NotificationSoundCard}"
+                            OffContent="{x:Bind ToggleOffText, Mode=OneWay}"
+                            OnContent="{x:Bind ToggleOnText, Mode=OneWay}"
                             Toggled="OnToggleChanged" />
                     </toolkit:SettingsCard>
                 </StackPanel>
@@ -415,8 +424,9 @@
                         </toolkit:SettingsCard.HeaderIcon>
                         <ToggleSwitch
                             x:Name="ToggleTrayMemoryUsage"
-                            OffContent=""
-                            OnContent=""
+                            AutomationProperties.Name="{Binding Header, ElementName=TrayMemoryUsageCard}"
+                            OffContent="{x:Bind ToggleOffText, Mode=OneWay}"
+                            OnContent="{x:Bind ToggleOnText, Mode=OneWay}"
                             Toggled="OnToggleChanged" />
                     </toolkit:SettingsCard>
 
@@ -454,8 +464,9 @@
                         </toolkit:SettingsCard.HeaderIcon>
                         <ToggleSwitch
                             x:Name="ToggleAllowStandby"
-                            OffContent=""
-                            OnContent=""
+                            AutomationProperties.Name="{Binding Header, ElementName=AllowStandbyCard}"
+                            OffContent="{x:Bind ToggleOffText, Mode=OneWay}"
+                            OnContent="{x:Bind ToggleOnText, Mode=OneWay}"
                             Toggled="OnToggleChanged" />
                     </toolkit:SettingsCard>
 
@@ -465,8 +476,9 @@
                         </toolkit:SettingsCard.HeaderIcon>
                         <ToggleSwitch
                             x:Name="ToggleLogResults"
-                            OffContent=""
-                            OnContent=""
+                            AutomationProperties.Name="{Binding Header, ElementName=LogResultsCard}"
+                            OffContent="{x:Bind ToggleOffText, Mode=OneWay}"
+                            OnContent="{x:Bind ToggleOnText, Mode=OneWay}"
                             Toggled="OnToggleChanged" />
                     </toolkit:SettingsCard>
                 </StackPanel>

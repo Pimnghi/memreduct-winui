@@ -129,12 +129,18 @@ public sealed partial class SettingsPage : Page
             UpdateHotkeyButtonAccessibility();
             LoadThemes();
             LoadTrayActions();
+            // Refresh state labels even when only the application language changes.
+            Bindings.Update();
         }
         finally
         {
             _loading = wasLoading;
         }
     }
+
+    private string ToggleOnText => CoreService.GetString(StrId.ToggleOn) ?? "On";
+
+    private string ToggleOffText => CoreService.GetString(StrId.ToggleOff) ?? "Off";
 
     private void LoadLocales()
     {

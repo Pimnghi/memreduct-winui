@@ -90,4 +90,6 @@ public static class StrId
     public const uint CommandLineHelpClean = 124;
     public const uint CommandLineHelpFull = 125;
     public const uint TrayShowMemoryUsage = 126;
+    public const uint ToggleOn = 127;
+    public const uint ToggleOff = 128;
 }
