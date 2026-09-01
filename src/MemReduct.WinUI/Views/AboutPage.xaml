@@ -25,7 +25,7 @@
                     <Image
                         Width="96"
                         Height="96"
-                        Source="Assets/AppIcon.ico"
+                        Source="ms-appx:///Assets/AppIcon.ico"
                         Stretch="Uniform" />
                     <TextBlock
                         x:Name="AppNameText"
