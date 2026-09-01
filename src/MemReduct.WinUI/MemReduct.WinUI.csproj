@@ -1,0 +1,94 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net9.0-windows10.0.26100.0</TargetFramework>
+        <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+        <RootNamespace>MemReduct.WinUI</RootNamespace>
+        <AssemblyName>memreduct-winui</AssemblyName>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <Platforms>x64;ARM64</Platforms>
+        <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+        <RuntimeIdentifier Condition="'$(Platform)' == 'x64'">win-x64</RuntimeIdentifier>
+        <RuntimeIdentifier Condition="'$(Platform)' == 'ARM64'">win-arm64</RuntimeIdentifier>
+        <UseWinUI>true</UseWinUI>
+        <WindowsPackageType>None</WindowsPackageType>
+        <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+        <SelfContained>true</SelfContained>
+        <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+        <ApplicationIcon>Assets\AppIcon.ico</ApplicationIcon>
+        <AssemblyTitle>Mem Reduct WinUI</AssemblyTitle>
+        <Product>Mem Reduct WinUI</Product>
+        <Description>Lightweight real-time memory management application.</Description>
+        <Authors>Pimnghi</Authors>
+        <WinUISDKReferences>false</WinUISDKReferences>
+        <EnableMsixTooling>false</EnableMsixTooling>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <Version>1.1.0</Version>
+        <AssemblyVersion>1.1.0.0</AssemblyVersion>
+        <FileVersion>1.1.0.0</FileVersion>
+        <NativeCorePath>$(MSBuildProjectDirectory)\..\MemReduct.WinUI.Native\bin\$(Platform)\CoreLib.dll</NativeCorePath>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Content Include="Assets\SplashScreen.scale-200.png"/>
+        <Content Include="Assets\LockScreenLogo.scale-200.png"/>
+        <Content Include="Assets\Square150x150Logo.scale-200.png"/>
+        <Content Include="Assets\Square44x44Logo.scale-200.png"/>
+        <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png"/>
+        <Content Include="Assets\Square44x44Logo.targetsize-48_altform-lightunplated.png"/>
+        <Content Include="Assets\StoreLogo.png"/>
+        <Content Include="Assets\AppIcon.ico" CopyToOutputDirectory="PreserveNewest"/>
+        <Content Include="Assets\AppIcon.Notification.png" CopyToOutputDirectory="PreserveNewest"/>
+        <Content Include="Assets\Wide310x150Logo.scale-200.png"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="$(NativeCorePath)" Link="CoreLib.dll" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+        <Content Include="language\memreduct-winui.lng" Link="language\memreduct-winui.lng" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Manifest Include="$(ApplicationManifest)"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.251219" />
+        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.7705"/>
+        <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260317003"/>
+    </ItemGroup>
+
+    <!-- Publish Properties -->
+    <PropertyGroup>
+        <PublishReadyToRun Condition="'$(Configuration)' == 'Debug'">False</PublishReadyToRun>
+        <PublishReadyToRun Condition="'$(Configuration)' != 'Debug'">True</PublishReadyToRun>
+        <PublishTrimmed>False</PublishTrimmed>
+    </PropertyGroup>
+
+    <Target Name="ValidateNativeCore" BeforeTargets="PrepareForBuild">
+        <Error Condition="'$(Platform)' != 'x64' and '$(Platform)' != 'ARM64'"
+               Text="Unsupported platform '$(Platform)'. Use x64 or ARM64." />
+        <Error Condition="!Exists('$(NativeCorePath)')"
+               Text="CoreLib.dll is missing for $(Platform). Run scripts\build-publish.ps1 or build CoreLib first." />
+    </Target>
+
+    <Target Name="CopyWinUiResourcesToPublishDirectory" AfterTargets="Publish">
+        <ItemGroup>
+            <_WinUiXbfResource Include="$(TargetDir)**\*.xbf" />
+            <_WinUiPriResource Include="$(TargetDir)$(AssemblyName).pri"
+                               Condition="Exists('$(TargetDir)$(AssemblyName).pri')" />
+        </ItemGroup>
+
+        <Error Condition="'@(_WinUiXbfResource)' == ''"
+               Text="WinUI XBF resources are missing from '$(TargetDir)'." />
+        <Error Condition="'@(_WinUiPriResource)' == ''"
+               Text="WinUI PRI resource is missing from '$(TargetDir)'." />
+        <Copy SourceFiles="@(_WinUiXbfResource)"
+              DestinationFiles="@(_WinUiXbfResource->'$(PublishDir)%(RecursiveDir)%(Filename)%(Extension)')"
+              SkipUnchangedFiles="true" />
+        <Copy SourceFiles="@(_WinUiPriResource)"
+              DestinationFolder="$(PublishDir)"
+              SkipUnchangedFiles="true" />
+    </Target>
+</Project>

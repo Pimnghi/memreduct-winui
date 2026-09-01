@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="Assets/AppIcon.Notification.png" width="128" alt="Mem Reduct WinUI 图标">
+  <img src="src/MemReduct.WinUI/Assets/AppIcon.Notification.png" width="128" alt="Mem Reduct WinUI 图标">
 </p>
 
 <h1 align="center">Mem Reduct WinUI</h1>
@@ -23,7 +23,7 @@
 
 ## 界面预览
 
-![Mem Reduct WinUI 仪表盘](Assets/dashboard_screenshot.png)
+![Mem Reduct WinUI 仪表盘](docs/images/dashboard_screenshot.png)
 
 ## 下载
 
@@ -119,16 +119,16 @@ dotnet --version
 # 在 memreduct-winui 目录中执行
 
 # 干净构建并发布 x64、ARM64 自包含应用目录
-.\build-publish.ps1
+.\scripts\build-publish.ps1
 
 # 仅构建一个平台
-.\build-publish.ps1 -Platform x64
+.\scripts\build-publish.ps1 -Platform x64
 
 # 生成可直接发布的版本化 ZIP、SHA-256 和发布清单
-.\build-portable.ps1
+.\scripts\build-portable.ps1
 
 # 生成 x64、ARM64 自包含安装程序
-.\build-installer.ps1
+.\scripts\build-installer.ps1
 ```
 
 输出目录：`artifacts\publish\win-x64\`、`artifacts\publish\win-arm64\`。
@@ -141,7 +141,7 @@ dotnet --version
 版本一致性检查，并验证 `memreduct-winui.exe`、`CoreLib.dll` 和
 `mrw-cli.exe` 均与目标平台匹配。不要使用单独的 `dotnet build` 代替完整发布
 脚本，否则不会得到经过验证的 Native 二进制和最终应用目录。
-仓库内 `src\app.h` 是 WinUI 版本的规范版本源，构建过程不依赖父目录中的原版
+仓库内 `src\MemReduct.WinUI.Shared\app.h` 是 WinUI 版本的规范版本源，构建过程不依赖父目录中的原版
 Mem Reduct 源码，因此全新克隆可以独立完成构建。
 
 安装程序使用 Inno Setup 7.0.2 或更高版本编译，分别生成 x64、ARM64
@@ -168,35 +168,33 @@ mrw-cli.exe -clean:full
 ```
 memreduct-winui/
 ├── .github/                   CI、Issue Form 和依赖更新配置
-├── src/                       Native 版本与资源契约
-│   ├── app.h                   规范版本源
-│   └── resource.h              稳定资源 ID
-├── App.xaml(.cs)              应用入口
-├── MainWindow.xaml(.cs)       主窗口、导航、托盘、热键
-├── MainPage.xaml(.cs)         内存统计 + 清理
-├── SettingsPage.xaml(.cs)     设置页面
-├── AboutPage.xaml(.cs)        关于页面
-├── Core/                      C# 桥接层
-│   ├── CoreService.cs          C DLL 的 C# 封装
-│   ├── NativeMethods.cs        P/Invoke [DllImport] 声明
-│   ├── IniConfig.cs            INI 配置读写
-│   ├── TrayIcon.cs             托盘图标 + 右键菜单
-│   ├── AutoCleanService.cs     后台自动清理定时器
-│   ├── ToastService.cs         气泡通知
-│   └── StrId.cs                字符串资源 ID 常量
-├── CoreLib/                   Native C DLL
-│   ├── core.h / core.c         内存清理核心逻辑
-│   ├── CoreLib.def             导出函数列表
-│   ├── CoreLib.vcxproj         MSBuild 项目
-│   └── routine/                共享 C 库
-├── CliHost/                   Native 控制台入口（mrw-cli.exe）
-├── language/
-│   └── memreduct-winui.lng     多语言翻译文件
-├── Assets/                     应用图标和图片
-├── global.json                 .NET 9 SDK feature band
-├── app.manifest                Win32 应用清单
-└── memreduct-winui.csproj      项目文件
+├── src/
+│   ├── MemReduct.WinUI/        C# WinUI 3 应用
+│   │   ├── Shell/               主窗口和导航外壳
+│   │   ├── Views/               仪表盘、设置和关于页面
+│   │   ├── Core/                配置、清理协调、托盘和系统集成
+│   │   ├── Assets/              应用运行时图标与资源
+│   │   ├── language/            多语言翻译文件
+│   │   └── MemReduct.WinUI.csproj
+│   ├── MemReduct.WinUI.Native/ Native C 清理核心与 routine
+│   │   └── MemReduct.WinUI.Native.vcxproj
+│   ├── MemReduct.WinUI.Cli/    mrw-cli.exe 控制台宿主
+│   │   └── MemReduct.WinUI.Cli.vcxproj
+│   └── MemReduct.WinUI.Shared/ 规范版本与稳定资源 ID 头文件
+├── scripts/                    构建、便携包和安装包脚本
+├── packaging/installer/       Inno Setup 安装器定义
+├── docs/images/               README 展示图片
+├── artifacts/                 本地构建和发布产物（不跟踪）
+├── MemReduct.WinUI.sln        托管与 Native 解决方案
+└── global.json                .NET 9 SDK feature band
 ```
+
+`src` 下统一使用 `MemReduct.WinUI` 产品前缀，以区别于上游 Mem Reduct。
+每个可编译项目直接对应一个目录，项目文件与目录同名；`Native` 和 `Cli` 表示
+模块职责，不表示它们使用 XAML。`MemReduct.WinUI.Shared` 仅存放共享头文件，
+在解决方案中作为文件夹显示，不生成额外 DLL。各项目的中间产物分别写入自身的
+`bin`、`obj`，最终交付仍使用 `artifacts`。对外文件名继续保持
+`memreduct-winui.exe`、`CoreLib.dll` 和 `mrw-cli.exe`。
 
 ## 配置
 

@@ -22,7 +22,7 @@ feature requests are handled through the repository's Issue Forms.
 Run the complete publish script for code changes:
 
 ```powershell
-.\build-publish.ps1
+.\scripts\build-publish.ps1
 ```
 
 Changes to native code, P/Invoke declarations, packaging, or build logic must
@@ -32,7 +32,8 @@ checked.
 
 For UI changes, test light and dark themes, common DPI values, narrow and wide
 windows, and all affected languages. New user-visible strings must be added to
-the English fallback and every section of `language\memreduct-winui.lng`.
+the English fallback and every section of
+`src\MemReduct.WinUI\language\memreduct-winui.lng`.
 
 ## Repository hygiene
 

@@ -1,12 +1,7 @@
-# .NET / WinUI build output
+# Managed and native build output (all projects)
 bin/
 obj/
 /artifacts/
-
-# Native CoreLib build output
-/CoreLib/bin/
-/CoreLib/x64/
-/CoreLib/ARM64/
 
 # IDE local state
 /.vs/

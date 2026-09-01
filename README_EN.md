@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="Assets/AppIcon.Notification.png" width="128" alt="Mem Reduct WinUI icon">
+  <img src="src/MemReduct.WinUI/Assets/AppIcon.Notification.png" width="128" alt="Mem Reduct WinUI icon">
 </p>
 
 <h1 align="center">Mem Reduct WinUI</h1>
@@ -23,7 +23,7 @@ Real-time memory management application with WinUI 3 native interface. Built on 
 
 ## Preview
 
-![Mem Reduct WinUI dashboard](Assets/dashboard_screenshot_en.png)
+![Mem Reduct WinUI dashboard](docs/images/dashboard_screenshot_en.png)
 
 ## Download
 
@@ -128,10 +128,10 @@ Build Tools is installed.
 # Run from the memreduct-winui directory
 
 # Clean-build and publish both self-contained architectures
-.\build-publish.ps1
+.\scripts\build-publish.ps1
 
 # Build one architecture only
-.\build-publish.ps1 -Platform x64
+.\scripts\build-publish.ps1 -Platform x64
 ```
 
 Outputs: `artifacts\publish\win-x64\` and
@@ -144,14 +144,14 @@ the C# WinUI application. It verifies version consistency and checks that
 architecture. Do not replace the complete publish script with a standalone
 `dotnet build`; that would not produce the validated native binaries and final
 application directory.
-The repository-local `src\app.h` is the canonical version source for the
+The repository-local `src\MemReduct.WinUI.Shared\app.h` is the canonical version source for the
 WinUI application. No source file from a parent checkout of the original Mem
 Reduct project is required, so a fresh clone builds independently.
 
 To build the upload-ready versioned ZIP archives and checksums:
 
 ```powershell
-.\build-portable.ps1
+.\scripts\build-portable.ps1
 ```
 
 Portable release files are written to `artifacts\portable\<version>\`.
@@ -159,7 +159,7 @@ Portable release files are written to `artifacts\portable\<version>\`.
 To build the self-contained per-machine installers for x64 and ARM64:
 
 ```powershell
-.\build-installer.ps1
+.\scripts\build-installer.ps1
 ```
 
 Inno Setup 7.0.2 or later is required. Installers and their checksum files are
@@ -193,35 +193,35 @@ for compatibility.
 ```
 memreduct-winui/
 ├── .github/                   CI, Issue Forms, dependency updates
-├── src/                       Native version and resource contracts
-│   ├── app.h                  Canonical version source
-│   └── resource.h             Stable resource IDs
-├── App.xaml(.cs)              Application entry
-├── MainWindow.xaml(.cs)       Main window, navigation, tray, hotkey
-├── MainPage.xaml(.cs)         Memory statistics + clean
-├── SettingsPage.xaml(.cs)     Settings
-├── AboutPage.xaml(.cs)        About dialog
-├── Core/                      C# bridge layer
-│   ├── CoreService.cs         C DLL wrappers
-│   ├── NativeMethods.cs       P/Invoke declarations
-│   ├── IniConfig.cs           INI config via kernel32
-│   ├── TrayIcon.cs            SysTray icon + context menu
-│   ├── AutoCleanService.cs    Background auto-clean timer
-│   ├── ToastService.cs        Balloon notification helper
-│   └── StrId.cs               String resource ID constants
-├── CoreLib/                   Native C DLL
-│   ├── core.h / core.c        Memory cleanup core
-│   ├── CoreLib.def            Exported functions
-│   ├── CoreLib.vcxproj        MSBuild project
-│   └── routine/               Shared C library
-├── CliHost/                   Native console entry point (mrw-cli.exe)
-├── language/
-│   └── memreduct-winui.lng    Language translations
-├── Assets/                    App icons and images
-├── global.json                .NET 9 SDK feature band
-├── app.manifest               Win32 app manifest
-└── memreduct-winui.csproj     Project file
+├── src/
+│   ├── MemReduct.WinUI/       C# WinUI 3 application
+│   │   ├── Shell/              Main window and navigation shell
+│   │   ├── Views/              Dashboard, settings, and about pages
+│   │   ├── Core/               Configuration, cleanup, tray, integrations
+│   │   ├── Assets/             Runtime icons and application resources
+│   │   ├── language/           Runtime translations
+│   │   └── MemReduct.WinUI.csproj
+│   ├── MemReduct.WinUI.Native/ Native C cleanup core and routine
+│   │   └── MemReduct.WinUI.Native.vcxproj
+│   ├── MemReduct.WinUI.Cli/    mrw-cli.exe console host
+│   │   └── MemReduct.WinUI.Cli.vcxproj
+│   └── MemReduct.WinUI.Shared/ Canonical version and stable resource ID headers
+├── scripts/                   Build and packaging entry points
+├── packaging/installer/      Inno Setup definition
+├── docs/images/              README screenshots
+├── artifacts/                Local build/release outputs (ignored)
+├── MemReduct.WinUI.sln       Managed and native solution
+└── global.json               .NET 9 SDK feature band
 ```
+
+All modules under `src` use the `MemReduct.WinUI` product prefix to distinguish
+them from upstream Mem Reduct. Each buildable project has its own directory and
+a matching project filename. `Native` and `Cli` describe responsibilities; they
+do not imply that those modules use XAML. `MemReduct.WinUI.Shared` contains only
+shared headers and appears as a solution folder, not an additional DLL project.
+Each project writes intermediate output to its own `bin` and `obj` directories;
+final deliverables remain under `artifacts`. Public binary filenames remain
+`memreduct-winui.exe`, `CoreLib.dll`, and `mrw-cli.exe`.
 
 ## Configuration
 

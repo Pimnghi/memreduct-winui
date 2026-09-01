@@ -20,7 +20,7 @@ Issue Form 提交。
 代码改动应运行完整发布构建：
 
 ```powershell
-.\build-publish.ps1
+.\scripts\build-publish.ps1
 ```
 
 涉及 Native、P/Invoke、打包或构建逻辑的改动必须同时验证 x64 和 ARM64。仅修改
@@ -28,7 +28,7 @@ Issue Form 提交。
 
 界面改动应验证浅色/深色主题、常见 DPI、宽窄窗口以及受影响的语言。新增用户
 可见文本时，必须同时补充英文 fallback 和
-`language\memreduct-winui.lng` 的所有语言 section。
+`src\MemReduct.WinUI\language\memreduct-winui.lng` 的所有语言 section。
 
 ## 仓库整洁
 

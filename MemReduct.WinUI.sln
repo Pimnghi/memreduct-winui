@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MemReduct.WinUI", "src\MemReduct.WinUI\MemReduct.WinUI.csproj", "{6653AF2F-A77F-4E83-8474-7B39B6CA8E8C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D1E2F3A4-B5C6-7890-ABCD-EF1234567890} = {D1E2F3A4-B5C6-7890-ABCD-EF1234567890}
+	EndProjectSection
+EndProject
+Project("{BC8A1FFA-BEE3-4634-8014-F334798102B3}") = "MemReduct.WinUI.Native", "src\MemReduct.WinUI.Native\MemReduct.WinUI.Native.vcxproj", "{D1E2F3A4-B5C6-7890-ABCD-EF1234567890}"
+EndProject
+Project("{BC8A1FFA-BEE3-4634-8014-F334798102B3}") = "MemReduct.WinUI.Cli", "src\MemReduct.WinUI.Cli\MemReduct.WinUI.Cli.vcxproj", "{4D52D723-2682-4BA8-AFC1-AF5F3A8F1C70}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MemReduct.WinUI.Shared", "MemReduct.WinUI.Shared", "{88D66CB4-A66A-4EC0-9226-244ACCE9F2AA}"
+	ProjectSection(SolutionItems) = preProject
+		src\MemReduct.WinUI.Shared\app.h = src\MemReduct.WinUI.Shared\app.h
+		src\MemReduct.WinUI.Shared\resource.h = src\MemReduct.WinUI.Shared\resource.h
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|ARM64 = Debug|ARM64
+		Debug|x64 = Debug|x64
+		Release|ARM64 = Release|ARM64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6653AF2F-A77F-4E83-8474-7B39B6CA8E8C}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{6653AF2F-A77F-4E83-8474-7B39B6CA8E8C}.Debug|ARM64.Build.0 = Debug|ARM64
+		{6653AF2F-A77F-4E83-8474-7B39B6CA8E8C}.Debug|ARM64.Deploy.0 = Debug|ARM64
+		{6653AF2F-A77F-4E83-8474-7B39B6CA8E8C}.Debug|x64.ActiveCfg = Debug|x64
+		{6653AF2F-A77F-4E83-8474-7B39B6CA8E8C}.Debug|x64.Build.0 = Debug|x64
+		{6653AF2F-A77F-4E83-8474-7B39B6CA8E8C}.Debug|x64.Deploy.0 = Debug|x64
+		{6653AF2F-A77F-4E83-8474-7B39B6CA8E8C}.Release|ARM64.ActiveCfg = Release|ARM64
+		{6653AF2F-A77F-4E83-8474-7B39B6CA8E8C}.Release|ARM64.Build.0 = Release|ARM64
+		{6653AF2F-A77F-4E83-8474-7B39B6CA8E8C}.Release|ARM64.Deploy.0 = Release|ARM64
+		{6653AF2F-A77F-4E83-8474-7B39B6CA8E8C}.Release|x64.ActiveCfg = Release|x64
+		{6653AF2F-A77F-4E83-8474-7B39B6CA8E8C}.Release|x64.Build.0 = Release|x64
+		{6653AF2F-A77F-4E83-8474-7B39B6CA8E8C}.Release|x64.Deploy.0 = Release|x64
+		{D1E2F3A4-B5C6-7890-ABCD-EF1234567890}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{D1E2F3A4-B5C6-7890-ABCD-EF1234567890}.Debug|ARM64.Build.0 = Debug|ARM64
+		{D1E2F3A4-B5C6-7890-ABCD-EF1234567890}.Debug|x64.ActiveCfg = Debug|x64
+		{D1E2F3A4-B5C6-7890-ABCD-EF1234567890}.Debug|x64.Build.0 = Debug|x64
+		{D1E2F3A4-B5C6-7890-ABCD-EF1234567890}.Release|ARM64.ActiveCfg = Release|ARM64
+		{D1E2F3A4-B5C6-7890-ABCD-EF1234567890}.Release|ARM64.Build.0 = Release|ARM64
+		{D1E2F3A4-B5C6-7890-ABCD-EF1234567890}.Release|x64.ActiveCfg = Release|x64
+		{D1E2F3A4-B5C6-7890-ABCD-EF1234567890}.Release|x64.Build.0 = Release|x64
+		{4D52D723-2682-4BA8-AFC1-AF5F3A8F1C70}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{4D52D723-2682-4BA8-AFC1-AF5F3A8F1C70}.Debug|ARM64.Build.0 = Debug|ARM64
+		{4D52D723-2682-4BA8-AFC1-AF5F3A8F1C70}.Debug|x64.ActiveCfg = Debug|x64
+		{4D52D723-2682-4BA8-AFC1-AF5F3A8F1C70}.Debug|x64.Build.0 = Debug|x64
+		{4D52D723-2682-4BA8-AFC1-AF5F3A8F1C70}.Release|ARM64.ActiveCfg = Release|ARM64
+		{4D52D723-2682-4BA8-AFC1-AF5F3A8F1C70}.Release|ARM64.Build.0 = Release|ARM64
+		{4D52D723-2682-4BA8-AFC1-AF5F3A8F1C70}.Release|x64.ActiveCfg = Release|x64
+		{4D52D723-2682-4BA8-AFC1-AF5F3A8F1C70}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+EndGlobal

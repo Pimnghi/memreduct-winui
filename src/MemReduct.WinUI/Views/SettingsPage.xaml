@@ -1,0 +1,478 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Page
+    x:Class="MemReduct.WinUI.Views.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:toolkit="using:CommunityToolkit.WinUI.Controls">
+
+    <Page.Resources>
+        <Style
+            x:Key="HotkeyKeycapStyle"
+            TargetType="Button"
+            BasedOn="{StaticResource AccentButtonStyle}">
+            <Setter Property="MinWidth" Value="48" />
+            <Setter Property="Height" Value="36" />
+            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="IsHitTestVisible" Value="False" />
+            <Setter Property="IsTabStop" Value="False" />
+        </Style>
+        <Style
+            x:Key="HotkeyDialogKeycapStyle"
+            TargetType="Button"
+            BasedOn="{StaticResource HotkeyKeycapStyle}">
+            <Setter Property="MinWidth" Value="68" />
+            <Setter Property="Height" Value="56" />
+            <Setter Property="Padding" Value="18,0" />
+            <Setter Property="FontSize" Value="18" />
+        </Style>
+    </Page.Resources>
+
+    <ScrollViewer
+        HorizontalAlignment="Stretch"
+        HorizontalContentAlignment="Stretch"
+        VerticalScrollBarVisibility="Auto"
+        Padding="24,16,24,0">
+        <Grid HorizontalAlignment="Stretch">
+            <StackPanel
+                MaxWidth="1000"
+                Margin="0,0,0,32"
+                HorizontalAlignment="Stretch"
+                Spacing="28">
+
+            <TextBlock
+                x:Name="SettingsPageTitle"
+                Text="Settings"
+                Style="{StaticResource TitleTextBlockStyle}" />
+
+            <!-- General -->
+            <StackPanel Spacing="8">
+                <TextBlock x:Name="GeneralHeader" Text="General" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <StackPanel Spacing="4">
+                    <toolkit:SettingsCard x:Name="LanguageCard" Header="Language">
+                        <toolkit:SettingsCard.HeaderIcon>
+                            <FontIcon Glyph="&#xE775;" />
+                        </toolkit:SettingsCard.HeaderIcon>
+                        <ComboBox
+                            x:Name="CmbLanguage"
+                            Width="220"
+                            SelectionChanged="OnLanguageChanged" />
+                    </toolkit:SettingsCard>
+
+                    <toolkit:SettingsCard x:Name="AlwaysOnTopCard" Header="Always on top">
+                        <toolkit:SettingsCard.HeaderIcon>
+                            <FontIcon Glyph="&#xE840;" />
+                        </toolkit:SettingsCard.HeaderIcon>
+                        <ToggleSwitch
+                            x:Name="ToggleAlwaysOnTop"
+                            OffContent=""
+                            OnContent=""
+                            Toggled="OnToggleChanged" />
+                    </toolkit:SettingsCard>
+
+                    <toolkit:SettingsCard x:Name="LoadOnStartupCard" Header="Load on system startup">
+                        <toolkit:SettingsCard.HeaderIcon>
+                            <FontIcon Glyph="&#xE768;" />
+                        </toolkit:SettingsCard.HeaderIcon>
+                        <ToggleSwitch
+                            x:Name="ToggleLoadOnStartup"
+                            OffContent=""
+                            OnContent=""
+                            Toggled="OnToggleChanged" />
+                    </toolkit:SettingsCard>
+
+                    <toolkit:SettingsCard x:Name="StartMinimizedCard" Header="Start minimized">
+                        <toolkit:SettingsCard.HeaderIcon>
+                            <FontIcon Glyph="&#xE921;" />
+                        </toolkit:SettingsCard.HeaderIcon>
+                        <ToggleSwitch
+                            x:Name="ToggleStartMinimized"
+                            OffContent=""
+                            OnContent=""
+                            Toggled="OnToggleChanged" />
+                    </toolkit:SettingsCard>
+
+                    <toolkit:SettingsCard x:Name="ConfirmCleanCard" Header="Confirm memory cleaning">
+                        <toolkit:SettingsCard.HeaderIcon>
+                            <FontIcon Glyph="&#xE73E;" />
+                        </toolkit:SettingsCard.HeaderIcon>
+                        <ToggleSwitch
+                            x:Name="ToggleConfirmClean"
+                            OffContent=""
+                            OnContent=""
+                            Toggled="OnToggleChanged" />
+                    </toolkit:SettingsCard>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Appearance -->
+            <StackPanel Spacing="8">
+                <TextBlock x:Name="AppearanceHeader" Text="Appearance" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <StackPanel Spacing="4">
+                    <toolkit:SettingsCard x:Name="ThemeCard" Header="Theme">
+                        <toolkit:SettingsCard.HeaderIcon>
+                            <FontIcon Glyph="&#xE790;" />
+                        </toolkit:SettingsCard.HeaderIcon>
+                        <ComboBox
+                            x:Name="CmbTheme"
+                            Width="220"
+                            SelectionChanged="OnThemeChanged" />
+                    </toolkit:SettingsCard>
+
+                    <toolkit:SettingsCard x:Name="WarningCard" Header="Warning level threshold">
+                        <toolkit:SettingsCard.HeaderIcon>
+                            <FontIcon Glyph="&#xE7BA;" />
+                        </toolkit:SettingsCard.HeaderIcon>
+                        <Grid Width="220" ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <Slider
+                                x:Name="SliderWarning"
+                                Minimum="1"
+                                Maximum="100"
+                                StepFrequency="1"
+                                SnapsTo="StepValues"
+                                ValueChanged="OnWarningValueChanged" />
+                            <TextBlock
+                                x:Name="WarningValueText"
+                                Grid.Column="1"
+                                Width="44"
+                                VerticalAlignment="Center"
+                                FontWeight="SemiBold"
+                                Text="70%"
+                                TextAlignment="Right" />
+                        </Grid>
+                    </toolkit:SettingsCard>
+
+                    <toolkit:SettingsCard x:Name="DangerCard" Header="Danger level threshold">
+                        <toolkit:SettingsCard.HeaderIcon>
+                            <FontIcon Glyph="&#xEA39;" />
+                        </toolkit:SettingsCard.HeaderIcon>
+                        <Grid Width="220" ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <Slider
+                                x:Name="SliderDanger"
+                                Minimum="1"
+                                Maximum="100"
+                                StepFrequency="1"
+                                SnapsTo="StepValues"
+                                ValueChanged="OnDangerValueChanged" />
+                            <TextBlock
+                                x:Name="DangerValueText"
+                                Grid.Column="1"
+                                Width="44"
+                                VerticalAlignment="Center"
+                                FontWeight="SemiBold"
+                                Text="90%"
+                                TextAlignment="Right" />
+                        </Grid>
+                    </toolkit:SettingsCard>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Memory cleaning -->
+            <StackPanel Spacing="8">
+                <TextBlock x:Name="MemoryHeader" Text="Memory cleaning" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <StackPanel Spacing="4">
+                    <toolkit:SettingsExpander
+                        x:Name="RegionsExpander"
+                        Header="Memory regions to clean"
+                        IsExpanded="False">
+                        <toolkit:SettingsExpander.HeaderIcon>
+                            <FontIcon Glyph="&#xE950;" />
+                        </toolkit:SettingsExpander.HeaderIcon>
+                        <toolkit:SettingsExpander.Items>
+                            <toolkit:SettingsCard
+                                x:Name="WorkingSetCard"
+                                Header="Working set"
+                                HorizontalContentAlignment="Stretch">
+                                <CheckBox
+                                    x:Name="ChkWorkingSet"
+                                    HorizontalAlignment="Right"
+                                    Click="OnRegionChanged" />
+                            </toolkit:SettingsCard>
+                            <toolkit:SettingsCard
+                                x:Name="SystemFileCacheCard"
+                                Header="System file cache"
+                                HorizontalContentAlignment="Stretch">
+                                <CheckBox
+                                    x:Name="ChkSystemFileCache"
+                                    HorizontalAlignment="Right"
+                                    Click="OnRegionChanged" />
+                            </toolkit:SettingsCard>
+                            <toolkit:SettingsCard
+                                x:Name="StandbyPriority0Card"
+                                Header="Standby list (without priority)"
+                                HorizontalContentAlignment="Stretch">
+                                <CheckBox
+                                    x:Name="ChkStandbyPriority0"
+                                    HorizontalAlignment="Right"
+                                    Click="OnRegionChanged" />
+                            </toolkit:SettingsCard>
+                            <toolkit:SettingsCard
+                                x:Name="StandbyListCard"
+                                Header="Standby list"
+                                HorizontalContentAlignment="Stretch">
+                                <CheckBox
+                                    x:Name="ChkStandbyList"
+                                    HorizontalAlignment="Right"
+                                    Click="OnRegionChanged" />
+                            </toolkit:SettingsCard>
+                            <toolkit:SettingsCard
+                                x:Name="ModifiedListCard"
+                                Header="Modified page list"
+                                HorizontalContentAlignment="Stretch">
+                                <CheckBox
+                                    x:Name="ChkModifiedList"
+                                    HorizontalAlignment="Right"
+                                    Click="OnRegionChanged" />
+                            </toolkit:SettingsCard>
+                            <toolkit:SettingsCard
+                                x:Name="CombineMemoryListsCard"
+                                Header="Combine memory lists"
+                                HorizontalContentAlignment="Stretch">
+                                <CheckBox
+                                    x:Name="ChkCombineMemoryLists"
+                                    HorizontalAlignment="Right"
+                                    Click="OnRegionChanged" />
+                            </toolkit:SettingsCard>
+                            <toolkit:SettingsCard
+                                x:Name="RegistryCacheCard"
+                                Header="Registry cache"
+                                HorizontalContentAlignment="Stretch">
+                                <CheckBox
+                                    x:Name="ChkRegistryCache"
+                                    HorizontalAlignment="Right"
+                                    Click="OnRegionChanged" />
+                            </toolkit:SettingsCard>
+                            <toolkit:SettingsCard
+                                x:Name="ModifiedFileCacheCard"
+                                Header="Modified file cache"
+                                HorizontalContentAlignment="Stretch">
+                                <CheckBox
+                                    x:Name="ChkModifiedFileCache"
+                                    HorizontalAlignment="Right"
+                                    Click="OnRegionChanged" />
+                            </toolkit:SettingsCard>
+                        </toolkit:SettingsExpander.Items>
+                    </toolkit:SettingsExpander>
+
+                    <toolkit:SettingsExpander
+                        x:Name="AutoCleanExpander"
+                        Header="Clean when usage reaches threshold"
+                        IsExpanded="False">
+                        <toolkit:SettingsExpander.HeaderIcon>
+                            <FontIcon Glyph="&#xE895;" />
+                        </toolkit:SettingsExpander.HeaderIcon>
+                        <ToggleSwitch
+                            x:Name="ToggleAutoClean"
+                            OffContent=""
+                            OnContent=""
+                            Toggled="OnToggleChanged" />
+                        <toolkit:SettingsExpander.Items>
+                            <toolkit:SettingsCard
+                                x:Name="AutoCleanThresholdCard"
+                                HorizontalContentAlignment="Right">
+                                <Grid Width="220" ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                    <Slider
+                                        x:Name="SliderAutoClean"
+                                        Minimum="1"
+                                        Maximum="100"
+                                        StepFrequency="1"
+                                        SnapsTo="StepValues"
+                                        ValueChanged="OnAutoCleanValueChanged" />
+                                    <TextBlock
+                                        x:Name="AutoCleanValueText"
+                                        Grid.Column="1"
+                                        Width="44"
+                                        VerticalAlignment="Center"
+                                        FontWeight="SemiBold"
+                                        Text="90%"
+                                        TextAlignment="Right" />
+                                </Grid>
+                            </toolkit:SettingsCard>
+                        </toolkit:SettingsExpander.Items>
+                    </toolkit:SettingsExpander>
+
+                    <toolkit:SettingsExpander
+                        x:Name="IntervalCleanExpander"
+                        Header="Clean at specified intervals"
+                        IsExpanded="False">
+                        <toolkit:SettingsExpander.HeaderIcon>
+                            <FontIcon Glyph="&#xE823;" />
+                        </toolkit:SettingsExpander.HeaderIcon>
+                        <ToggleSwitch
+                            x:Name="ToggleIntervalClean"
+                            OffContent=""
+                            OnContent=""
+                            Toggled="OnToggleChanged" />
+                        <toolkit:SettingsExpander.Items>
+                            <toolkit:SettingsCard
+                                x:Name="IntervalValueCard"
+                                HorizontalContentAlignment="Right">
+                                <StackPanel
+                                    HorizontalAlignment="Right"
+                                    Orientation="Horizontal"
+                                    Spacing="8">
+                                    <NumberBox
+                                        x:Name="NbInterval"
+                                        Width="96"
+                                        Minimum="1"
+                                        Maximum="1440"
+                                        SpinButtonPlacementMode="Compact"
+                                        ValueChanged="OnIntervalValueChanged" />
+                                    <TextBlock
+                                        x:Name="IntervalMinuteText"
+                                        VerticalAlignment="Center"
+                                        Text="minutes" />
+                                </StackPanel>
+                            </toolkit:SettingsCard>
+                        </toolkit:SettingsExpander.Items>
+                    </toolkit:SettingsExpander>
+
+                    <toolkit:SettingsExpander
+                        x:Name="HotkeyExpander"
+                        Header="Shortcut"
+                        IsExpanded="False">
+                        <toolkit:SettingsExpander.HeaderIcon>
+                            <FontIcon Glyph="&#xE765;" />
+                        </toolkit:SettingsExpander.HeaderIcon>
+                        <ToggleSwitch
+                            x:Name="ToggleHotkey"
+                            OffContent=""
+                            OnContent=""
+                            Toggled="OnHotkeyChanged" />
+                        <toolkit:SettingsExpander.Items>
+                            <toolkit:SettingsCard HorizontalContentAlignment="Right">
+                                <StackPanel HorizontalAlignment="Right" Spacing="6">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <StackPanel
+                                            x:Name="HotkeyKeycapsPanel"
+                                            VerticalAlignment="Center"
+                                            Orientation="Horizontal"
+                                            Spacing="6" />
+                                        <Button
+                                            x:Name="EditHotkeyButton"
+                                            Width="40"
+                                            Height="36"
+                                            Padding="0"
+                                            Style="{StaticResource SubtleButtonStyle}"
+                                            Click="OnEditHotkeyClick">
+                                            <FontIcon Glyph="&#xE70F;" />
+                                        </Button>
+                                    </StackPanel>
+                                    <TextBlock
+                                        x:Name="HotkeyStatusText"
+                                        MaxWidth="320"
+                                        HorizontalAlignment="Right"
+                                        Foreground="{ThemeResource SystemFillColorCriticalBrush}"
+                                        TextWrapping="Wrap"
+                                        Visibility="Collapsed" />
+                                </StackPanel>
+                            </toolkit:SettingsCard>
+                        </toolkit:SettingsExpander.Items>
+                    </toolkit:SettingsExpander>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Notifications -->
+            <StackPanel Spacing="8">
+                <TextBlock x:Name="NotificationHeader" Text="Notifications" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <StackPanel Spacing="4">
+                    <toolkit:SettingsCard x:Name="ShowResultsCard" Header="Show memory cleaning results">
+                        <toolkit:SettingsCard.HeaderIcon>
+                            <FontIcon Glyph="&#xEA8F;" />
+                        </toolkit:SettingsCard.HeaderIcon>
+                        <ToggleSwitch
+                            x:Name="ToggleShowResults"
+                            OffContent=""
+                            OnContent=""
+                            Toggled="OnToggleChanged" />
+                    </toolkit:SettingsCard>
+
+                    <toolkit:SettingsCard x:Name="NotificationSoundCard" Header="Enable notification sound">
+                        <toolkit:SettingsCard.HeaderIcon>
+                            <FontIcon Glyph="&#xE767;" />
+                        </toolkit:SettingsCard.HeaderIcon>
+                        <ToggleSwitch
+                            x:Name="ToggleNotificationSound"
+                            OffContent=""
+                            OnContent=""
+                            Toggled="OnToggleChanged" />
+                    </toolkit:SettingsCard>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Tray icon -->
+            <StackPanel Spacing="8">
+                <TextBlock x:Name="TrayHeader" Text="Tray icon" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <StackPanel Spacing="4">
+                    <toolkit:SettingsCard
+                        x:Name="TrayMemoryUsageCard"
+                        Header="Show memory usage in tray icon">
+                        <toolkit:SettingsCard.HeaderIcon>
+                            <FontIcon
+                                FontFamily="Segoe MDL2 Assets"
+                                Glyph="&#xEC4A;" />
+                        </toolkit:SettingsCard.HeaderIcon>
+                        <ToggleSwitch
+                            x:Name="ToggleTrayMemoryUsage"
+                            OffContent=""
+                            OnContent=""
+                            Toggled="OnToggleChanged" />
+                    </toolkit:SettingsCard>
+
+                    <toolkit:SettingsCard x:Name="TrayLeftCard" Header="Single click">
+                        <toolkit:SettingsCard.HeaderIcon>
+                            <FontIcon Glyph="&#xE962;" />
+                        </toolkit:SettingsCard.HeaderIcon>
+                        <ComboBox
+                            x:Name="CmbTrayLeft"
+                            Width="220"
+                            SelectionChanged="OnTrayActionChanged" />
+                    </toolkit:SettingsCard>
+
+                    <toolkit:SettingsCard x:Name="TrayMidCard" Header="Middle click">
+                        <toolkit:SettingsCard.HeaderIcon>
+                            <FontIcon Glyph="&#xE7C9;" />
+                        </toolkit:SettingsCard.HeaderIcon>
+                        <ComboBox
+                            x:Name="CmbTrayMid"
+                            Width="220"
+                            SelectionChanged="OnTrayActionChanged" />
+                    </toolkit:SettingsCard>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Advanced -->
+            <StackPanel Spacing="8">
+                <TextBlock x:Name="AdvancedHeader" Text="Advanced" Style="{StaticResource SubtitleTextBlockStyle}" />
+                <StackPanel Spacing="4">
+                    <toolkit:SettingsCard
+                        x:Name="AllowStandbyCard"
+                        Header="Allow Standby lists and Modified page list cleanup on autoreduct">
+                        <toolkit:SettingsCard.HeaderIcon>
+                            <FontIcon Glyph="&#xE7BA;" />
+                        </toolkit:SettingsCard.HeaderIcon>
+                        <ToggleSwitch
+                            x:Name="ToggleAllowStandby"
+                            OffContent=""
+                            OnContent=""
+                            Toggled="OnToggleChanged" />
+                    </toolkit:SettingsCard>
+
+                    <toolkit:SettingsCard x:Name="LogResultsCard" Header="Log cleaning results into a debug log">
+                        <toolkit:SettingsCard.HeaderIcon>
+                            <FontIcon Glyph="&#xE8A5;" />
+                        </toolkit:SettingsCard.HeaderIcon>
+                        <ToggleSwitch
+                            x:Name="ToggleLogResults"
+                            OffContent=""
+                            OnContent=""
+                            Toggled="OnToggleChanged" />
+                    </toolkit:SettingsCard>
+                </StackPanel>
+            </StackPanel>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</Page>

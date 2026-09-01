@@ -39,4 +39,4 @@ jobs:
 
       - name: Build and validate
         shell: pwsh
-        run: .\build-publish.ps1 -Platform "${{ matrix.platform }}"
+        run: .\scripts\build-publish.ps1 -Platform "${{ matrix.platform }}"

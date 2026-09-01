@@ -1,0 +1,42 @@
+#include <windows.h>
+#include "resource.h"
+#include "../MemReduct.WinUI.Shared/app.h"
+
+#define CLI_NAME L"mrw-cli"
+#define CLI_DESCRIPTION L"Mem Reduct WinUI Command Line"
+#define CLI_PRODUCT L"Mem Reduct WinUI"
+#define CLI_AUTHOR L"Pimnghi"
+
+IDI_APPICON ICON "../MemReduct.WinUI/Assets/AppIcon.ico"
+
+1 VERSIONINFO
+FILEVERSION APP_VERSION_RES
+PRODUCTVERSION APP_VERSION_RES
+FILEOS VOS__WINDOWS32
+FILETYPE VFT_APP
+FILESUBTYPE VFT2_UNKNOWN
+FILEFLAGSMASK 0x00000000
+#ifdef _DEBUG
+FILEFLAGS VS_FF_DEBUG
+#else
+FILEFLAGS 0x0L
+#endif
+{
+    BLOCK "StringFileInfo"
+    {
+        BLOCK "040904E4"
+        {
+            VALUE "CompanyName", CLI_AUTHOR
+            VALUE "FileDescription", CLI_DESCRIPTION
+            VALUE "FileVersion", APP_VERSION
+            VALUE "InternalName", CLI_NAME
+            VALUE "OriginalFilename", CLI_NAME L".exe"
+            VALUE "ProductName", CLI_PRODUCT
+            VALUE "ProductVersion", APP_VERSION
+        }
+    }
+    BLOCK "VarFileInfo"
+    {
+        VALUE "Translation", 0x0409, 1252
+    }
+}
