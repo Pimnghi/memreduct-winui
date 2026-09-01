@@ -98,14 +98,14 @@ public sealed partial class SettingsPage : Page
 
             v = s(StrId.SettingsMemory);            if (v != null) MemoryHeader.Text = v;
             v = s(StrId.TitleMemoryRegions);        if (v != null) RegionsExpander.Header = v;
-            v = s(StrId.WorkingSet);                if (v != null) WorkingSetCard.Header = v;
-            v = s(StrId.SystemFileCache);           if (v != null) SystemFileCacheCard.Header = v;
-            v = s(StrId.StandbyPriority0);          if (v != null) StandbyPriority0Card.Header = v;
-            v = s(StrId.StandbyList);               if (v != null) StandbyListCard.Header = v;
-            v = s(StrId.ModifiedList);              if (v != null) ModifiedListCard.Header = v;
-            v = s(StrId.CombineMemoryLists);        if (v != null) CombineMemoryListsCard.Header = v;
-            v = s(StrId.RegistryCache);             if (v != null) RegistryCacheCard.Header = v;
-            v = s(StrId.ModifiedFileCache);         if (v != null) ModifiedFileCacheCard.Header = v;
+            v = s(StrId.WorkingSet);                if (v != null) ChkWorkingSet.Content = v;
+            v = s(StrId.SystemFileCache);           if (v != null) ChkSystemFileCache.Content = v;
+            v = s(StrId.StandbyPriority0);          if (v != null) ChkStandbyPriority0.Content = v;
+            v = s(StrId.StandbyList);               if (v != null) ChkStandbyList.Content = v;
+            v = s(StrId.ModifiedList);              if (v != null) ChkModifiedList.Content = v;
+            v = s(StrId.CombineMemoryLists);        if (v != null) ChkCombineMemoryLists.Content = v;
+            v = s(StrId.RegistryCache);             if (v != null) ChkRegistryCache.Content = v;
+            v = s(StrId.ModifiedFileCache);         if (v != null) ChkModifiedFileCache.Content = v;
             v = s(StrId.AutoCleanEnable);           if (v != null) AutoCleanExpander.Header = v;
             v = s(StrId.AutoCleanInterval);         if (v != null) IntervalCleanExpander.Header = v;
             v = s(StrId.MinuteUnit);                if (v != null) IntervalMinuteText.Text = v;

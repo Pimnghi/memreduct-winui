@@ -183,74 +183,74 @@
                         <toolkit:SettingsExpander.Items>
                             <toolkit:SettingsCard
                                 x:Name="WorkingSetCard"
-                                Header="Working set"
+                                ContentAlignment="Left"
                                 HorizontalContentAlignment="Stretch">
                                 <CheckBox
                                     x:Name="ChkWorkingSet"
-                                    HorizontalAlignment="Right"
+                                    Content="Working set"
                                     Click="OnRegionChanged" />
                             </toolkit:SettingsCard>
                             <toolkit:SettingsCard
                                 x:Name="SystemFileCacheCard"
-                                Header="System file cache"
+                                ContentAlignment="Left"
                                 HorizontalContentAlignment="Stretch">
                                 <CheckBox
                                     x:Name="ChkSystemFileCache"
-                                    HorizontalAlignment="Right"
+                                    Content="System file cache"
                                     Click="OnRegionChanged" />
                             </toolkit:SettingsCard>
                             <toolkit:SettingsCard
                                 x:Name="StandbyPriority0Card"
-                                Header="Standby list (without priority)"
+                                ContentAlignment="Left"
                                 HorizontalContentAlignment="Stretch">
                                 <CheckBox
                                     x:Name="ChkStandbyPriority0"
-                                    HorizontalAlignment="Right"
+                                    Content="Standby list (without priority)"
                                     Click="OnRegionChanged" />
                             </toolkit:SettingsCard>
                             <toolkit:SettingsCard
                                 x:Name="StandbyListCard"
-                                Header="Standby list"
+                                ContentAlignment="Left"
                                 HorizontalContentAlignment="Stretch">
                                 <CheckBox
                                     x:Name="ChkStandbyList"
-                                    HorizontalAlignment="Right"
+                                    Content="Standby list"
                                     Click="OnRegionChanged" />
                             </toolkit:SettingsCard>
                             <toolkit:SettingsCard
                                 x:Name="ModifiedListCard"
-                                Header="Modified page list"
+                                ContentAlignment="Left"
                                 HorizontalContentAlignment="Stretch">
                                 <CheckBox
                                     x:Name="ChkModifiedList"
-                                    HorizontalAlignment="Right"
+                                    Content="Modified page list"
                                     Click="OnRegionChanged" />
                             </toolkit:SettingsCard>
                             <toolkit:SettingsCard
                                 x:Name="CombineMemoryListsCard"
-                                Header="Combine memory lists"
+                                ContentAlignment="Left"
                                 HorizontalContentAlignment="Stretch">
                                 <CheckBox
                                     x:Name="ChkCombineMemoryLists"
-                                    HorizontalAlignment="Right"
+                                    Content="Combine memory lists"
                                     Click="OnRegionChanged" />
                             </toolkit:SettingsCard>
                             <toolkit:SettingsCard
                                 x:Name="RegistryCacheCard"
-                                Header="Registry cache"
+                                ContentAlignment="Left"
                                 HorizontalContentAlignment="Stretch">
                                 <CheckBox
                                     x:Name="ChkRegistryCache"
-                                    HorizontalAlignment="Right"
+                                    Content="Registry cache"
                                     Click="OnRegionChanged" />
                             </toolkit:SettingsCard>
                             <toolkit:SettingsCard
                                 x:Name="ModifiedFileCacheCard"
-                                Header="Modified file cache"
+                                ContentAlignment="Left"
                                 HorizontalContentAlignment="Stretch">
                                 <CheckBox
                                     x:Name="ChkModifiedFileCache"
-                                    HorizontalAlignment="Right"
+                                    Content="Modified file cache"
                                     Click="OnRegionChanged" />
                             </toolkit:SettingsCard>
                         </toolkit:SettingsExpander.Items>
