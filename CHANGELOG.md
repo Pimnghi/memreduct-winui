@@ -13,8 +13,7 @@
 
 ## [1.2.0] - 2026-09-02
 
-[GitHub Release](https://github.com/Pimnghi/memreduct-winui/releases/tag/v1.2.0) ·
-[完整变更](https://github.com/Pimnghi/memreduct-winui/compare/v1.1.0...v1.2.0)
+[GitHub Release](https://github.com/Pimnghi/memreduct-winui/releases/tag/v1.2.0)
 
 本版本着重改善设置页面的原生 WinUI 交互与视觉一致性，并修复托盘菜单和页面布局问题。
 

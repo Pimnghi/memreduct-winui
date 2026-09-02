@@ -214,15 +214,6 @@ memreduct-winui/
 └── global.json               .NET 9 SDK feature band
 ```
 
-All modules under `src` use the `MemReduct.WinUI` product prefix to distinguish
-them from upstream Mem Reduct. Each buildable project has its own directory and
-a matching project filename. `Native` and `Cli` describe responsibilities; they
-do not imply that those modules use XAML. `MemReduct.WinUI.Shared` contains only
-shared headers and appears as a solution folder, not an additional DLL project.
-Each project writes intermediate output to its own `bin` and `obj` directories;
-final deliverables remain under `artifacts`. Public binary filenames remain
-`memreduct-winui.exe`, `CoreLib.dll`, and `mrw-cli.exe`.
-
 ## Configuration
 
 The portable build stores settings in `data\memreduct-winui.ini` alongside the

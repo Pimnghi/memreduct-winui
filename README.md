@@ -189,13 +189,6 @@ memreduct-winui/
 └── global.json                .NET 9 SDK feature band
 ```
 
-`src` 下统一使用 `MemReduct.WinUI` 产品前缀，以区别于上游 Mem Reduct。
-每个可编译项目直接对应一个目录，项目文件与目录同名；`Native` 和 `Cli` 表示
-模块职责，不表示它们使用 XAML。`MemReduct.WinUI.Shared` 仅存放共享头文件，
-在解决方案中作为文件夹显示，不生成额外 DLL。各项目的中间产物分别写入自身的
-`bin`、`obj`，最终交付仍使用 `artifacts`。对外文件名继续保持
-`memreduct-winui.exe`、`CoreLib.dll` 和 `mrw-cli.exe`。
-
 ## 配置
 
 便携版的设置保存在 exe 同级目录的 `data\memreduct-winui.ini`。
