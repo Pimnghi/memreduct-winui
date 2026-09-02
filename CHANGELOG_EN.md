@@ -12,7 +12,7 @@ WinUI.
 
 There are currently no unreleased changes.
 
-## [1.2.0] - 2026-09-01
+## [1.2.0] - 2026-09-02
 
 [GitHub Release](https://github.com/Pimnghi/memreduct-winui/releases/tag/v1.2.0) ·
 [Full changelog](https://github.com/Pimnghi/memreduct-winui/compare/v1.1.0...v1.2.0)
